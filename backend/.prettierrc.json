@@ -3,4 +3,5 @@
     "proseWrap": "always",
     "endOfLine": "lf",
     "embeddedLanguageFormatting": "off",
+    "singleQuote": true
 }
