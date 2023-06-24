@@ -1,3 +1,13 @@
+# Transcendence
+
+## Reference
+
+ 1) [Frontend](./frontend/README.md)
+
+ 2) [Backend](./backend/README.md)
+
+## Extract from the subject
+
 Application Features
 
 User Account
@@ -29,3 +39,5 @@ Game
 - matchmaking system
 - customization option available (different maps, power up etc.)
 - the game must be responsive
+
+[subject](./ressources/en.subject.pdf)
