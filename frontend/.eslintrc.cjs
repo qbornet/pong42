@@ -34,5 +34,7 @@ module.exports = {
     'for-direction': 'error',
     'no-const-assign': 'error',
     'no-constructor-return': 'error',
+    'react/jsx-uses-react': 'off',
+    'react/react-in-jsx-scope': 'off',
   },
 };
