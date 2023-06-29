@@ -29,14 +29,9 @@ module.exports = {
   plugins: ['@typescript-eslint', 'react', 'prettier'],
   rules: {
     'prettier/prettier': 'error',
-    'arrow-body-style': 'off',
-    'comma-dangle': 'off',
-    'prefer-arrow-callback': 'off',
-    'getter-return': 'error',
-    'for-direction': 'error',
-    'no-const-assign': 'error',
-    'no-constructor-return': 'error',
     'react/react-in-jsx-scope': 'off',
-    'react/jsx-uses-react': 'off'
+    'react/jsx-uses-react': 'off',
+    'comma-dangle': "off",
+    "@typescript-eslint/comma-dangle": "off"
   }
 };
