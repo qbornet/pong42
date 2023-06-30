@@ -31,7 +31,7 @@ module.exports = {
     'prettier/prettier': 'error',
     'react/react-in-jsx-scope': 'off',
     'react/jsx-uses-react': 'off',
-    'comma-dangle': "off",
-    "@typescript-eslint/comma-dangle": "off"
+    'comma-dangle': 'off',
+    '@typescript-eslint/comma-dangle': 'off'
   }
 };
