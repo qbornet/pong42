@@ -29,6 +29,7 @@ module.exports = {
   rules: {
     'prettier/prettier': 'error',
     'comma-dangle': 'off',
-    '@typescript-eslint/comma-dangle': 'off'
+    '@typescript-eslint/comma-dangle': 'off',
+    'import/no-extraneous-dependencies': ['error', { devDependencies: true }]
   }
 };
