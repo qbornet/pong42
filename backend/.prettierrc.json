@@ -2,7 +2,7 @@
   "tabWidth": 2,
   "semi": true,
   "singleQuote": true,
-  "proseWrap": "always",
+  "proseWrap": "preserve",
   "trailingComma": "none",
   "endOfLine": "lf",
   "htmlWhitespaceSensitivity": "strict"
