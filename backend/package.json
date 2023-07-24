@@ -6,7 +6,9 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build -b swc",
+    "build:client": "rm -rf client/ && cd ../frontend && npm run build && cp -r ./dist ../backend/client",
+    "build:server": "nest build -b swc",
+    "build": "npm run build:client && npm run build:server",
     "norm": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start -b swc",
     "start:dev": "nest start -b swc --watch",
