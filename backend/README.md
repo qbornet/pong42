@@ -38,6 +38,7 @@ Create .env file with the following information
 
 ```env
 PORT=<port number>
+NODE_ENV=<dev | prod>
 ```
 
 ## Running the app
