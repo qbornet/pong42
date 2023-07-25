@@ -1,4 +1,8 @@
-import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
+import {
+  MessageBody,
+  SubscribeMessage,
+  WebSocketGateway
+} from '@nestjs/websockets';
 import Config, { Env } from '../config/configuration';
 
 function webSocketOptions() {
@@ -16,9 +20,9 @@ function webSocketOptions() {
 
 @WebSocketGateway(Config().port, webSocketOptions())
 export default class ChatGateway {
-  @SubscribeMessage('message')
-  handleMessage(client: any, payload: any): string {
-    console.log('Hello world !');
-    return 'Hello world!';
+  @SubscribeMessage('events')
+  handleEvent(@MessageBody() data: string): string {
+    console.log(data);
+    return data;
   }
 }
