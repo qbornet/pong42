@@ -32,6 +32,14 @@
 $ npm install
 ```
 
+## Configuration
+
+Create .env file with the following information
+
+```env
+PORT=<port number>
+```
+
 ## Running the app
 
 ```bash
