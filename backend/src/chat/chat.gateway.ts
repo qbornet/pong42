@@ -1,4 +1,8 @@
-import { OnGatewayInit, WebSocketGateway } from '@nestjs/websockets';
+import {
+  OnGatewayConnection,
+  OnGatewayInit,
+  WebSocketGateway
+} from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
 import Config, { Env } from '../config/configuration';
 
@@ -16,10 +20,12 @@ function webSocketOptions() {
 }
 
 @WebSocketGateway(Config().port, webSocketOptions())
-export default class ChatGateway implements OnGatewayInit {
+export default class ChatGateway implements OnGatewayInit, OnGatewayConnection {
   private readonly logger = new Logger(ChatGateway.name);
 
   afterInit() {
     this.logger.log('Initialized');
   }
+
+  handleConnection(data) {}
 }
