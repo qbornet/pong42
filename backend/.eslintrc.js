@@ -4,9 +4,9 @@ module.exports = {
     es2021: true
   },
   extends: [
-    'plugin:prettier/recommended',
     'airbnb-base',
-    'airbnb-typescript/base'
+    'airbnb-typescript/base',
+    'plugin:prettier/recommended'
   ],
   overrides: [
     {
