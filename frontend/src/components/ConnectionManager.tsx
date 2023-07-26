@@ -1,7 +1,14 @@
 import socket from '../socket';
 
-export default function ConnectionManager() {
+interface ConnectionManagerProps {
+  username: string;
+}
+
+export default function ConnectionManager({
+  username
+}: ConnectionManagerProps) {
   const connect = () => {
+    socket.auth = { username };
     socket.connect();
   };
   const disconnect = () => {
