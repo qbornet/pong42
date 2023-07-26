@@ -1,8 +1,5 @@
-import {
-  MessageBody,
-  SubscribeMessage,
-  WebSocketGateway
-} from '@nestjs/websockets';
+import { OnGatewayInit, WebSocketGateway } from '@nestjs/websockets';
+import { Logger } from '@nestjs/common';
 import Config, { Env } from '../config/configuration';
 
 function webSocketOptions() {
@@ -19,10 +16,10 @@ function webSocketOptions() {
 }
 
 @WebSocketGateway(Config().port, webSocketOptions())
-export default class ChatGateway {
-  @SubscribeMessage('events')
-  handleEvent(@MessageBody() data: string): string {
-    console.log(data);
-    return data;
+export default class ChatGateway implements OnGatewayInit {
+  private readonly logger = new Logger(ChatGateway.name);
+
+  afterInit() {
+    this.logger.log('Initialized');
   }
 }
