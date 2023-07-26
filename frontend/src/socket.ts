@@ -1,10 +1,11 @@
 import { io } from 'socket.io-client';
 
-const URL = 'http://localhost:3000';
-const socket = io(URL, { autoConnect: false });
+const devURL = 'http://localhost:3000';
+const URL = process.env.NODE_ENV === 'prod' ? '' : devURL;
 
-socket.onAny((event, ...args) => {
-  console.log(event, args);
+const socket = io(URL, {
+  autoConnect: false,
+  transports: ['websocket', 'polling']
 });
 
 export default socket;
