@@ -1,9 +1,11 @@
 import {
   OnGatewayConnection,
+  OnGatewayDisconnect,
   OnGatewayInit,
   WebSocketGateway
 } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
+import { Server, Socket } from 'socket.io';
 import Config, { Env } from '../config/configuration';
 
 function webSocketOptions() {
@@ -20,12 +22,20 @@ function webSocketOptions() {
 }
 
 @WebSocketGateway(Config().port, webSocketOptions())
-export default class ChatGateway implements OnGatewayInit, OnGatewayConnection {
+export default class ChatGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
   private readonly logger = new Logger(ChatGateway.name);
 
-  afterInit() {
+  afterInit(server: Server) {
     this.logger.log('Initialized');
   }
 
-  handleConnection(data) {}
+  handleConnection(client: Socket, ...args: any[]) {
+    this.logger.log(`Client id:${client.id} connected`);
+  }
+
+  handleDisconnect(client: Socket) {
+    this.logger.log(`Client id:${client.id} disconnected`);
+  }
 }
