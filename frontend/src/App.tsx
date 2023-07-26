@@ -28,9 +28,9 @@ function App() {
         </span>
       </label>
       <button
-        className="inline-block rounded bg-indigo-600 px-8 py-3 text-sm font-medium text-white transition hover:rotate-2 hover:scale-110 focus:outline-none focus:ring active:bg-indigo-500"
-        type="submit"
         onClick={handleClick}
+        type="button"
+        className="inline-block rounded bg-indigo-600 px-8 py-3 text-sm font-medium text-white transition hover:scale-110 hover:shadow-xl focus:outline-none focus:ring active:bg-indigo-500"
       >
         Send
       </button>
