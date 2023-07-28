@@ -2,7 +2,8 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
-  WebSocketGateway
+  WebSocketGateway,
+  WebSocketServer
 } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
@@ -10,15 +11,17 @@ import Config, { Env } from '../config/configuration';
 
 function webSocketOptions() {
   const config = Config();
+  const options = {};
   if (config.env === Env.Dev) {
     return {
       cors: {
         origin: 'http://localhost:5173',
         transports: ['websocket', 'polling']
-      }
+      },
+      ...options
     };
   }
-  return {};
+  return options;
 }
 
 @WebSocketGateway(Config().port, webSocketOptions())
@@ -27,12 +30,17 @@ export default class ChatGateway
 {
   private readonly logger = new Logger(ChatGateway.name);
 
+  @WebSocketServer() io: Server;
+
   afterInit(server: Server) {
     this.logger.log('Initialized');
   }
 
   handleConnection(client: Socket, ...args: any[]) {
+    const { sockets } = this.io.sockets;
+
     this.logger.log(`Client id:${client.id} connected`);
+    this.logger.debug(`Number of connected clients: ${sockets.size}`);
   }
 
   handleDisconnect(client: Socket) {
