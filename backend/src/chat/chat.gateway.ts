@@ -32,7 +32,12 @@ export default class ChatGateway
 
   @WebSocketServer() io: Server;
 
-  afterInit(server: Server) {
+  afterInit() {
+    this.io.use((socket, next) => {
+      const auth = socket.handshake;
+      this.logger.debug(auth);
+      next();
+    });
     this.logger.log('Initialized');
   }
 
