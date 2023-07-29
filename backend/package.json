@@ -6,7 +6,9 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build -b swc",
+    "build:client": "rm -rf client/ && cd ../frontend && npm run build && cp -r ./dist ../backend/client",
+    "build:server": "nest build -b swc",
+    "build": "npm run build:client && npm run build:server",
     "norm": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start -b swc",
     "start:dev": "nest start -b swc --watch",
@@ -23,12 +25,17 @@
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
+    "@nestjs/config": "^3.0.0",
     "@nestjs/core": "^10.0.0",
     "@nestjs/platform-express": "^10.0.0",
     "@prisma/client": "^5.0.0",
     "bcrypt": "^5.1.0",
+    "@nestjs/platform-socket.io": "^10.1.0",
+    "@nestjs/serve-static": "^4.0.0",
+    "@nestjs/websockets": "^10.1.0",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "socket.io": "^4.7.1"
   },
   "devDependencies": {
     "@jest/globals": "^29.6.1",
