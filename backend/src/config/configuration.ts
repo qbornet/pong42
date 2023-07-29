@@ -17,7 +17,7 @@ function parseNodeEnv(input: string): number | undefined {
 }
 
 export default () => ({
-  port: parseInt(process.env.PORT!, 10) || 3000,
+  port: parseInt(process.env.PORT!, 10) || '3000',
   env: parseNodeEnv(process.env.NODE_ENV!) || Env.Dev,
   Env
 });
