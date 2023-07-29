@@ -26,17 +26,13 @@ function webSocketOptions() {
 
 @WebSocketGateway(Config().port, webSocketOptions())
 export default class ChatGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
   private readonly logger = new Logger(ChatGateway.name);
 
   @WebSocketServer() io: Server;
 
   afterInit() {
-    this.io.use((socket, next) => {
-      const auth = socket.handshake;
-      this.logger.debug(auth);
-      next();
-    });
     this.logger.log('Initialized');
   }
 

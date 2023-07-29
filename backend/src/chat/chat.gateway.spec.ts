@@ -1,18 +1,30 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import { INestApplication, Logger } from '@nestjs/common';
+import { Socket, io } from 'socket.io-client';
+import { vi } from 'vitest';
 import ChatGateway from './chat.gateway';
+
+async function createNestApp(...gateways: any): Promise<INestApplication> {
+  const testingModule = await Test.createTestingModule({
+    providers: gateways
+  }).compile();
+
+  return testingModule.createNestApplication();
+}
 
 describe('ChatGateway', () => {
   let gateway: ChatGateway;
+  let app: INestApplication;
+  let ioClient: Socket;
 
-  beforeAll(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [ChatGateway]
-    }).compile();
-
-    gateway = module.get<ChatGateway>(ChatGateway);
+  beforeEach(async () => {
+    app = await createNestApp(ChatGateway);
+    gateway = app.get<ChatGateway>(ChatGateway);
   });
 
-  it('should be defined', () => {
-    expect(gateway).toBeDefined();
+  it('should log "Initialized" after instanciation', async () => {
+    const logSpy = vi.spyOn(gateway, 'afterInit').mockImplementation(() => {});
+    await app.listen(3000);
+    expect(logSpy).toBeCalled();
   });
 });
