@@ -26,8 +26,7 @@ function webSocketOptions() {
 
 @WebSocketGateway(Config().port, webSocketOptions())
 export default class ChatGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-{
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(ChatGateway.name);
 
   @WebSocketServer() io: Server;
@@ -43,9 +42,9 @@ export default class ChatGateway
 
   handleConnection(client: Socket, ...args: any[]) {
     const { sockets } = this.io.sockets;
-
     this.logger.log(`Client id:${client.id} connected`);
     this.logger.debug(`Number of connected clients: ${sockets.size}`);
+    this.io.emit('hello');
   }
 
   handleDisconnect(client: Socket) {
