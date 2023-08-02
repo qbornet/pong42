@@ -5,8 +5,8 @@ import {
   WebSocketGateway,
   WebSocketServer
 } from '@nestjs/websockets';
-import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
+import { Logger } from '@nestjs/common';
 import Config, { Env } from '../config/configuration';
 
 function webSocketOptions() {
@@ -29,6 +29,10 @@ export default class ChatGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   private readonly logger = new Logger(ChatGateway.name);
+
+  getLogger(): Logger {
+    return this.logger;
+  }
 
   @WebSocketServer() io: Server;
 

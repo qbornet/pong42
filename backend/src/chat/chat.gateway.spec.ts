@@ -1,7 +1,6 @@
 import { Test } from '@nestjs/testing';
-import { INestApplication, Logger } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import { Socket, io } from 'socket.io-client';
-import { DeepMockProxy, mockDeep } from 'jest-mock-extended';
 import ChatGateway from './chat.gateway';
 
 async function createNestApp(...gateways: any): Promise<INestApplication> {
@@ -16,15 +15,18 @@ describe('ChatGateway', () => {
   let gateway: ChatGateway;
   let app: INestApplication;
   let ioClient: Socket;
-  let logger: ChatGateway;
+  let logSpy: jest.SpyInstance;
 
   beforeAll(async () => {
-    logger = mockDeep<ChatGateway>();
-    app = await createNestApp(ChatGateway, {
-      provide: Logger,
-      useValue: logger
-    });
+    // Chat module initilization
+    app = await createNestApp(ChatGateway);
     gateway = app.get<ChatGateway>(ChatGateway);
+    logSpy = jest.spyOn(gateway.getLogger(), 'log');
+
+    // Chat is now listening
+    app.listen(3000);
+
+    // Instance of the client that will test interact with the Chat gateway
     ioClient = io('http://localhost:3000', {
       autoConnect: false,
       transports: ['websocket', 'polling']
@@ -36,8 +38,8 @@ describe('ChatGateway', () => {
   });
 
   it('should initialize the app', () => {
-    app.listen(3000);
-    expect(logger.log).toHaveBeenCalled('initialized');
+    expect(logSpy).toHaveBeenCalledTimes(1);
+    expect(logSpy).toHaveBeenCalledWith('Initialized');
   });
 
   it('should be defined', () => {
