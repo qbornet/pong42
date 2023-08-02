@@ -43,7 +43,7 @@ export default class ChatGateway
   handleConnection(client: Socket, ...args: any[]) {
     const { sockets } = this.io.sockets;
     this.logger.log(`Client id:${client.id} connected`);
-    this.logger.debug(`Number of connected clients: ${sockets.size}`);
+    this.logger.log(`Nb clients: ${sockets.size}`);
   }
 
   handleDisconnect(client: Socket) {

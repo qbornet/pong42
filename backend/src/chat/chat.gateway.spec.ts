@@ -37,13 +37,14 @@ describe('ChatGateway', () => {
     await app.close();
   });
 
-  it('should initialize the app', () => {
-    expect(logSpy).toHaveBeenCalledTimes(1);
-    expect(logSpy).toHaveBeenCalledWith('Initialized');
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
+  it('should initialize the app', () => {
     expect(gateway).toBeDefined();
+    expect(logSpy).toHaveBeenCalledTimes(1);
+    expect(logSpy).toHaveBeenCalledWith('Initialized');
   });
 
   it('should connect', async () => {
@@ -53,6 +54,7 @@ describe('ChatGateway', () => {
         resolve();
       });
     });
+    expect(logSpy).toHaveBeenCalledTimes(2);
     ioClient.disconnect();
   });
 });
