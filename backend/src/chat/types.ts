@@ -1,3 +1,5 @@
+import { Socket } from 'socket.io';
+
 export interface ServerToClientEvents {
   noArg: () => void;
   basicEmit: (a: number, b: string, c: Buffer) => void;
@@ -12,7 +14,6 @@ export interface InterServerEvents {
   ping: () => void;
 }
 
-export interface SocketData {
-  name: string;
-  age: number;
+export interface SocketData extends Socket {
+  username: string;
 }
