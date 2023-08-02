@@ -1,6 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
+import { INestApplication, Logger } from '@nestjs/common';
 import { Socket, io } from 'socket.io-client';
+import { DeepMockProxy, mockDeep } from 'jest-mock-extended';
 import ChatGateway from './chat.gateway';
 
 async function createNestApp(...gateways: any): Promise<INestApplication> {
@@ -15,13 +16,41 @@ describe('ChatGateway', () => {
   let gateway: ChatGateway;
   let app: INestApplication;
   let ioClient: Socket;
+  let logger: ChatGateway;
 
-  beforeEach(async () => {
-    app = await createNestApp(ChatGateway);
+  beforeAll(async () => {
+    logger = mockDeep<ChatGateway>();
+    app = await createNestApp(ChatGateway, {
+      provide: Logger,
+      useValue: logger
+    });
     gateway = app.get<ChatGateway>(ChatGateway);
+    ioClient = io('http://localhost:3000', {
+      autoConnect: false,
+      transports: ['websocket', 'polling']
+    });
   });
 
-  it('should be defined', async () => {
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('should initialize the app', () => {
+    app.listen(3000);
+    expect(logger.log).toHaveBeenCalled('initialized');
+  });
+
+  it('should be defined', () => {
     expect(gateway).toBeDefined();
+  });
+
+  it('should connect', async () => {
+    ioClient.connect();
+    await new Promise<void>((resolve) => {
+      ioClient.on('connect', () => {
+        resolve();
+      });
+    });
+    ioClient.disconnect();
   });
 });
