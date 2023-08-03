@@ -1,7 +1,10 @@
 import {
+  ConnectedSocket,
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
+  SubscribeMessage,
   WebSocketGateway,
   WebSocketServer
 } from '@nestjs/websockets';
@@ -9,7 +12,6 @@ import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import Config, { Env } from '../config/configuration';
 import { SocketData } from './types';
-import { connected } from 'process';
 
 function webSocketOptions() {
   const config = Config();
@@ -69,7 +71,22 @@ export default class ChatGateway
     });
   }
 
-  handleDisconnect(client: Socket) {
-    this.logger.log(`Client id:${client.id} disconnected`);
+  handleDisconnect(socket: Socket) {
+    this.logger.log(`Client id:${socket.id} disconnected`);
+  }
+
+  @SubscribeMessage('private message')
+  handlePrivateMessage(
+    @MessageBody('to') to: string,
+    @MessageBody('content') content: string,
+    @ConnectedSocket() socket: SocketData
+  ) {
+    this.logger.log(
+      `Incoming private message from ${to} with content: ${content}`
+    );
+    socket.to(to).emit('private message', {
+      content,
+      from: socket.id
+    });
   }
 }

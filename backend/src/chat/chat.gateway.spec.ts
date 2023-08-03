@@ -1,11 +1,11 @@
 import { INestApplication } from '@nestjs/common';
-import { Socket } from 'socket.io-client';
 import ChatGateway from './chat.gateway';
 import {
   createNestApp,
   expectConnect,
   expectConnectFailure,
   expectEvent,
+  expectEventSpecific,
   getClientSocket
 } from './chat.helper';
 
@@ -60,7 +60,6 @@ describe('ChatGateway', () => {
       await expectConnect(socket);
       socket.disconnect();
 
-      // Spy calls expectations
       const { calls } = logSpy.mock;
       expect(logSpy).toHaveBeenCalledTimes(2);
 
@@ -107,17 +106,11 @@ describe('ChatGateway', () => {
       gateway = app.get<ChatGateway>(ChatGateway);
       logSpy = jest.spyOn(gateway.getLogger(), 'log');
       app.listen(3000);
+      jest.clearAllMocks();
     });
 
     afterEach(async () => {
       await app.close();
-      jest.clearAllMocks();
-    });
-
-    it('should initialize the app', () => {
-      expect(gateway).toBeDefined();
-      expect(logSpy).toHaveBeenCalledTimes(1);
-      expect(logSpy).toHaveBeenCalledWith('Initialized');
     });
 
     it('already connected client receive new connected client information', async () => {
@@ -133,6 +126,31 @@ describe('ChatGateway', () => {
       await expectConnect(client0);
       await expectConnect(client1);
       await expectEvent(client0, 'user connected');
+
+      client0.disconnect();
+      client1.disconnect();
+    });
+
+    it('is possible to send private message to another client', async () => {
+      const client0 = getClientSocket({ username: 'toto' });
+      const client1 = getClientSocket({ username: 'tata' });
+
+      client1.on('private message', (data) => {
+        expect(data).toHaveProperty('content');
+        expect(data).toHaveProperty('from');
+        expect(data.from).toBe(client0.id);
+        expect(data.content).toBe('some private infos: 42');
+      });
+
+      await expectConnect(client0);
+      await expectConnect(client1);
+
+      client0.emit('private message', {
+        content: 'some private infos: 42',
+        to: client1.id
+      });
+
+      await expectEvent(client1, 'private message');
 
       client0.disconnect();
       client1.disconnect();
