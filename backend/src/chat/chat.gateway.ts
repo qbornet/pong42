@@ -1,13 +1,18 @@
 import {
+  ConnectedSocket,
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
+  SubscribeMessage,
   WebSocketGateway,
   WebSocketServer
 } from '@nestjs/websockets';
+import { Server } from 'socket.io';
 import { Logger } from '@nestjs/common';
-import { Server, Socket } from 'socket.io';
 import Config, { Env } from '../config/configuration';
+import { ChatSocket } from './chat.interface';
+import ChatService from './chat.service';
 
 function webSocketOptions() {
   const config = Config();
@@ -28,27 +33,41 @@ function webSocketOptions() {
 export default class ChatGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
+  private chatService = new ChatService();
+
   private readonly logger = new Logger(ChatGateway.name);
+
+  getLogger(): Logger {
+    return this.logger;
+  }
 
   @WebSocketServer() io: Server;
 
   afterInit() {
-    this.io.use((socket, next) => {
-      const auth = socket.handshake;
-      this.logger.debug(auth);
-      next();
-    });
+    this.chatService.setIoServer(this.io);
     this.logger.log('Initialized');
   }
 
-  handleConnection(client: Socket, ...args: any[]) {
+  handleConnection(socket: ChatSocket, ...args: any[]) {
     const { sockets } = this.io.sockets;
-
-    this.logger.log(`Client id:${client.id} connected`);
-    this.logger.debug(`Number of connected clients: ${sockets.size}`);
+    this.logger.log(`Client id:${socket.id} connected`);
+    this.logger.log(`Nb clients: ${sockets.size}`);
+    return this.chatService.handleConnection(socket, args);
   }
 
-  handleDisconnect(client: Socket) {
-    this.logger.log(`Client id:${client.id} disconnected`);
+  handleDisconnect(socket: ChatSocket) {
+    this.logger.log(`Client id:${socket.id} disconnected`);
+  }
+
+  @SubscribeMessage('private message')
+  handlePrivateMessage(
+    @MessageBody('to') to: string,
+    @MessageBody('content') content: string,
+    @ConnectedSocket() socket: ChatSocket
+  ) {
+    this.logger.log(
+      `Incoming private message from ${to} with content: ${content}`
+    );
+    this.chatService.handlePrivateMessage(to, content, socket);
   }
 }
