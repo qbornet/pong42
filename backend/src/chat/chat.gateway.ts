@@ -79,7 +79,7 @@ export default class ChatGateway
   handlePrivateMessage(
     @MessageBody('to') to: string,
     @MessageBody('content') content: string,
-    @ConnectedSocket() socket: SocketData
+    @ConnectedSocket() socket: Socket
   ) {
     this.logger.log(
       `Incoming private message from ${to} with content: ${content}`

@@ -155,5 +155,30 @@ describe('ChatGateway', () => {
       client0.disconnect();
       client1.disconnect();
     });
+
+    it('other connected clients does not receive private message', async () => {
+      const client0 = getClientSocket({ username: 'toto' });
+      const client1 = getClientSocket({ username: 'tata' });
+      const client2 = getClientSocket({ username: 'tata' });
+
+      client2.on('private message', () => {
+        fail('it should not reach here');
+      });
+
+      await expectConnect(client0);
+      await expectConnect(client1);
+      await expectConnect(client2);
+
+      client0.emit('private message', {
+        content: 'some private infos: 42',
+        to: client1.id
+      });
+
+      await expectEvent(client1, 'private message');
+
+      client0.disconnect();
+      client1.disconnect();
+      client2.disconnect();
+    });
   });
 });
