@@ -48,3 +48,15 @@ export async function expectConnectFailure(socket: Socket): Promise<void> {
   });
   return promise;
 }
+
+export async function expectEvent(
+  socket: Socket,
+  event: string
+): Promise<void> {
+  const promise = new Promise<void>((resolve) => {
+    socket.on(event, () => {
+      resolve();
+    });
+  });
+  return promise;
+}

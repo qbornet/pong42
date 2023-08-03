@@ -5,6 +5,7 @@ import {
   createNestApp,
   expectConnect,
   expectConnectFailure,
+  expectEvent,
   getClientSocket
 } from './chat.helper';
 
@@ -18,7 +19,6 @@ describe('ChatGateway', () => {
       app = await createNestApp(ChatGateway);
       gateway = app.get<ChatGateway>(ChatGateway);
       logSpy = jest.spyOn(gateway.getLogger(), 'log');
-
       app.listen(3000);
     });
 
@@ -100,7 +100,6 @@ describe('ChatGateway', () => {
   describe('At least one client connected', () => {
     let gateway: ChatGateway;
     let app: INestApplication;
-    let client0: Socket;
     let logSpy: jest.SpyInstance;
 
     beforeEach(async () => {
@@ -108,7 +107,6 @@ describe('ChatGateway', () => {
       gateway = app.get<ChatGateway>(ChatGateway);
       logSpy = jest.spyOn(gateway.getLogger(), 'log');
       app.listen(3000);
-      client0 = getClientSocket({ username: 'toto' });
     });
 
     afterEach(async () => {
@@ -123,17 +121,18 @@ describe('ChatGateway', () => {
     });
 
     it('already connected client receive new connected client information', async () => {
+      const client0 = getClientSocket({ username: 'toto' });
       const client1 = getClientSocket({ username: 'tata' });
 
       client0.on('user connected', (data) => {
-        expect(data.length).toBe(1);
-        expect(data[0]).toHaveProperty('userID');
-        expect(data[0]).toHaveProperty('username');
-        expect(data[0].username).toBe('tata');
+        expect(data).toHaveProperty('userID');
+        expect(data).toHaveProperty('username');
+        expect(data.username).toBe('tata');
       });
 
       await expectConnect(client0);
       await expectConnect(client1);
+      await expectEvent(client0, 'user connected');
 
       client0.disconnect();
       client1.disconnect();
