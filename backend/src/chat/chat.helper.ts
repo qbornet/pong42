@@ -1,5 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
+import { randomBytes } from 'crypto';
 import { Socket, io } from 'socket.io-client';
 
 export async function createNestApp(
@@ -59,4 +60,8 @@ export async function expectEvent(
     });
   });
   return promise;
+}
+
+export function randomId(): string {
+  return randomBytes(8).toString('hex');
 }

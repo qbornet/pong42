@@ -8,10 +8,10 @@ import {
   WebSocketGateway,
   WebSocketServer
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import Config, { Env } from '../config/configuration';
-import { SocketData } from './types';
+import { ChatSocket } from './chat.interface';
 
 function webSocketOptions() {
   const config = Config();
@@ -41,7 +41,7 @@ export default class ChatGateway
   @WebSocketServer() io: Server;
 
   afterInit() {
-    this.io.use((socket: SocketData, next) => {
+    this.io.use((socket: ChatSocket, next) => {
       const { username } = socket.handshake.auth;
       if (!username) {
         return next(new Error('invalid username'));
@@ -52,13 +52,13 @@ export default class ChatGateway
     this.logger.log('Initialized');
   }
 
-  handleConnection(socket: SocketData, ...args: any[]) {
+  handleConnection(socket: ChatSocket, ...args: any[]) {
     const { sockets } = this.io.sockets;
     this.logger.log(`Client id:${socket.id} connected`);
     this.logger.log(`Nb clients: ${sockets.size}`);
 
     const users: { userID: string; username: string }[] = [];
-    this.io.of('/').sockets.forEach((s: SocketData, id: string) => {
+    this.io.of('/').sockets.forEach((s: Chat, id: string) => {
       users.push({
         userID: id,
         username: s.username
@@ -71,7 +71,7 @@ export default class ChatGateway
     });
   }
 
-  handleDisconnect(socket: Socket) {
+  handleDisconnect(socket: ChatSocket) {
     this.logger.log(`Client id:${socket.id} disconnected`);
   }
 
@@ -79,7 +79,7 @@ export default class ChatGateway
   handlePrivateMessage(
     @MessageBody('to') to: string,
     @MessageBody('content') content: string,
-    @ConnectedSocket() socket: Socket
+    @ConnectedSocket() socket: ChatSocket
   ) {
     this.logger.log(
       `Incoming private message from ${to} with content: ${content}`
