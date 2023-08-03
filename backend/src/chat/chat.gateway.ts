@@ -62,7 +62,11 @@ export default class ChatGateway
         username: s.username
       });
     });
-    this.io.emit('users', users);
+    socket.emit('users', users);
+    socket.broadcast.emit('user connected', {
+      userID: socket.id,
+      username: socket.username
+    });
   }
 
   handleDisconnect(client: Socket) {

@@ -11,11 +11,19 @@ async function createNestApp(...gateways: any): Promise<INestApplication> {
   return testingModule.createNestApplication();
 }
 
+function getClientSocket(auth: { [key: string]: any }): Socket {
+  const socket = io('http://localhost:3000', {
+    autoConnect: false,
+    transports: ['websocket', 'polling']
+  });
+  socket.auth = auth;
+  return socket;
+}
+
 describe('ChatGateway', () => {
   describe('Single client connection', () => {
     let gateway: ChatGateway;
     let app: INestApplication;
-    let ioClient: Socket;
     let logSpy: jest.SpyInstance;
 
     beforeEach(async () => {
@@ -26,12 +34,6 @@ describe('ChatGateway', () => {
 
       // Chat is now listening
       app.listen(3000);
-
-      // Instance of the client that will test interact with the Chat gateway
-      ioClient = io('http://localhost:3000', {
-        autoConnect: false,
-        transports: ['websocket', 'polling']
-      });
     });
 
     afterEach(async () => {
@@ -46,15 +48,17 @@ describe('ChatGateway', () => {
     });
 
     it('should connect', async () => {
+      const socket = getClientSocket({
+        username: 'toto'
+      });
       await new Promise<void>((resolve) => {
-        ioClient.on('connect', () => {
+        socket.on('connect', () => {
           resolve();
         });
-        ioClient.auth = { username: 'toto' };
-        ioClient.connect();
+        socket.connect();
         jest.clearAllMocks();
       });
-      ioClient.disconnect();
+      socket.disconnect();
 
       const { calls } = logSpy.mock;
       expect(logSpy).toHaveBeenCalledTimes(2);
@@ -67,33 +71,80 @@ describe('ChatGateway', () => {
     });
 
     it('cannot connect without username', async () => {
+      const socket = getClientSocket({});
       await new Promise<void>((resolve) => {
-        ioClient.on('connect', () => {
+        socket.on('connect', () => {
           resolve();
           fail('it should not reach here');
         });
-        ioClient.on('connect_error', () => {
+        socket.on('connect_error', () => {
           resolve();
         });
 
-        ioClient.connect();
+        socket.connect();
       });
     });
 
     it('sends all connected users (only the current user here)', async () => {
+      const socket = getClientSocket({ username: 'toto' });
       await new Promise<void>((resolve) => {
-        ioClient.on('connect', () => {});
-        ioClient.on('users', (data) => {
+        socket.on('connect', () => {});
+        socket.on('users', (data) => {
           expect(data.length).toBe(1);
           expect(data[0]).toHaveProperty('userID');
           expect(data[0]).toHaveProperty('username');
           resolve();
         });
-        ioClient.auth = { username: 'toto' };
-        ioClient.connect();
+        socket.connect();
         jest.clearAllMocks();
       });
-      ioClient.disconnect();
+      socket.disconnect();
+    });
+
+    it('does not receive info about its own connection', async () => {
+      const socket = getClientSocket({ username: 'toto' });
+      await new Promise<void>((resolve) => {
+        socket.on('connect', () => {
+          resolve();
+        });
+        socket.on('user connected', () => {
+          fail('it should not reach here');
+        });
+        socket.connect();
+        jest.clearAllMocks();
+      });
+      socket.disconnect();
+    });
+  });
+  describe('At least one client connected', () => {
+    let gateway: ChatGateway;
+    let app: INestApplication;
+    let socket: Socket;
+    let logSpy: jest.SpyInstance;
+
+    beforeEach(async () => {
+      // Chat module initilization
+      app = await createNestApp(ChatGateway);
+      gateway = app.get<ChatGateway>(ChatGateway);
+      logSpy = jest.spyOn(gateway.getLogger(), 'log');
+
+      // Chat is now listening
+      app.listen(3000);
+
+      socket = getClientSocket({ username: 'toto' });
+      socket.connect();
+    });
+
+    afterEach(async () => {
+      socket.disconnect();
+      await app.close();
+      jest.clearAllMocks();
+    });
+
+    it('should initialize the app', () => {
+      expect(gateway).toBeDefined();
+      expect(logSpy).toHaveBeenCalledTimes(1);
+      expect(logSpy).toHaveBeenCalledWith('Initialized');
     });
   });
 });
