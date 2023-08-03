@@ -1,44 +1,29 @@
-import { Test } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { Socket, io } from 'socket.io-client';
+import { Socket } from 'socket.io-client';
 import ChatGateway from './chat.gateway';
-
-async function createNestApp(...gateways: any): Promise<INestApplication> {
-  const testingModule = await Test.createTestingModule({
-    providers: gateways
-  }).compile();
-
-  return testingModule.createNestApplication();
-}
-
-function getClientSocket(auth: { [key: string]: any }): Socket {
-  const socket = io('http://localhost:3000', {
-    autoConnect: false,
-    transports: ['websocket', 'polling']
-  });
-  socket.auth = auth;
-  return socket;
-}
+import {
+  createNestApp,
+  expectConnect,
+  expectConnectFailure,
+  getClientSocket
+} from './chat.helper';
 
 describe('ChatGateway', () => {
-  describe('Single client connection', () => {
+  describe('App initilization', () => {
     let gateway: ChatGateway;
     let app: INestApplication;
     let logSpy: jest.SpyInstance;
 
-    beforeEach(async () => {
-      // Chat module initilization
+    beforeAll(async () => {
       app = await createNestApp(ChatGateway);
       gateway = app.get<ChatGateway>(ChatGateway);
       logSpy = jest.spyOn(gateway.getLogger(), 'log');
 
-      // Chat is now listening
       app.listen(3000);
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
       await app.close();
-      jest.clearAllMocks();
     });
 
     it('should initialize the app', () => {
@@ -46,20 +31,36 @@ describe('ChatGateway', () => {
       expect(logSpy).toHaveBeenCalledTimes(1);
       expect(logSpy).toHaveBeenCalledWith('Initialized');
     });
+  });
+
+  describe('Single client connection', () => {
+    let gateway: ChatGateway;
+    let app: INestApplication;
+    let logSpy: jest.SpyInstance;
+
+    beforeEach(async () => {
+      app = await createNestApp(ChatGateway);
+      gateway = app.get<ChatGateway>(ChatGateway);
+      logSpy = jest.spyOn(gateway.getLogger(), 'log');
+      app.listen(3000);
+    });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    afterEach(async () => {
+      await app.close();
+    });
 
     it('should connect', async () => {
       const socket = getClientSocket({
         username: 'toto'
       });
-      await new Promise<void>((resolve) => {
-        socket.on('connect', () => {
-          resolve();
-        });
-        socket.connect();
-        jest.clearAllMocks();
-      });
+      await expectConnect(socket);
       socket.disconnect();
 
+      // Spy calls expectations
       const { calls } = logSpy.mock;
       expect(logSpy).toHaveBeenCalledTimes(2);
 
@@ -72,71 +73,45 @@ describe('ChatGateway', () => {
 
     it('cannot connect without username', async () => {
       const socket = getClientSocket({});
-      await new Promise<void>((resolve) => {
-        socket.on('connect', () => {
-          resolve();
-          fail('it should not reach here');
-        });
-        socket.on('connect_error', () => {
-          resolve();
-        });
-
-        socket.connect();
-      });
+      await expectConnectFailure(socket);
     });
 
     it('sends all connected users (only the current user here)', async () => {
       const socket = getClientSocket({ username: 'toto' });
-      await new Promise<void>((resolve) => {
-        socket.on('connect', () => {});
-        socket.on('users', (data) => {
-          expect(data.length).toBe(1);
-          expect(data[0]).toHaveProperty('userID');
-          expect(data[0]).toHaveProperty('username');
-          resolve();
-        });
-        socket.connect();
-        jest.clearAllMocks();
+      socket.on('users', (data) => {
+        expect(data.length).toBe(1);
+        expect(data[0]).toHaveProperty('userID');
+        expect(data[0]).toHaveProperty('username');
       });
+      await expectConnect(socket);
       socket.disconnect();
     });
 
     it('does not receive info about its own connection', async () => {
       const socket = getClientSocket({ username: 'toto' });
-      await new Promise<void>((resolve) => {
-        socket.on('connect', () => {
-          resolve();
-        });
-        socket.on('user connected', () => {
-          fail('it should not reach here');
-        });
-        socket.connect();
-        jest.clearAllMocks();
+      socket.on('user connected', () => {
+        fail('it should not reach here');
       });
+      await expectConnect(socket);
       socket.disconnect();
     });
   });
+
   describe('At least one client connected', () => {
     let gateway: ChatGateway;
     let app: INestApplication;
-    let socket: Socket;
+    let client0: Socket;
     let logSpy: jest.SpyInstance;
 
     beforeEach(async () => {
-      // Chat module initilization
       app = await createNestApp(ChatGateway);
       gateway = app.get<ChatGateway>(ChatGateway);
       logSpy = jest.spyOn(gateway.getLogger(), 'log');
-
-      // Chat is now listening
       app.listen(3000);
-
-      socket = getClientSocket({ username: 'toto' });
-      socket.connect();
+      client0 = getClientSocket({ username: 'toto' });
     });
 
     afterEach(async () => {
-      socket.disconnect();
       await app.close();
       jest.clearAllMocks();
     });
@@ -145,6 +120,23 @@ describe('ChatGateway', () => {
       expect(gateway).toBeDefined();
       expect(logSpy).toHaveBeenCalledTimes(1);
       expect(logSpy).toHaveBeenCalledWith('Initialized');
+    });
+
+    it('already connected client receive new connected client information', async () => {
+      const client1 = getClientSocket({ username: 'tata' });
+
+      client0.on('user connected', (data) => {
+        expect(data.length).toBe(1);
+        expect(data[0]).toHaveProperty('userID');
+        expect(data[0]).toHaveProperty('username');
+        expect(data[0].username).toBe('tata');
+      });
+
+      await expectConnect(client0);
+      await expectConnect(client1);
+
+      client0.disconnect();
+      client1.disconnect();
     });
   });
 });
