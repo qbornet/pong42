@@ -144,15 +144,13 @@ describe('ChatGateway', () => {
       const client0 = getClientSocket({ username: 'toto' });
       const client1 = getClientSocket({ username: 'tata' });
 
-      let session0: {
+      interface Session {
         userID: string;
         sessionID: string;
-      };
+      }
 
-      let session1: {
-        userID: string;
-        sessionID: string;
-      };
+      let session0: Session;
+      let session1: Session;
 
       client0.on('session', (session) => {
         session0 = session;
@@ -162,23 +160,34 @@ describe('ChatGateway', () => {
       });
 
       client1.on('private message', (data) => {
+        console.log(data);
+      });
+
+      client0.on('private message', (data) => {
         expect(data).toHaveProperty('content');
         expect(data).toHaveProperty('from');
         expect(data).toHaveProperty('to');
         expect(data.content).toBe('some private infos: 42');
-        expect(data.from).toBe(session0.userID);
-        expect(data.to).toBe(session1.userID);
+        expect(data.from).toBe(session1.userID);
+        expect(data.to).toBe(session0.userID);
       });
 
-      await expectConnect(client0);
-      await expectConnect(client1);
+      client0.connect();
+      client1.connect();
+      await expectEvent(client0, 'session');
+      await expectEvent(client1, 'session');
 
-      client0.emit('private message', {
+      console.log('client 0', session0);
+      console.log('client 1', session1);
+
+      // session0 is defined, session event handler has been called. Code is async
+      client1.emit('private message', {
         content: 'some private infos: 42',
-        to: session1.userID
+        to: session0.userID
       });
 
-      await expectEvent(client1, 'private message');
+      await expectEvent(client0, 'private message');
+      //await expectEvent(client0, 'private message');
 
       client0.disconnect();
       client1.disconnect();

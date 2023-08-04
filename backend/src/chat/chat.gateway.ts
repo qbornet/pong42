@@ -68,6 +68,6 @@ export default class ChatGateway
     this.logger.log(
       `Incoming private message from ${to} with content: ${content}`
     );
-    ChatService.handlePrivateMessage(to, content, socket);
+    this.chatService.handlePrivateMessage(to, content, socket);
   }
 }

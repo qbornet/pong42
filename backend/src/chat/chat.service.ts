@@ -56,8 +56,8 @@ export default class ChatService {
     });
   }
 
-  static handlePrivateMessage(to: string, content: string, socket: ChatSocket) {
-    socket.to(to).to(socket.userID).emit('private message', {
+  handlePrivateMessage(to: string, content: string, socket: ChatSocket) {
+    this.io.to(to).to(socket.userID).emit('private message', {
       content,
       from: socket.userID,
       to
