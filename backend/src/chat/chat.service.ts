@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { Server } from 'socket.io';
+import SessionStoreService from 'src/session-store/session-store.service';
 import { ChatSocket } from './chat.interface';
 
 @Injectable()
 export default class ChatService {
   public io: Server;
+
+  private readonly session: SessionStoreService;
 
   setIoServer(server: Server) {
     this.io = server;
