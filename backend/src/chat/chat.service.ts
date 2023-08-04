@@ -1,7 +1,7 @@
 import { randomBytes } from 'crypto';
 import { Injectable } from '@nestjs/common';
 import { Server } from 'socket.io';
-import SessionStore from 'src/session-store/session-store.interface';
+import { SessionStore } from 'src/session-store/session-store.interface';
 import { ChatSocket } from './chat.interface';
 
 @Injectable()
@@ -38,6 +38,7 @@ export default class ChatService {
 
   handleConnection(socket: ChatSocket, ...args: any[]) {
     const users: { userID: string; username: string }[] = [];
+    socket.join(socket.userID);
     this.io.of('/').sockets.forEach((sckt: ChatSocket, id: string) => {
       users.push({
         userID: id,
@@ -56,9 +57,10 @@ export default class ChatService {
   }
 
   static handlePrivateMessage(to: string, content: string, socket: ChatSocket) {
-    socket.to(to).emit('private message', {
+    socket.to(to).to(socket.userID).emit('private message', {
       content,
-      from: socket.id
+      from: socket.userID,
+      to
     });
   }
 

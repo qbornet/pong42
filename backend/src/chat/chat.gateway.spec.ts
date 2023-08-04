@@ -144,11 +144,30 @@ describe('ChatGateway', () => {
       const client0 = getClientSocket({ username: 'toto' });
       const client1 = getClientSocket({ username: 'tata' });
 
+      let session0: {
+        userID: string;
+        sessionID: string;
+      };
+
+      let session1: {
+        userID: string;
+        sessionID: string;
+      };
+
+      client0.on('session', (session) => {
+        session0 = session;
+      });
+      client1.on('session', (session) => {
+        session1 = session;
+      });
+
       client1.on('private message', (data) => {
         expect(data).toHaveProperty('content');
         expect(data).toHaveProperty('from');
-        expect(data.from).toBe(client0.id);
+        expect(data).toHaveProperty('to');
         expect(data.content).toBe('some private infos: 42');
+        expect(data.from).toBe(session0.userID);
+        expect(data.to).toBe(session1.userID);
       });
 
       await expectConnect(client0);
@@ -156,7 +175,7 @@ describe('ChatGateway', () => {
 
       client0.emit('private message', {
         content: 'some private infos: 42',
-        to: client1.id
+        to: session1.userID
       });
 
       await expectEvent(client1, 'private message');
