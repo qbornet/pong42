@@ -61,7 +61,3 @@ export async function expectEvent(
   });
   return promise;
 }
-
-export function randomId(): string {
-  return randomBytes(8).toString('hex');
-}

@@ -45,13 +45,13 @@ export default class ChatGateway
 
   afterInit() {
     this.chatService.setIoServer(this.io);
+    this.chatService.afterInit();
     this.logger.log('Initialized');
   }
 
   handleConnection(socket: ChatSocket, ...args: any[]) {
-    const { sockets } = this.io.sockets;
     this.logger.log(`Client id:${socket.id} connected`);
-    this.logger.log(`Nb clients: ${sockets.size}`);
+    this.logger.log(`Nb clients: ${this.io.sockets.sockets.size}`);
     return this.chatService.handleConnection(socket, args);
   }
 
@@ -68,6 +68,6 @@ export default class ChatGateway
     this.logger.log(
       `Incoming private message from ${to} with content: ${content}`
     );
-    this.chatService.handlePrivateMessage(to, content, socket);
+    ChatService.handlePrivateMessage(to, content, socket);
   }
 }

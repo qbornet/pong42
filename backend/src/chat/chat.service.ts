@@ -1,21 +1,36 @@
+import { randomBytes } from 'crypto';
 import { Injectable } from '@nestjs/common';
 import { Server } from 'socket.io';
-import SessionStoreService from 'src/session-store/session-store.service';
+import SessionStore from 'src/session-store/session-store.interface';
 import { ChatSocket } from './chat.interface';
 
 @Injectable()
 export default class ChatService {
   public io: Server;
 
-  private readonly session: SessionStoreService;
+  private readonly sessionStore: SessionStore;
 
   setIoServer(server: Server) {
     this.io = server;
-    this.io.use((socket: ChatSocket, next) => {
+  }
+
+  afterInit() {
+    return this.io.use((socket: ChatSocket, next) => {
+      const { sessionID } = socket.handshake.auth;
+      if (sessionID) {
+        const session = this.sessionStore.findSession(sessionID);
+        if (session) {
+          socket.sessionID = sessionID;
+          socket.username = session.username;
+          return next();
+        }
+      }
       const { username } = socket.handshake.auth;
       if (!username) {
         return next(new Error('invalid username'));
       }
+      socket.sessionID = ChatService.randomId();
+      socket.userID = ChatService.randomId();
       socket.username = username;
       return next();
     });
@@ -36,10 +51,14 @@ export default class ChatService {
     });
   }
 
-  handlePrivateMessage(to: string, content: string, socket: ChatSocket) {
+  static handlePrivateMessage(to: string, content: string, socket: ChatSocket) {
     socket.to(to).emit('private message', {
       content,
       from: socket.id
     });
+  }
+
+  static randomId(): string {
+    return randomBytes(8).toString('hex');
   }
 }
