@@ -5,7 +5,6 @@ import {
   expectConnect,
   expectConnectFailure,
   expectEvent,
-  expectEventSpecific,
   getClientSocket
 } from './chat.helper';
 
@@ -90,6 +89,16 @@ describe('ChatGateway', () => {
       const socket = getClientSocket({ username: 'toto' });
       socket.on('user connected', () => {
         fail('it should not reach here');
+      });
+      await expectConnect(socket);
+      socket.disconnect();
+    });
+
+    it('receives sessionID userID when connect', async () => {
+      const socket = getClientSocket({ username: 'toto' });
+      socket.on('session', (session) => {
+        expect(session).toHaveProperty('userID');
+        expect(session).toHaveProperty('sessionID');
       });
       await expectConnect(socket);
       socket.disconnect();

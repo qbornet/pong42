@@ -15,7 +15,7 @@ export default class ChatService {
   }
 
   afterInit() {
-    return this.io.use((socket: ChatSocket, next) => {
+    this.io.use((socket: ChatSocket, next) => {
       const { sessionID } = socket.handshake.auth;
       if (sessionID) {
         const session = this.sessionStore.findSession(sessionID);
@@ -48,6 +48,10 @@ export default class ChatService {
     socket.broadcast.emit('user connected', {
       userID: socket.id,
       username: socket.username
+    });
+    socket.emit('session', {
+      sessionID: socket.sessionID,
+      userID: socket.userID
     });
   }
 
