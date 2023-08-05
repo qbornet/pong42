@@ -152,15 +152,13 @@ describe('ChatGateway', () => {
       let session0: Session;
       let session1: Session;
 
-      client0.on('session', (session) => {
-        session0 = session;
-      });
-      client1.on('session', (session) => {
-        session1 = session;
-      });
-
       client1.on('private message', (data) => {
-        console.log(data);
+        expect(data).toHaveProperty('content');
+        expect(data).toHaveProperty('from');
+        expect(data).toHaveProperty('to');
+        expect(data.content).toBe('some private infos: 42');
+        expect(data.from).toBe(session1.userID);
+        expect(data.to).toBe(session0.userID);
       });
 
       client0.on('private message', (data) => {
@@ -172,22 +170,25 @@ describe('ChatGateway', () => {
         expect(data.to).toBe(session0.userID);
       });
 
-      client0.connect();
-      client1.connect();
-      await expectEvent(client0, 'session');
-      await expectEvent(client1, 'session');
-
-      console.log('client 0', session0);
-      console.log('client 1', session1);
-
-      // session0 is defined, session event handler has been called. Code is async
-      client1.emit('private message', {
-        content: 'some private infos: 42',
-        to: session0.userID
+      client0.on('session', (session) => {
+        session0 = session;
       });
 
-      await expectEvent(client0, 'private message');
-      //await expectEvent(client0, 'private message');
+      client1.on('session', (session) => {
+        session1 = session;
+        client1.emit('private message', {
+          content: 'some private infos: 42',
+          to: session0.userID
+        });
+      });
+
+      await expectConnect(client0);
+      await expectConnect(client1);
+
+      const promise0 = expectEvent(client0, 'private message');
+      const promise1 = expectEvent(client1, 'private message');
+
+      await Promise.all([promise0, promise1]);
 
       client0.disconnect();
       client1.disconnect();
