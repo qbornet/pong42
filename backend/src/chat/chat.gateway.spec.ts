@@ -182,13 +182,17 @@ describe('ChatGateway', () => {
         });
       });
 
-      await expectConnect(client0);
-      await expectConnect(client1);
+      await Promise.all([
+        expectConnect(client0),
+        expectEvent(client0, 'session'),
+        expectConnect(client1),
+        expectEvent(client1, 'session')
+      ]);
 
-      const promise0 = expectEvent(client0, 'private message');
-      const promise1 = expectEvent(client1, 'private message');
-
-      await Promise.all([promise0, promise1]);
+      await Promise.all([
+        expectEvent(client0, 'private message'),
+        expectEvent(client1, 'private message')
+      ]);
 
       client0.disconnect();
       client1.disconnect();
