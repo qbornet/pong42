@@ -8,12 +8,11 @@ import {
   WebSocketGateway,
   WebSocketServer
 } from '@nestjs/websockets';
-import SessionStore from 'src/session-store/session-store';
 import { randomBytes } from 'crypto';
 import { Server } from 'socket.io';
 import { Logger } from '@nestjs/common';
+import InMemorySessionStore from 'src/session-store/in-memory-session-store/in-memory-session-store.service';
 import Config, { Env } from '../config/configuration';
-import { ChatSocket } from './chat.interface';
 
 function webSocketOptions() {
   const config = Config();
@@ -36,7 +35,7 @@ export default class ChatGateway
 {
   private readonly logger = new Logger(ChatGateway.name);
 
-  private readonly sessionStore: SessionStore;
+  private readonly sessionStore: InMemorySessionStore;
 
   getLogger(): Logger {
     return this.logger;

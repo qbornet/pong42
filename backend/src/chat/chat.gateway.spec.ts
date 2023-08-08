@@ -102,6 +102,20 @@ describe('ChatGateway', () => {
       await expectEvent(socket, 'connect');
       socket.disconnect();
     });
+
+    it('can connect from multiple user session through the same socket', async () => {
+      const socket0 = getClientSocket({ username: 'toto' });
+
+      let session: Session;
+      socket0.on('session', (data) => {
+        session = data;
+      });
+
+      socket0.connect();
+      await expectEvent(socket0, 'session');
+      console.log(session);
+      socket0.disconnect();
+    });
   });
 
   describe('At least one client connected', () => {

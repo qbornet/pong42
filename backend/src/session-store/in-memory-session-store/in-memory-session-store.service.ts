@@ -1,5 +1,7 @@
+import { Injectable } from '@nestjs/common';
 import { SessionStore } from '../session-store.interface';
 
+@Injectable()
 export default class InMemorySessionStore<IdType = any, SessionType = any>
   implements SessionStore
 {
