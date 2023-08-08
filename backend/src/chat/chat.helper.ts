@@ -2,12 +2,8 @@ import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { Socket, io } from 'socket.io-client';
 
-export async function createNestApp(
-  ...gateways: any
-): Promise<INestApplication> {
-  const testingModule = await Test.createTestingModule({
-    providers: gateways
-  }).compile();
+export async function createNestApp(module: any): Promise<INestApplication> {
+  const testingModule = await Test.createTestingModule(module).compile();
 
   return testingModule.createNestApplication();
 }

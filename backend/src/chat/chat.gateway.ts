@@ -11,8 +11,10 @@ import {
 import { randomBytes } from 'crypto';
 import { Server } from 'socket.io';
 import { Logger } from '@nestjs/common';
-import InMemorySessionStore from 'src/session-store/in-memory-session-store/in-memory-session-store.service';
+import { Session } from 'src/session-store/session-store.interface';
+import InMemorySessionStoreService from '../session-store/in-memory-session-store/in-memory-session-store.service';
 import Config, { Env } from '../config/configuration';
+import { ChatSocket } from './chat.interface';
 
 function webSocketOptions() {
   const config = Config();
@@ -35,7 +37,9 @@ export default class ChatGateway
 {
   private readonly logger = new Logger(ChatGateway.name);
 
-  private readonly sessionStore: InMemorySessionStore;
+  constructor(
+    private sessionService: InMemorySessionStoreService<string, Session>
+  ) {}
 
   getLogger(): Logger {
     return this.logger;
@@ -47,9 +51,10 @@ export default class ChatGateway
     this.io.use((socket: ChatSocket, next) => {
       const { sessionID } = socket.handshake.auth;
       if (sessionID) {
-        const session = this.sessionStore.findSession(sessionID);
+        const session = this.sessionService.findSession(sessionID);
         if (session) {
           socket.sessionID = sessionID;
+          socket.userID = session.userID;
           socket.username = session.username;
           return next();
         }
@@ -61,6 +66,11 @@ export default class ChatGateway
       socket.sessionID = ChatGateway.randomId();
       socket.userID = ChatGateway.randomId();
       socket.username = username;
+      this.sessionService.saveSession(socket.sessionID, {
+        userID: socket.userID,
+        username,
+        connected: true
+      });
       return next();
     });
     this.logger.log('Initialized');
@@ -71,15 +81,15 @@ export default class ChatGateway
     this.logger.log(`Nb clients: ${this.io.sockets.sockets.size}`);
     const users: { userID: string; username: string }[] = [];
     socket.join(socket.userID);
-    this.io.of('/').sockets.forEach((sckt: ChatSocket, id: string) => {
+    this.io.of('/').sockets.forEach((sckt: ChatSocket) => {
       users.push({
-        userID: id,
+        userID: sckt.userID,
         username: sckt.username
       });
     });
     socket.emit('users', users);
     socket.broadcast.emit('user connected', {
-      userID: socket.id,
+      userID: socket.userID,
       username: socket.username
     });
     socket.emit('session', {

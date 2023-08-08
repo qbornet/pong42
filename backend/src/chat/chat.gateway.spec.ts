@@ -1,6 +1,14 @@
+import { Test } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
+import SessionStoreModule from '../session-store/session-store.module';
 import ChatGateway from './chat.gateway';
 import { createNestApp, expectEvent, getClientSocket } from './chat.helper';
+import { Session } from 'src/session-store/session-store.interface';
+
+const testedModule = {
+  imports: [SessionStoreModule],
+  providers: [ChatGateway]
+};
 
 describe('ChatGateway', () => {
   describe('App initilization', () => {
@@ -9,7 +17,7 @@ describe('ChatGateway', () => {
     let logSpy: jest.SpyInstance;
 
     beforeAll(async () => {
-      app = await createNestApp(ChatGateway);
+      app = await createNestApp(testedModule);
       gateway = app.get<ChatGateway>(ChatGateway);
       logSpy = jest.spyOn(gateway.getLogger(), 'log');
       app.listen(3000);
@@ -32,7 +40,7 @@ describe('ChatGateway', () => {
     let logSpy: jest.SpyInstance;
 
     beforeEach(async () => {
-      app = await createNestApp(ChatGateway);
+      app = await createNestApp(testedModule);
       gateway = app.get<ChatGateway>(ChatGateway);
       logSpy = jest.spyOn(gateway.getLogger(), 'log');
       app.listen(3000);
@@ -106,15 +114,29 @@ describe('ChatGateway', () => {
     it('can connect from multiple user session through the same socket', async () => {
       const socket0 = getClientSocket({ username: 'toto' });
 
-      let session: Session;
-      socket0.on('session', (data) => {
-        session = data;
+      let session0: any;
+      socket0.on('session', (session) => {
+        session0 = session;
       });
-
       socket0.connect();
       await expectEvent(socket0, 'session');
-      console.log(session);
+
+      const socket1 = getClientSocket({
+        username: 'toto',
+        sessionID: session0.sessionID
+      });
+
+      let session1: any;
+      socket1.on('session', (session) => {
+        session1 = session;
+      });
+      socket1.connect();
+      await expectEvent(socket1, 'session');
+
+      expect(session1).toEqual(session0);
+
       socket0.disconnect();
+      socket1.disconnect();
     });
   });
 
@@ -124,7 +146,7 @@ describe('ChatGateway', () => {
     let logSpy: jest.SpyInstance;
 
     beforeEach(async () => {
-      app = await createNestApp(ChatGateway);
+      app = await createNestApp(testedModule);
       gateway = app.get<ChatGateway>(ChatGateway);
       logSpy = jest.spyOn(gateway.getLogger(), 'log');
       app.listen(3000);
