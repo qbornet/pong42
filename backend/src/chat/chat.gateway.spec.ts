@@ -56,7 +56,7 @@ describe('ChatGateway', () => {
       const socket = getClientSocket({
         username: 'toto'
       });
-      await expectConnect(socket);
+      await expectEvent(socket, 'connect');
       socket.disconnect();
 
       const { calls } = logSpy.mock;
