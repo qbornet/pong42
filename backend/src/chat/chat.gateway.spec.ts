@@ -1,12 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import ChatGateway from './chat.gateway';
-import {
-  createNestApp,
-  expectConnect,
-  expectConnectFailure,
-  expectEvent,
-  getClientSocket
-} from './chat.helper';
+import { createNestApp, expectEvent, getClientSocket } from './chat.helper';
 
 describe('ChatGateway', () => {
   describe('App initilization', () => {
@@ -56,6 +50,7 @@ describe('ChatGateway', () => {
       const socket = getClientSocket({
         username: 'toto'
       });
+      socket.connect();
       await expectEvent(socket, 'connect');
       socket.disconnect();
 
@@ -71,7 +66,8 @@ describe('ChatGateway', () => {
 
     it('cannot connect without username', async () => {
       const socket = getClientSocket({});
-      await expectConnectFailure(socket);
+      socket.connect();
+      await expectEvent(socket, 'connect_error');
     });
 
     it('sends all connected users (only the current user here)', async () => {
@@ -81,7 +77,8 @@ describe('ChatGateway', () => {
         expect(data[0]).toHaveProperty('userID');
         expect(data[0]).toHaveProperty('username');
       });
-      await expectConnect(socket);
+      socket.connect();
+      await expectEvent(socket, 'connect');
       socket.disconnect();
     });
 
@@ -90,7 +87,8 @@ describe('ChatGateway', () => {
       socket.on('user connected', () => {
         fail('it should not reach here');
       });
-      await expectConnect(socket);
+      socket.connect();
+      await expectEvent(socket, 'connect');
       socket.disconnect();
     });
 
@@ -100,7 +98,8 @@ describe('ChatGateway', () => {
         expect(session).toHaveProperty('userID');
         expect(session).toHaveProperty('sessionID');
       });
-      await expectConnect(socket);
+      socket.connect();
+      await expectEvent(socket, 'connect');
       socket.disconnect();
     });
   });
@@ -132,8 +131,12 @@ describe('ChatGateway', () => {
         expect(data.username).toBe('tata');
       });
 
-      await expectConnect(client0);
-      await expectConnect(client1);
+      client0.connect();
+      await expectEvent(client0, 'connect');
+
+      client1.connect();
+      await expectEvent(client1, 'connect');
+
       await expectEvent(client0, 'user connected');
 
       client0.disconnect();
@@ -176,18 +179,24 @@ describe('ChatGateway', () => {
 
       client1.on('session', (session) => {
         session1 = session;
-        client1.emit('private message', {
-          content: 'some private infos: 42',
-          to: session0.userID
-        });
       });
 
+      client0.connect();
       await Promise.all([
-        expectConnect(client0),
-        expectEvent(client0, 'session'),
-        expectConnect(client1),
+        expectEvent(client0, 'connect'),
+        expectEvent(client0, 'session')
+      ]);
+
+      client1.connect();
+      await Promise.all([
+        expectEvent(client1, 'connect'),
         expectEvent(client1, 'session')
       ]);
+
+      client1.emit('private message', {
+        content: 'some private infos: 42',
+        to: session0.userID
+      });
 
       await Promise.all([
         expectEvent(client0, 'private message'),
@@ -207,9 +216,15 @@ describe('ChatGateway', () => {
         fail('it should not reach here');
       });
 
-      await expectConnect(client0);
-      await expectConnect(client1);
-      await expectConnect(client2);
+      client0.connect();
+      client1.connect();
+      client2.connect();
+
+      await Promise.all([
+        expectEvent(client0, 'connect'),
+        expectEvent(client1, 'connect'),
+        expectEvent(client2, 'connect')
+      ]);
 
       client0.emit('private message', {
         content: 'some private infos: 42',
