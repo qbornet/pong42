@@ -8,11 +8,12 @@ import {
   WebSocketGateway,
   WebSocketServer
 } from '@nestjs/websockets';
+import SessionStore from 'src/session-store/session-store';
+import { randomBytes } from 'crypto';
 import { Server } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import Config, { Env } from '../config/configuration';
 import { ChatSocket } from './chat.interface';
-import ChatService from './chat.service';
 
 function webSocketOptions() {
   const config = Config();
@@ -33,9 +34,9 @@ function webSocketOptions() {
 export default class ChatGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-  private chatService = new ChatService();
-
   private readonly logger = new Logger(ChatGateway.name);
+
+  private readonly sessionStore: SessionStore;
 
   getLogger(): Logger {
     return this.logger;
@@ -44,15 +45,48 @@ export default class ChatGateway
   @WebSocketServer() io: Server;
 
   afterInit() {
-    this.chatService.setIoServer(this.io);
-    this.chatService.afterInit();
+    this.io.use((socket: ChatSocket, next) => {
+      const { sessionID } = socket.handshake.auth;
+      if (sessionID) {
+        const session = this.sessionStore.findSession(sessionID);
+        if (session) {
+          socket.sessionID = sessionID;
+          socket.username = session.username;
+          return next();
+        }
+      }
+      const { username } = socket.handshake.auth;
+      if (!username) {
+        return next(new Error('invalid username'));
+      }
+      socket.sessionID = ChatGateway.randomId();
+      socket.userID = ChatGateway.randomId();
+      socket.username = username;
+      return next();
+    });
     this.logger.log('Initialized');
   }
 
   handleConnection(socket: ChatSocket, ...args: any[]) {
     this.logger.log(`Client id:${socket.id} connected`);
     this.logger.log(`Nb clients: ${this.io.sockets.sockets.size}`);
-    return this.chatService.handleConnection(socket, args);
+    const users: { userID: string; username: string }[] = [];
+    socket.join(socket.userID);
+    this.io.of('/').sockets.forEach((sckt: ChatSocket, id: string) => {
+      users.push({
+        userID: id,
+        username: sckt.username
+      });
+    });
+    socket.emit('users', users);
+    socket.broadcast.emit('user connected', {
+      userID: socket.id,
+      username: socket.username
+    });
+    socket.emit('session', {
+      sessionID: socket.sessionID,
+      userID: socket.userID
+    });
   }
 
   handleDisconnect(socket: ChatSocket) {
@@ -68,6 +102,14 @@ export default class ChatGateway
     this.logger.log(
       `Incoming private message from ${to} with content: ${content}`
     );
-    this.chatService.handlePrivateMessage(to, content, socket);
+    this.io.to(to).to(socket.userID).emit('private message', {
+      content,
+      from: socket.userID,
+      to
+    });
+  }
+
+  static randomId(): string {
+    return randomBytes(8).toString('hex');
   }
 }
