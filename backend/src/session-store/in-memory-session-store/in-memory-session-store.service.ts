@@ -1,13 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import SessionStore from '../session-store.interface';
+import { SessionStore } from '../session-store.interface';
 
-@Injectable()
-export default class InMemorySessionStoreService<
-  IdType = any,
-  SessionType = any
-> implements SessionStore
+export default class InMemorySessionStore<IdType = any, SessionType = any>
+  implements SessionStore
 {
-  private readonly sessions: Map<IdType, SessionType>;
+  private sessions: Map<IdType, SessionType>;
 
   constructor() {
     this.sessions = new Map<IdType, SessionType>();

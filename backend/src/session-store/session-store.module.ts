@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import InMemorySessionStoreService from './in-memory-session-store/in-memory-session-store.service';
+import InMemorySessionStoreModule from './in-memory-session-store/in-memory-session-store.module';
 
 @Module({
-  imports: [],
+  imports: [InMemorySessionStoreModule],
   controllers: [],
-  providers: [InMemorySessionStoreService],
-  exports: [InMemorySessionStoreService]
+  providers: [],
+  exports: [InMemorySessionStoreModule]
 })
 export default class SessionStoreModule {}

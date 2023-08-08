@@ -3,3 +3,9 @@ export interface SessionStore<IdType = any, SessionType = any> {
   saveSession(id: IdType, session: SessionType): any;
   findAllSession(): any;
 }
+
+export interface Session {
+  userID: string;
+  username: string;
+  connected: boolean;
+}
