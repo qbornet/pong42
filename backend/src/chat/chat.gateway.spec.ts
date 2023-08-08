@@ -138,6 +138,22 @@ describe('ChatGateway', () => {
       socket0.disconnect();
       socket1.disconnect();
     });
+
+    it('emit user disconnect on disconnection of a client', async () => {
+      const socket = getClientSocket({ username: 'toto' });
+
+      socket.on('disconnect', (data) => {
+        console.log(data);
+      });
+
+      socket.on('disconnected', (data) => {
+        console.log(data);
+      });
+
+      socket.connect();
+      await expectEvent(socket, 'connect');
+      socket.disconnect();
+    });
   });
 
   describe('At least one client connected', () => {
