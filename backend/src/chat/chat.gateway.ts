@@ -71,7 +71,8 @@ export default class ChatGateway
       this.sessionStore.saveSession(socket.sessionID, {
         userID: socket.userID,
         username,
-        connected: true
+        connected: true,
+        messages: []
       });
       return next();
     });
@@ -81,12 +82,26 @@ export default class ChatGateway
   handleConnection(socket: ChatSocket, ...args: any[]) {
     this.logger.log(`Client id:${socket.id} connected`);
     this.logger.log(`Nb clients: ${this.io.sockets.sockets.size}`);
-    const users: { userID: string; username: string }[] = [];
+
+    const users: Session[] = [];
+    const messagesPerUser = new Map();
+    this.messageStore.findMessageForUser(socket.userID).forEach((message) => {
+      const { from, to } = message;
+      const otherUser = socket.userID === from ? to : from;
+      if (messagesPerUser.has(otherUser)) {
+        messagesPerUser.get(otherUser).push(message);
+      } else {
+        messagesPerUser.set(otherUser, [message]);
+      }
+    });
+
     socket.join(socket.userID);
-    this.io.of('/').sockets.forEach((sckt: ChatSocket) => {
+    this.sessionStore.findAllSession().forEach((session: Session) => {
       users.push({
-        userID: sckt.userID,
-        username: sckt.username
+        userID: session.userID,
+        username: session.username,
+        connected: session.connected,
+        messages: messagesPerUser.get(session.userID) || []
       });
     });
     socket.emit('users', users);
@@ -106,11 +121,10 @@ export default class ChatGateway
 
     if (matchingSockets.length === 0) {
       socket.broadcast.emit('user disconnected', socket.userID);
-      const session = this.sessionStore.findSession(socket.userID);
-      this.sessionStore.saveSession(socket.userID, {
-        connected: false,
-        ...session
-      });
+      const session = this.sessionStore.findSession(socket.sessionID);
+      if (session) {
+        session.connected = false;
+      }
     }
   }
 
@@ -128,7 +142,8 @@ export default class ChatGateway
       from: socket.userID,
       to
     };
-    this.io.to(to).to(socket.userID).emit('private message', message);
+    socket.to(to).to(socket.userID).emit('private message', message);
+    this.messageStore.saveMessage(message);
   }
 
   static randomId(): string {

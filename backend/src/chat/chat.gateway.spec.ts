@@ -166,6 +166,33 @@ describe('ChatGateway', () => {
       await expectEvent(client1, 'user disconnected');
       client1.disconnect();
     });
+
+    it('can disconnect/reconnect to the same session', async () => {
+      let client0 = getClientSocket({ username: 'toto' });
+
+      let session0: {
+        userID: string;
+        sessionID: string;
+      };
+
+      client0.on('session', (session) => {
+        session0 = session;
+      });
+
+      client0.connect();
+      await Promise.all([
+        expectEvent(client0, 'connect'),
+        expectEvent(client0, 'session')
+      ]);
+      client0.disconnect();
+      client0 = getClientSocket({
+        username: 'toto',
+        sessionID: session0.sessionID
+      });
+      client0.connect();
+      await expectEvent(client0, 'session');
+      client0.disconnect();
+    });
   });
 
   describe('At least one client connected', () => {
@@ -219,7 +246,7 @@ describe('ChatGateway', () => {
       let session0: Session;
       let session1: Session;
 
-      client1.on('private message', (data) => {
+      client0.on('private message', (data) => {
         expect(data).toHaveProperty('content');
         expect(data).toHaveProperty('from');
         expect(data).toHaveProperty('to');
@@ -227,6 +254,49 @@ describe('ChatGateway', () => {
         expect(data.from).toBe(session1.userID);
         expect(data.to).toBe(session0.userID);
       });
+
+      client0.on('session', (session) => {
+        session0 = session;
+      });
+
+      client1.on('session', (session) => {
+        session1 = session;
+      });
+
+      client0.connect();
+      await Promise.all([
+        expectEvent(client0, 'connect'),
+        expectEvent(client0, 'session')
+      ]);
+
+      client1.connect();
+      await Promise.all([
+        expectEvent(client1, 'connect'),
+        expectEvent(client1, 'session')
+      ]);
+
+      client1.emit('private message', {
+        content: 'some private infos: 42',
+        to: session0.userID
+      });
+
+      await Promise.all([expectEvent(client0, 'private message')]);
+
+      client0.disconnect();
+      client1.disconnect();
+    });
+
+    it('receives old messages upon disconnection', async () => {
+      let client0 = getClientSocket({ username: 'toto' });
+      const client1 = getClientSocket({ username: 'tata' });
+
+      interface Session {
+        userID: string;
+        sessionID: string;
+      }
+
+      let session0: Session;
+      let session1: Session;
 
       client0.on('private message', (data) => {
         expect(data).toHaveProperty('content');
@@ -262,12 +332,23 @@ describe('ChatGateway', () => {
         to: session0.userID
       });
 
-      await Promise.all([
-        expectEvent(client0, 'private message'),
-        expectEvent(client1, 'private message')
-      ]);
+      await Promise.all([expectEvent(client0, 'private message')]);
+      client0.disconnect();
+
+      client0 = getClientSocket({
+        username: 'toto',
+        sessionID: session0.sessionID
+      });
+
+      client0.on('users', (data) => {
+        console.log(data);
+      });
+
+      client0.connect();
+      await expectEvent(client0, 'users');
 
       client0.disconnect();
+
       client1.disconnect();
     });
 

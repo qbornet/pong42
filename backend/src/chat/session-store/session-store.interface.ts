@@ -9,4 +9,5 @@ export interface Session {
   userID: UserID;
   username: string;
   connected: boolean;
+  messages: string[];
 }
