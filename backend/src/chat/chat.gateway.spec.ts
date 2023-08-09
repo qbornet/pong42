@@ -1,9 +1,7 @@
-import { Test } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import SessionStoreModule from '../session-store/session-store.module';
+import SessionStoreModule from './session-store/session-store.module';
 import ChatGateway from './chat.gateway';
 import { createNestApp, expectEvent, getClientSocket } from './chat.helper';
-import { Session } from 'src/session-store/session-store.interface';
 
 const testedModule = {
   imports: [SessionStoreModule],

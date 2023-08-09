@@ -11,8 +11,8 @@ import {
 import { randomBytes } from 'crypto';
 import { Server } from 'socket.io';
 import { Logger } from '@nestjs/common';
-import { Session } from 'src/session-store/session-store.interface';
-import InMemorySessionStoreService from '../session-store/in-memory-session-store/in-memory-session-store.service';
+import { Session } from './session-store/session-store.interface';
+import InMemorySessionStoreService from './session-store/in-memory-session-store/in-memory-session-store.service';
 import Config, { Env } from '../config/configuration';
 import { ChatSocket } from './chat.interface';
 
