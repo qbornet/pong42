@@ -15,6 +15,7 @@ import { Session } from './session-store/session-store.interface';
 import InMemorySessionStoreService from './session-store/in-memory-session-store/in-memory-session-store.service';
 import Config, { Env } from '../config/configuration';
 import { ChatSocket } from './chat.interface';
+import InMemoryMessageStoreService from './message-store/in-memory-message-store/in-memory-message-store.service';
 
 function webSocketOptions() {
   const config = Config();
@@ -38,7 +39,8 @@ export default class ChatGateway
   private readonly logger = new Logger(ChatGateway.name);
 
   constructor(
-    private sessionStore: InMemorySessionStoreService<string, Session>
+    private sessionStore: InMemorySessionStoreService<string, Session>,
+    private messageStore: InMemoryMessageStoreService
   ) {}
 
   getLogger(): Logger {
@@ -121,11 +123,12 @@ export default class ChatGateway
     this.logger.log(
       `Incoming private message from ${to} with content: ${content}`
     );
-    this.io.to(to).to(socket.userID).emit('private message', {
+    const message = {
       content,
       from: socket.userID,
       to
-    });
+    };
+    this.io.to(to).to(socket.userID).emit('private message', message);
   }
 
   static randomId(): string {

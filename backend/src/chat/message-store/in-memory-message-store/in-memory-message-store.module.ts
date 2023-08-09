@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { InMemoryMessageStoreService } from './in-memory-message-store.service';
+import InMemoryMessageStoreService from './in-memory-message-store.service';
 
 @Module({
   providers: [InMemoryMessageStoreService],
