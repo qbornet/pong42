@@ -111,7 +111,7 @@ describe('ChatGateway', () => {
       socket.disconnect();
     });
 
-    it('can connect from multiple user session through the same socket', async () => {
+    it('can connect from multiple socket through the same user session', async () => {
       const socket0 = getClientSocket({ username: 'toto' });
 
       let session0: any;
@@ -139,20 +139,33 @@ describe('ChatGateway', () => {
       socket1.disconnect();
     });
 
-    it('emit user disconnect on disconnection of a client', async () => {
-      const socket = getClientSocket({ username: 'toto' });
+    it('emit "user disconnected" on disconnection of a client', async () => {
+      const client0 = getClientSocket({ username: 'toto' });
+      const client1 = getClientSocket({ username: 'tata' });
 
-      socket.on('disconnect', (data) => {
-        console.log(data);
+      let session0: {
+        userID: string;
+        sessionID: string;
+      };
+
+      client0.on('session', (session) => {
+        session0 = session;
       });
 
-      socket.on('disconnected', (data) => {
-        console.log(data);
+      client1.on('user disconnected', (data) => {
+        expect(data).toBe(session0.userID);
       });
 
-      socket.connect();
-      await expectEvent(socket, 'connect');
-      socket.disconnect();
+      client0.connect();
+      client1.connect();
+      await Promise.all([
+        expectEvent(client0, 'connect'),
+        expectEvent(client0, 'session'),
+        expectEvent(client1, 'connect')
+      ]);
+      client0.disconnect();
+      await expectEvent(client1, 'user disconnected');
+      client1.disconnect();
     });
   });
 

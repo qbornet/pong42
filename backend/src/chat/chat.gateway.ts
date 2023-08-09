@@ -38,7 +38,7 @@ export default class ChatGateway
   private readonly logger = new Logger(ChatGateway.name);
 
   constructor(
-    private sessionService: InMemorySessionStoreService<string, Session>
+    private sessionStore: InMemorySessionStoreService<string, Session>
   ) {}
 
   getLogger(): Logger {
@@ -51,7 +51,7 @@ export default class ChatGateway
     this.io.use((socket: ChatSocket, next) => {
       const { sessionID } = socket.handshake.auth;
       if (sessionID) {
-        const session = this.sessionService.findSession(sessionID);
+        const session = this.sessionStore.findSession(sessionID);
         if (session) {
           socket.sessionID = sessionID;
           socket.userID = session.userID;
@@ -66,7 +66,7 @@ export default class ChatGateway
       socket.sessionID = ChatGateway.randomId();
       socket.userID = ChatGateway.randomId();
       socket.username = username;
-      this.sessionService.saveSession(socket.sessionID, {
+      this.sessionStore.saveSession(socket.sessionID, {
         userID: socket.userID,
         username,
         connected: true
@@ -98,8 +98,18 @@ export default class ChatGateway
     });
   }
 
-  handleDisconnect(socket: ChatSocket) {
+  async handleDisconnect(socket: ChatSocket) {
     this.logger.log(`Client id:${socket.id} disconnected`);
+    const matchingSockets = await this.io.in(socket.userID).fetchSockets();
+
+    if (matchingSockets.length === 0) {
+      socket.broadcast.emit('user disconnected', socket.userID);
+      const session = this.sessionStore.findSession(socket.userID);
+      this.sessionStore.saveSession(socket.userID, {
+        connected: false,
+        ...session
+      });
+    }
   }
 
   @SubscribeMessage('private message')
