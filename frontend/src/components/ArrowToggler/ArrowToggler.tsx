@@ -27,8 +27,16 @@ export default function ArrowToggler({
     setToggle(!toggle);
   };
   return (
-    <button type="button" onClick={handleClick} className="">
-      {toggle ? <IoIosArrowDown /> : <IoIosArrowUp />}
+    <button
+      type="button"
+      onClick={handleClick}
+      className="flex flex-col items-center justify-center gap-3 rounded-full border-2 border-solid border-blue-300 bg-transparent p-1"
+    >
+      {toggle ? (
+        <IoIosArrowDown className="text-white" />
+      ) : (
+        <IoIosArrowUp className="text-white" />
+      )}
     </button>
   );
 }
