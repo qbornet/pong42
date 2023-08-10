@@ -3,12 +3,7 @@ module.exports = {
     browser: true,
     es2021: true
   },
-  extends: [
-    'plugin:prettier/recommended',
-    'airbnb',
-    'airbnb/hooks',
-    'airbnb-typescript'
-  ],
+  extends: ['plugin:prettier/recommended', 'airbnb', 'airbnb/hooks', 'airbnb-typescript', 'plugin:storybook/recommended'],
   overrides: [
     {
       env: {
