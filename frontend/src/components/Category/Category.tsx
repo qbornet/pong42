@@ -36,7 +36,7 @@ const categories = {
 export default function Category({ type = 'chat' }: CategoryProps) {
   const { about, icon } = categories[type];
   return (
-    <div className="inline-flex items-center justify-center gap-6">
+    <div className="inline-flex items-end justify-center gap-6">
       {icon}
       <p className="text-center text-base font-bold text-white">{about}</p>
     </div>
