@@ -3,7 +3,13 @@ module.exports = {
     browser: true,
     es2021: true
   },
-  extends: ['plugin:prettier/recommended', 'airbnb', 'airbnb/hooks', 'airbnb-typescript', 'plugin:storybook/recommended'],
+  extends: [
+    'plugin:prettier/recommended',
+    'airbnb',
+    'airbnb/hooks',
+    'airbnb-typescript',
+    'plugin:storybook/recommended'
+  ],
   overrides: [
     {
       env: {
@@ -24,6 +30,7 @@ module.exports = {
   plugins: ['@typescript-eslint', 'react', 'prettier'],
   rules: {
     'prettier/prettier': 'error',
+    'react/require-default-props': 'off',
     'react/react-in-jsx-scope': 'off',
     'react/jsx-uses-react': 'off',
     'comma-dangle': 'off',

@@ -9,7 +9,7 @@ interface CategoryProps {
   type: 'chat' | 'home' | 'leader' | 'support';
 }
 
-const iconStyle = 'w-8 h-8 text-blue-pong-100';
+const iconStyle = 'w-8 h-8 text-pong-blue-100';
 
 const categories = {
   chat: {

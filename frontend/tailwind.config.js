@@ -4,11 +4,12 @@ export default {
   theme: {
     extend: {
       boxShadow: {
-        'pong': '0px -2px 0px 0px #3C3B6C'
+        pong: '0px -2px 0px 0px #3C3B6C'
       },
       colors: {
-        blue: {
-          pong: {
+        pong: {
+          purple: '#6659FD',
+          blue: {
             100: '#6E6FA5',
             200: '#38396F',
             300: '#2A2957',
