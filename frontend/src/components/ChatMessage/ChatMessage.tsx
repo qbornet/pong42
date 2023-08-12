@@ -2,7 +2,7 @@ import ProfilePicture from '../ProfilePicture/ProfilePicture';
 
 function ChatMessage() {
   const message =
-    'A long message can be written in here and the content does broke the component';
+    'A long message can be written in here and the content does not broke the component';
   const time = '10:42 pm';
   const username = 'Toto42';
   return (

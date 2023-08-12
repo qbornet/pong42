@@ -1,5 +1,3 @@
-import { BsFillHexagonFill } from 'react-icons/bs';
-
 interface ProfilePictureProps {
   size?: 'xs' | 's' | 'm' | 'l' | 'xl';
   level?: number;
@@ -7,31 +5,31 @@ interface ProfilePictureProps {
 
 const style = Object.freeze({
   xs: {
-    div: 'h-14 w-14 border-[1.2px]',
+    div: 'h-[39px] w-[39px] border-[1.2px]',
     dimension: 'h-[24px] w-[18px]',
     text: 'text-xs',
     position: 'bottom-[-11px]'
   },
   s: {
-    div: 'h-20 w-20 border-[1.7px]',
+    div: 'h-[55px] w-[55px] border-[1.7px]',
     dimension: 'h-[30px] w-[24px]',
     text: 'text-sm',
     position: 'bottom-[-15px]'
   },
   m: {
-    div: 'h-28 w-28 border-[2.5px]',
+    div: 'h-[78px] w-[78px] border-[2.5px]',
     dimension: 'h-[35px] w-[28px]',
     text: 'text-sm',
     position: 'bottom-[-20px]'
   },
   l: {
-    div: 'h-32 w-32 border-[3.5px]',
+    div: 'h-[110px] w-[110px] border-[3.5px]',
     dimension: 'h-[40px] w-[32px]',
     text: 'text-lg',
     position: 'bottom-[-20px]'
   },
   xl: {
-    div: 'h-40 w-40 border-[5px]',
+    div: 'h-[155px] w-[155px] border-[5px]',
     dimension: 'h-[48px] w-[40px]',
     text: 'text-xl',
     position: 'bottom-[-20px]'
