@@ -3,9 +3,9 @@ import { IoIosArrowUp, IoIosArrowDown } from 'react-icons/io';
 
 interface ArrowTogglerProps {
   /**
-   * Arrow is facing up or down
+   * Arrow is facing up
    */
-  defaultUp?: boolean;
+  up?: boolean;
   /**
    * Optional click handler
    */
@@ -15,11 +15,8 @@ interface ArrowTogglerProps {
 /**
  * Toggle components
  */
-export default function ArrowToggler({
-  defaultUp = false,
-  onClick = undefined
-}: ArrowTogglerProps) {
-  const [toggle, setToggle] = useState(defaultUp);
+function ArrowToggler({ up = false, onClick }: ArrowTogglerProps) {
+  const [toggle, setToggle] = useState(up);
   const handleClick = () => {
     if (onClick) {
       onClick();
@@ -40,3 +37,10 @@ export default function ArrowToggler({
     </button>
   );
 }
+
+ArrowToggler.defaultProps = {
+  up: false,
+  onClick: () => undefined
+};
+
+export default ArrowToggler;

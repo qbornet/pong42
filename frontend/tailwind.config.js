@@ -3,6 +3,9 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      boxShadow: {
+        'pong': '0px -2px 0px 0px #3C3B6C'
+      },
       colors: {
         blue: {
           pong: {
