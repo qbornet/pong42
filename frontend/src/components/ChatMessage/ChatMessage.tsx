@@ -1,14 +1,23 @@
 import ProfilePicture from '../ProfilePicture/ProfilePicture';
 
-function ChatMessage() {
-  const message =
-    'A long message can be written in here and the content does not broke the component';
-  const time = '10:42 pm';
-  const username = 'Toto42';
+/* Change the date type format */
+interface ChatMessageProps {
+  message: string;
+  time: string;
+  username: string;
+  profilePictureUrl: string;
+}
+
+function ChatMessage({
+  message,
+  time,
+  username,
+  profilePictureUrl
+}: ChatMessageProps) {
   return (
-    <div className="flex w-72 flex-shrink-0 rounded-md bg-pong-blue-400 p-3">
+    <div className="mt-1 flex w-72 flex-shrink-0 rounded-md bg-pong-blue-400 p-3">
       <div className="min-w-fit">
-        <ProfilePicture size="xs" />
+        <ProfilePicture size="xs" url={profilePictureUrl} />
       </div>
       <div className="flex-grow px-2">
         <div className="flex items-center justify-between">

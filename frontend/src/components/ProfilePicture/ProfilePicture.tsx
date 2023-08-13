@@ -1,6 +1,7 @@
 interface ProfilePictureProps {
   size?: 'xs' | 's' | 'm' | 'l' | 'xl';
   level?: number;
+  url: string;
 }
 
 const style = Object.freeze({
@@ -36,10 +37,11 @@ const style = Object.freeze({
   }
 });
 
-function ProfilePicture({ size = 'xl', level = 1 }: ProfilePictureProps) {
+function ProfilePicture({ size = 'xl', level = 1, url }: ProfilePictureProps) {
+  const bg = `bg-[url(${url})`;
   return (
     <div
-      className={`${style[size].div} w-flex-shrink-0 relative flex items-end justify-center rounded-full border-solid border-pong-purple bg-[url(/starwatcher.jpg)] bg-cover bg-no-repeat`}
+      className={`${style[size].div} w-flex-shrink-0 relative flex items-end justify-center rounded-full border-solid border-pong-purple ${bg}] bg-cover bg-no-repeat`}
     >
       <div className={`absolute ${style[size].position}`}>
         <div
