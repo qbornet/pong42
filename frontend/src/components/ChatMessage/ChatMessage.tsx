@@ -5,19 +5,27 @@ interface ChatMessageProps {
   message: string;
   time: string;
   username: string;
+  level: number;
   profilePictureUrl: string;
+  noBgColor?: boolean;
 }
 
 function ChatMessage({
   message,
   time,
   username,
-  profilePictureUrl
+  level,
+  profilePictureUrl,
+  noBgColor
 }: ChatMessageProps) {
   return (
-    <div className="mt-1 flex w-72 flex-shrink-0 rounded-md bg-pong-blue-400 p-3">
+    <div
+      className={`mt-1 flex w-80 flex-shrink-0 ${
+        noBgColor ? '' : 'bg-pong-blue-400'
+      } p-3`}
+    >
       <div className="min-w-fit">
-        <ProfilePicture size="xs" url={profilePictureUrl} />
+        <ProfilePicture size="xs" url={profilePictureUrl} level={level} />
       </div>
       <div className="flex-grow px-2">
         <div className="flex items-center justify-between">

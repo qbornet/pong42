@@ -1,6 +1,6 @@
 interface ProfilePictureProps {
   size?: 'xs' | 's' | 'm' | 'l' | 'xl';
-  level?: number;
+  level: number;
   url: string;
 }
 
@@ -37,11 +37,11 @@ const style = Object.freeze({
   }
 });
 
-function ProfilePicture({ size = 'xl', level = 1, url }: ProfilePictureProps) {
-  const bg = `bg-[url(${url})`;
+function ProfilePicture({ size = 'xl', level, url }: ProfilePictureProps) {
   return (
     <div
-      className={`${style[size].div} w-flex-shrink-0 relative flex items-end justify-center rounded-full border-solid border-pong-purple ${bg}] bg-cover bg-no-repeat`}
+      style={{ backgroundImage: `url(${url})` }}
+      className={`${style[size].div} w-flex-shrink-0 relative flex items-end justify-center rounded-full border-solid border-pong-purple bg-cover bg-no-repeat`}
     >
       <div className={`absolute ${style[size].position}`}>
         <div

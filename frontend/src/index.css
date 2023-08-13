@@ -25,3 +25,8 @@ html {
 body {
   background-color: white;
 }
+
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}

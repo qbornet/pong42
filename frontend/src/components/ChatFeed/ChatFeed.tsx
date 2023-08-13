@@ -1,3 +1,4 @@
+import ChatHeader from '../ChatHeader/ChatHeader';
 import ChatMessage from '../ChatMessage/ChatMessage';
 
 function ChatFeed() {
@@ -6,111 +7,134 @@ function ChatFeed() {
       username: 'toto',
       time: '10:42 pm',
       message: 'Hello, how are you ?',
-      profilePictureUrl: '/starwatcher.jpg'
+      profilePictureUrl: '/luffy.png',
+      level: 42,
+      messageID: '1'
     },
     {
       username: 'tata',
       time: '11:04 pm',
       message: 'Fine and you? :)',
-      profilePictureUrl: '/starwatcher.jpg'
+      profilePictureUrl: '/starwatcher.jpg',
+      level: 24,
+      messageID: '2'
     },
     {
       username: 'toto',
       time: '1:05 pm',
       message: 'Everything perfect here. See you soone bro',
-      profilePictureUrl: '/starwatcher.jpg'
+      profilePictureUrl: '/luffy.png',
+      level: 42,
+      messageID: '3'
     },
     {
       username: 'tata',
       time: '10:42 pm',
       message: 'Bye!',
-      profilePictureUrl: '/starwatcher.jpg'
+      profilePictureUrl: '/starwatcher.jpg',
+      level: 24,
+      messageID: '4'
     },
     {
       username: 'toto',
       time: '10:42 pm',
       message: 'Hello, how are you ?',
-      profilePictureUrl: '/starwatcher.jpg'
+      profilePictureUrl: '/luffy.png',
+      level: 42,
+      messageID: '5'
     },
     {
       username: 'tata',
       time: '11:04 pm',
       message: 'Fine and you? :)',
-      profilePictureUrl: '/starwatcher.jpg'
+      profilePictureUrl: '/starwatcher.jpg',
+      level: 24,
+      messageID: '6'
     },
     {
       username: 'toto',
       time: '1:05 pm',
       message: 'Everything perfect here. See you soone bro',
-      profilePictureUrl: '/starwatcher.jpg'
+      profilePictureUrl: '/luffy.png',
+      level: 42,
+      messageID: '7'
     },
     {
       username: 'tata',
       time: '10:42 pm',
       message: 'Bye!',
-      profilePictureUrl: '/starwatcher.jpg'
+      profilePictureUrl: '/starwatcher.jpg',
+      level: 24,
+      messageID: '8'
     },
     {
       username: 'toto',
       time: '10:42 pm',
       message: 'Hello, how are you ?',
-      profilePictureUrl: '/starwatcher.jpg'
+      profilePictureUrl: '/luffy.png',
+      level: 42,
+      messageID: '9'
     },
     {
       username: 'tata',
       time: '11:04 pm',
       message: 'Fine and you? :)',
-      profilePictureUrl: '/starwatcher.jpg'
+      profilePictureUrl: '/starwatcher.jpg',
+      level: 24,
+      messageID: '10'
     },
     {
       username: 'toto',
       time: '1:05 pm',
       message: 'Everything perfect here. See you soone bro',
-      profilePictureUrl: '/starwatcher.jpg'
+      profilePictureUrl: '/luffy.png',
+      level: 42,
+      messageID: '11'
     },
     {
       username: 'tata',
       time: '10:42 pm',
       message: 'Bye!',
-      profilePictureUrl: '/starwatcher.jpg'
-    },
-    {
-      username: 'toto',
-      time: '10:42 pm',
-      message: 'Hello, how are you ?',
-      profilePictureUrl: '/starwatcher.jpg'
-    },
-    {
-      username: 'tata',
-      time: '11:04 pm',
-      message: 'Fine and you? :)',
-      profilePictureUrl: '/starwatcher.jpg'
-    },
-    {
-      username: 'toto',
-      time: '1:05 pm',
-      message: 'Everything perfect here. See you soone bro',
-      profilePictureUrl: '/starwatcher.jpg'
-    },
-    {
-      username: 'tata',
-      time: '10:42 pm',
-      message: 'Bye!',
-      profilePictureUrl: '/starwatcher.jpg'
+      profilePictureUrl: '/starwatcher.jpg',
+      level: 24,
+      messageID: '12'
     }
   ];
 
-  const chats = messages.map((chat) => (
-    <ChatMessage
-      message={chat.message}
-      time={chat.time}
-      username={chat.username}
-      profilePictureUrl={chat.profilePictureUrl}
-    />
-  ));
+  const chats = messages.map((chat, index) => {
+    if (index % 2) {
+      return (
+        <ChatMessage
+          key={chat.messageID}
+          message={chat.message}
+          time={chat.time}
+          username={chat.username}
+          level={chat.level}
+          profilePictureUrl={chat.profilePictureUrl}
+          noBgColor
+        />
+      );
+    }
+    return (
+      <ChatMessage
+        key={chat.messageID}
+        message={chat.message}
+        time={chat.time}
+        username={chat.username}
+        level={chat.level}
+        profilePictureUrl={chat.profilePictureUrl}
+      />
+    );
+  });
   return (
-    <div className="h-[658px] shrink-0 flex-col items-center justify-end overflow-y-auto bg-pong-blue-100 p-1">
-      {chats}
+    <div className="">
+      <div className="hide-scrollbar h-[758px] w-fit shrink-0 flex-col items-center justify-end overflow-y-scroll rounded-3xl bg-pong-blue-300">
+        <div className="absolute z-20">
+          <ChatHeader />
+        </div>
+        <div className="h-24" />
+        {chats}
+      </div>
     </div>
   );
 }

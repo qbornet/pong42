@@ -4,7 +4,7 @@ import Status from '../Status/Status';
 
 export default function ChatHeader() {
   return (
-    <div className="flex w-80 flex-wrap content-center items-center justify-center gap-x-24 gap-y-1 rounded-3xl bg-pong-blue-400 p-5 shadow-pong shadow-pong-blue-100 backdrop-blur">
+    <div className="flex w-80 flex-wrap content-center items-center justify-center gap-x-24 gap-y-1 rounded-t-3xl p-5 shadow-pong shadow-pong-blue-100 backdrop-blur">
       <Category type="chat" />
       <ArrowToggler onClick={() => undefined} />
       <Status position="start" severity="ok" message="Connected" />
