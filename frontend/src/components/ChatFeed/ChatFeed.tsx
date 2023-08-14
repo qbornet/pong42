@@ -1,5 +1,6 @@
 import ChatHeader from '../ChatHeader/ChatHeader';
 import ChatMessage from '../ChatMessage/ChatMessage';
+import SendMessageInput from '../SendMessageInput/SendMessageInput';
 
 function ChatFeed() {
   const messages = [
@@ -128,14 +129,13 @@ function ChatFeed() {
     );
   });
   return (
-    <div className="">
-      <div className="hide-scrollbar h-[758px] w-fit shrink-0 flex-col items-center justify-end overflow-y-scroll rounded-3xl bg-pong-blue-300">
-        <div className="absolute z-20">
-          <ChatHeader />
-        </div>
+    <div>
+      <div className="hide-scrollbar h-[758px] w-fit shrink-0 flex-col items-center justify-end overflow-y-scroll rounded-t-3xl bg-pong-blue-300">
+        <ChatHeader className="absolute z-20" />
         <div className="h-24" />
         {chats}
       </div>
+      <SendMessageInput />
     </div>
   );
 }
