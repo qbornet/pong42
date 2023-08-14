@@ -6,7 +6,8 @@ function ChatFeed() {
     {
       username: 'toto',
       time: '10:42 pm',
-      message: 'Hello, how are you ?',
+      message:
+        'Hello, how are you ? This is a very long message to say you nothing about life and everything. You know that 42 is the answer to life, all and everything write ? So here is what I have to say about it : 42.',
       profilePictureUrl: '/luffy.png',
       level: 42,
       messageID: '1'
@@ -128,7 +129,7 @@ function ChatFeed() {
   });
   return (
     <div className="">
-      <div className="hide-scrollbar h-[758px] min-w-fit shrink-0 flex-col items-center justify-end overflow-y-scroll rounded-3xl bg-pong-blue-300">
+      <div className="hide-scrollbar h-[758px] w-fit shrink-0 flex-col items-center justify-end overflow-y-scroll rounded-3xl bg-pong-blue-300">
         <div className="absolute z-20">
           <ChatHeader />
         </div>
