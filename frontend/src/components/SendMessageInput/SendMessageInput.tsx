@@ -16,7 +16,7 @@ function SendMessageInput() {
         />
       </label>
       <button type="button">
-        <FaTelegramPlane className="text-2xl text-pong-blue-100" />
+        <FaTelegramPlane className="h-6 w-6 text-pong-blue-100" />
       </button>
     </div>
   );
