@@ -20,7 +20,7 @@ function ChatMessage({
 }: ChatMessageProps) {
   return (
     <div
-      className={`mt-1 flex w-80 flex-shrink-0 ${
+      className={`mx-2 mt-1 flex w-80 flex-shrink-0 rounded-lg ${
         noBgColor ? '' : 'bg-pong-blue-400'
       } p-3`}
     >

@@ -128,7 +128,7 @@ function ChatFeed() {
   });
   return (
     <div className="">
-      <div className="hide-scrollbar h-[758px] w-fit shrink-0 flex-col items-center justify-end overflow-y-scroll rounded-3xl bg-pong-blue-300">
+      <div className="hide-scrollbar h-[758px] min-w-fit shrink-0 flex-col items-center justify-end overflow-y-scroll rounded-3xl bg-pong-blue-300">
         <div className="absolute z-20">
           <ChatHeader />
         </div>
