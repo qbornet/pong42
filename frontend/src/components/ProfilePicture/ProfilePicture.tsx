@@ -41,7 +41,7 @@ function ProfilePicture({ size = 'xl', level, url }: ProfilePictureProps) {
   return (
     <div
       style={{ backgroundImage: `url(${url})` }}
-      className={`${style[size].div} w-flex-shrink-0 relative flex items-end justify-center rounded-full border-solid border-pong-purple bg-cover bg-no-repeat`}
+      className={`cursor-pointer ${style[size].div} w-flex-shrink-0 relative flex items-end justify-center rounded-full border-solid border-pong-purple bg-cover bg-no-repeat`}
     >
       <div className={`absolute ${style[size].position}`}>
         <div

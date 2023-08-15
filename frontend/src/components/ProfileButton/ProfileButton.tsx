@@ -1,5 +1,9 @@
 import { useState } from 'react';
 
+interface ProfileButtonProps {
+  className: string;
+}
+
 const styles = Object.freeze({
   default:
     'inline-flex items-center justify-center rounded-lg border border-solid border-pong-blue-100 bg-pong-blue-600 px-4 py-1 text-pong-white',
@@ -7,7 +11,7 @@ const styles = Object.freeze({
     'inline-flex items-center justify-center rounded-lg border border-solid border-pong-blue-100 bg-transparent px-4 py-1 text-pong-blue-100'
 });
 
-function ProfileButton() {
+function ProfileButton({ className }: ProfileButtonProps) {
   const [style, setStyle] = useState<string>(styles.default);
 
   const handleMouseDown = () => {
@@ -21,11 +25,11 @@ function ProfileButton() {
   return (
     <button
       type="button"
-      className={style}
+      className={`${style} ${className}`}
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
     >
-      <span className="font-bold ">See Profile</span>
+      <span className="font-bold">See Profile</span>
     </button>
   );
 }
