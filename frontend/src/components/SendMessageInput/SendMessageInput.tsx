@@ -1,24 +1,40 @@
 import { FaTelegramPlane } from 'react-icons/fa';
 import { useState } from 'react';
+import socket from '../../socket';
 
 function SendMessageInput() {
   const [message, setMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = (event: any) => {
+    event.preventDefault();
+    setIsLoading(true);
+    const data = {
+      content: message,
+      to: '7f9411ff188ab767'
+    };
+    socket.timeout(5000).emit('private message', data, () => {
+      setIsLoading(false);
+    });
+    setMessage('');
+  };
   return (
-    <div className="flex h-14 w-[336px] flex-shrink-0 items-center justify-between gap-y-24 rounded-b-3xl bg-pong-blue-400 px-5">
-      <label htmlFor="UserEmail" className="">
-        <input
-          type="text"
-          id="UserEmail"
-          placeholder="Send Message..."
-          value={message}
-          onChange={(event) => setMessage(event.target.value)}
-          className="peer h-8 w-full border-none bg-transparent p-0 text-pong-white placeholder-pong-blue-100 outline-none"
-        />
-      </label>
-      <button type="button">
+    <form
+      onSubmit={handleSubmit}
+      className="flex h-14 w-[336px] flex-shrink-0 items-center justify-between gap-y-24 rounded-b-3xl bg-pong-blue-400 px-5"
+    >
+      <input
+        type="text"
+        id="UserEmail"
+        placeholder="Send Message..."
+        value={message}
+        onChange={(event) => setMessage(event.target.value)}
+        className="peer h-8 w-full border-none bg-transparent pr-3 text-pong-white placeholder-pong-blue-100 outline-none"
+      />
+      <button type="submit">
         <FaTelegramPlane className="h-6 w-6 text-pong-blue-100" />
       </button>
-    </div>
+    </form>
   );
 }
 

@@ -1,6 +1,6 @@
 import ChatMessage from '../ChatMessage/ChatMessage';
 
-interface ChatInfo {
+export interface ChatInfo {
   username: string;
   time: string;
   message: string;
@@ -13,7 +13,7 @@ interface ChatFeedProps {
   messages: ChatInfo[];
 }
 
-function ChatFeed({ messages = [] }: ChatFeedProps) {
+function ChatFeed({ messages }: ChatFeedProps) {
   return (
     <div>
       {messages.map((chat: ChatInfo, index: number) => {

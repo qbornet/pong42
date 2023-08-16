@@ -9,6 +9,12 @@ interface ChatHeaderProps {
 }
 
 function ChatHeader({ className, isConnected }: ChatHeaderProps) {
+  const connect = () => {
+    const sessionID = localStorage.getItem('sessionID');
+    socket.auth.sessionID = sessionID;
+    socket.connect();
+  };
+  const disconnect = () => socket.disconnect();
   return (
     <div
       className={`${className} flex w-[336px] flex-wrap content-center items-center justify-center gap-x-24 gap-y-1 rounded-t-3xl p-5 shadow-pong shadow-pong-blue-100 backdrop-blur`}
@@ -19,9 +25,7 @@ function ChatHeader({ className, isConnected }: ChatHeaderProps) {
         position="start"
         severity={isConnected ? 'ok' : 'err'}
         message={isConnected ? 'Connected' : 'Disconnected'}
-        onClick={
-          isConnected ? () => socket.disconnect() : () => socket.connect()
-        }
+        onClick={isConnected ? disconnect : connect}
       />
     </div>
   );
