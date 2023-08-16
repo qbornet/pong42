@@ -55,6 +55,7 @@ export default class ChatGateway
       if (sessionID) {
         const session = this.sessionStore.findSession(sessionID);
         if (session) {
+          session.connected = true;
           socket.sessionID = sessionID;
           socket.userID = session.userID;
           socket.username = session.username;
@@ -80,7 +81,7 @@ export default class ChatGateway
   }
 
   handleConnection(socket: ChatSocket, ...args: any[]) {
-    this.logger.log(`Client id:${socket.id} connected`);
+    this.logger.log(`ClientId: ${socket.userID} connected`);
     this.logger.log(`Nb clients: ${this.io.sockets.sockets.size}`);
 
     const users: Session[] = [];
@@ -116,7 +117,9 @@ export default class ChatGateway
   }
 
   async handleDisconnect(socket: ChatSocket) {
-    this.logger.log(`Client id:${socket.id} disconnected`);
+    this.logger.log(`ClientId: ${socket.userID} disconnected`);
+    this.logger.log(`Nb clients: ${this.io.sockets.sockets.size}`);
+
     const matchingSockets = await this.io.in(socket.userID).fetchSockets();
 
     if (matchingSockets.length === 0) {
