@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid';
 import {
   ConnectedSocket,
   MessageBody,
@@ -8,7 +9,6 @@ import {
   WebSocketGateway,
   WebSocketServer
 } from '@nestjs/websockets';
-import { randomBytes } from 'crypto';
 import { Server } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import { Session } from './session-store/session-store.interface';
@@ -140,6 +140,7 @@ export default class ChatGateway
     const message = {
       content,
       from: socket.userID,
+      messageID: ChatGateway.randomId(),
       to
     };
     socket.to(to).to(socket.userID).emit('private message', message);
@@ -147,6 +148,6 @@ export default class ChatGateway
   }
 
   static randomId(): string {
-    return randomBytes(8).toString('hex');
+    return uuidv4();
   }
 }
