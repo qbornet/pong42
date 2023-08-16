@@ -11,7 +11,7 @@ interface ChatHeaderProps {
 function ChatHeader({ className, isConnected }: ChatHeaderProps) {
   const connect = () => {
     const sessionID = localStorage.getItem('sessionID');
-    socket.auth.sessionID = sessionID;
+    socket.auth = { username: 'toto', sessionID };
     socket.connect();
   };
   const disconnect = () => socket.disconnect();

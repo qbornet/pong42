@@ -11,7 +11,7 @@ function SendMessageInput() {
     setIsLoading(true);
     const data = {
       content: message,
-      to: '7f9411ff188ab767'
+      to: 'bb98e7d9-20be-44e8-b389-223dbbca94d5'
     };
     socket.timeout(5000).emit('private message', data, () => {
       setIsLoading(false);

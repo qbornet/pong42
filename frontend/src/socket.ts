@@ -17,9 +17,4 @@ socket.onAny((event, ...args) => {
   console.log(event, args);
 });
 
-socket.userID = '';
-
-const username = 'toto';
-socket.auth = { username };
-
 export default socket;

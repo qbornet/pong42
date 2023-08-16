@@ -39,23 +39,43 @@ function Chat() {
       localStorage.setItem('sessionID', sessionID);
       socket.userID = userID;
     };
+    const onUsers = (users: any) => {
+      const sender = users.find((user: any) => user.userID !== socket.userID);
+      let msgs = [];
+      sender.messages.map((message: any) => {
+        msgs = [
+          ...msgs,
+          {
+            messageID: message.messageID,
+            message: message.content,
+            time: '10:00 pm',
+            username: sender.username,
+            level: 42,
+            profilePictureUrl: 'starwatcher.jpg'
+          }
+        ];
+      });
+      setMessages(() => msgs);
+    };
 
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
     socket.on('private message', onPrivateMessage);
     socket.on('session', onSession);
+    socket.on('users', onUsers);
 
     return () => {
       socket.off('connect', onConnect);
       socket.off('disconnect', onDisconnect);
       socket.off('private message', onPrivateMessage);
       socket.off('session', onSession);
+      socket.off('users', onUsers);
     };
   }, []);
 
   return (
     <div>
-      <div className="hide-scrollbar h-[758px] w-fit shrink-0 flex-col items-center justify-end overflow-y-scroll rounded-t-3xl bg-pong-blue-300">
+      <div className="hide-scrollbar h-[758px] w-fit shrink-0 flex-col-reverse items-center justify-end overflow-y-scroll rounded-t-3xl bg-pong-blue-300">
         <ChatHeader className="absolute z-30" isConnected={isConnected} />
         <div className="invisible h-24">
           <ChatMessage
