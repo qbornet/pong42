@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ChatFeed, { ChatInfo } from '../ChatFeed/ChatFeed';
 import ChatHeader from '../ChatHeader/ChatHeader';
 import ChatMessage from '../ChatMessage/ChatMessage';
@@ -18,6 +18,7 @@ interface Session {
 }
 
 function Chat() {
+  const messageEndRef = useRef(null);
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [messages, setMessages] = useState<ChatInfo[]>([]);
 
@@ -29,7 +30,7 @@ function Chat() {
         username: 'toto',
         time: '14:00pm',
         message: value.content,
-        profilePictureUrl: '/startwatcher.jpg',
+        profilePictureUrl: 'starwatcher.jpg',
         level: 42,
         messageID: value.messageID
       };
@@ -73,6 +74,14 @@ function Chat() {
     };
   }, []);
 
+  const scrollToBottom = () => {
+    messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   return (
     <div>
       <div className="hide-scrollbar h-[758px] w-fit shrink-0 flex-col-reverse items-center justify-end overflow-y-scroll rounded-t-3xl bg-pong-blue-300">
@@ -87,6 +96,7 @@ function Chat() {
           />
         </div>
         <ChatFeed messages={messages} />
+        <div ref={messageEndRef} />
       </div>
       <SendMessageInput />
     </div>
