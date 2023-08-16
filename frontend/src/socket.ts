@@ -8,4 +8,12 @@ const socket = io(URL, {
   transports: ['websocket', 'polling']
 });
 
+socket.onAny((event, ...args) => {
+  console.log('connected');
+  console.log(event, args);
+});
+
+const username = 'toto';
+socket.auth = { username };
+
 export default socket;
