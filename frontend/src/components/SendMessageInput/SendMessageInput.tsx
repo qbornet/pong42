@@ -1,6 +1,6 @@
 import { FaTelegramPlane } from 'react-icons/fa';
 import { useState } from 'react';
-import socket from '../../socket';
+import socket from '../../services/socket';
 
 function SendMessageInput() {
   const [message, setMessage] = useState('');

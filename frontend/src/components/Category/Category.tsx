@@ -3,9 +3,6 @@ import { AiOutlineHome } from 'react-icons/ai';
 import { BsQuestionCircle } from 'react-icons/bs';
 
 interface CategoryProps {
-  /**
-   *  Type
-   */
   type: 'chat' | 'home' | 'leader' | 'support';
 }
 
@@ -30,10 +27,7 @@ const categories = {
   }
 };
 
-/**
- * Category components
- */
-export default function Category({ type = 'chat' }: CategoryProps) {
+function Category({ type = 'chat' }: CategoryProps) {
   const { about, icon } = categories[type];
   return (
     <div className="inline-flex items-end justify-center gap-6">
@@ -42,3 +36,5 @@ export default function Category({ type = 'chat' }: CategoryProps) {
     </div>
   );
 }
+
+export default Category;

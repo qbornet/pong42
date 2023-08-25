@@ -3,7 +3,7 @@ import ChatFeed, { ChatInfo } from '../ChatFeed/ChatFeed';
 import ChatHeader from '../ChatHeader/ChatHeader';
 import ChatMessage from '../ChatMessage/ChatMessage';
 import SendMessageInput from '../SendMessageInput/SendMessageInput';
-import socket from '../../socket';
+import socket from '../../services/socket';
 
 interface Message {
   content: string;

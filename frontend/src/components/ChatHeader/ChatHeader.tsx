@@ -1,4 +1,4 @@
-import socket from '../../socket';
+import socket from '../../services/socket';
 import ArrowToggler from '../ArrowToggler/ArrowToggler';
 import Category from '../Category/Category';
 import Status from '../Status/Status';
