@@ -1,4 +1,4 @@
-import Chat from './components/Chat/Chat';
+import Chat from './features/Chat/Chat';
 
 function App() {
   return (

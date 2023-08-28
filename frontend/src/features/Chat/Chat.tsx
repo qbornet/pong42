@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import ChatFeed, { ChatInfo } from '../ChatFeed/ChatFeed';
-import ChatHeader from '../ChatHeader/ChatHeader';
-import ChatMessage from '../ChatMessage/ChatMessage';
-import SendMessageInput from '../SendMessageInput/SendMessageInput';
 import socket from '../../services/socket';
-import Hide from '../Hide/Hide';
+import ChatFeed, { ChatInfo } from '../../components/ChatFeed/ChatFeed';
+import ChatHeader from '../../components/ChatHeader/ChatHeader';
+import ChatMessage from '../../components/ChatMessage/ChatMessage';
+import Hide from '../../components/Hide/Hide';
+import SendMessageInput from '../../components/SendMessageInput/SendMessageInput';
 
 interface Message {
   content: string;
