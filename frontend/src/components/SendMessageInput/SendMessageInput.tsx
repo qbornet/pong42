@@ -11,7 +11,7 @@ function SendMessageInput() {
     // setIsLoading(true);
     const data = {
       content: message,
-      to: 'b2f2a822-7a4b-4881-8888-bf09ae433e2c'
+      to: '0a9cb99f-e482-4ebe-8bcd-c4c5cb5ea75b'
     };
     socket.timeout(5000).emit('private message', data, () => {
       // setIsLoading(false);
@@ -21,7 +21,7 @@ function SendMessageInput() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex h-14 w-[336px] flex-shrink-0 items-center justify-between gap-y-24 rounded-b-3xl bg-pong-blue-400 px-5"
+      className="flex h-14 w-[336px] flex-shrink-0 items-center justify-between gap-y-24 bg-pong-blue-400 px-5"
     >
       <input
         type="text"

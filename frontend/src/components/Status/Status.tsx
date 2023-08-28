@@ -24,7 +24,7 @@ export default function Status({
     <button
       type="button"
       aria-label="Connect button"
-      className={`flex h-5 w-full flex-shrink-0 items-center justify-${position} gap-5 bg-transparent`}
+      className={`ml-10 flex h-5 w-full flex-shrink-0 items-center justify-${position} gap-5 bg-transparent`}
       onClick={onClick}
     >
       <span className={`h-4 w-4 rounded-full ${colors[severity]}`} />

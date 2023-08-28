@@ -18,16 +18,18 @@ function ChatHeader({ className, isConnected, handleClick }: ChatHeaderProps) {
   const disconnect = () => socket.disconnect();
   return (
     <div
-      className={`${className} flex w-[336px] flex-wrap content-center items-center justify-center gap-x-24 gap-y-1 rounded-t-3xl p-5 shadow-pong shadow-pong-blue-100 backdrop-blur`}
+      className={`${className} flex w-[336px] items-center justify-center rounded-3xl rounded-t-3xl shadow-pong shadow-pong-blue-100`}
     >
-      <Category type="chat" />
-      <ArrowToggler onClick={handleClick} />
-      <Status
-        position="start"
-        severity={isConnected ? 'ok' : 'err'}
-        message={isConnected ? 'Connected' : 'Disconnected'}
-        onClick={isConnected ? disconnect : connect}
-      />
+      <div className="gp-y-1 flex w-1 flex-wrap content-center items-center justify-center gap-x-24 rounded-3xl bg-red-100 py-5 backdrop-blur">
+        <Category type="chat" />
+        <ArrowToggler onClick={handleClick} />
+        <Status
+          position="start"
+          severity={isConnected ? 'ok' : 'err'}
+          message={isConnected ? 'Connected' : 'Disconnected'}
+          onClick={isConnected ? disconnect : connect}
+        />
+      </div>
     </div>
   );
 }
