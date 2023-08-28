@@ -13,8 +13,10 @@ const socket = io(URL, {
 }) as PongSocket;
 
 socket.onAny((event, ...args) => {
+  /* eslint-disable */
   console.log('connected');
   console.log(event, args);
+  /* eslint-enable */
 });
 
 export default socket;

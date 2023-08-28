@@ -42,7 +42,7 @@ function Chat() {
     };
     const onUsers = (users: any) => {
       const sender = users.find((user: any) => user.userID !== socket.userID);
-      let msgs = [];
+      let msgs: any = [];
       sender.messages.map((message: any) => {
         msgs = [
           ...msgs,
@@ -55,6 +55,7 @@ function Chat() {
             profilePictureUrl: 'starwatcher.jpg'
           }
         ];
+        return message;
       });
       setMessages(() => msgs);
     };

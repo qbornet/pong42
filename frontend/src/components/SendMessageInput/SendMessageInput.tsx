@@ -4,17 +4,17 @@ import socket from '../../services/socket';
 
 function SendMessageInput() {
   const [message, setMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = (event: any) => {
     event.preventDefault();
-    setIsLoading(true);
+    // setIsLoading(true);
     const data = {
       content: message,
-      to: 'bb98e7d9-20be-44e8-b389-223dbbca94d5'
+      to: 'b2f2a822-7a4b-4881-8888-bf09ae433e2c'
     };
     socket.timeout(5000).emit('private message', data, () => {
-      setIsLoading(false);
+      // setIsLoading(false);
     });
     setMessage('');
   };
