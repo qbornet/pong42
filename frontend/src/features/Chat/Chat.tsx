@@ -87,7 +87,7 @@ function Chat() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, close]);
 
   return (
     <div className="w-fit overflow-hidden rounded-3xl">
