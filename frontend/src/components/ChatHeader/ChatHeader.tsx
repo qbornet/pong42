@@ -20,7 +20,7 @@ function ChatHeader({ className, isConnected, handleClick }: ChatHeaderProps) {
 
   useEffect(() => {
     connect();
-  });
+  }, []);
   return (
     <div
       className={`${className} flex w-[336px] items-center justify-center rounded-3xl rounded-t-3xl shadow-pong shadow-pong-blue-100`}
