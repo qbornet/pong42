@@ -144,6 +144,7 @@ export default class ChatGateway
       content,
       from: socket.userID,
       messageID: ChatGateway.randomId(),
+      date: new Date(),
       to
     };
     this.io.to(to).to(socket.userID).emit('private message', message);
