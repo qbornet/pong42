@@ -138,7 +138,7 @@ export default class ChatGateway
     @ConnectedSocket() socket: ChatSocket
   ) {
     this.logger.log(
-      `Incoming private message from ${to} with content: ${content}`
+      `Incoming private message from ${socket.userID} to ${to} with content: ${content}`
     );
     const message = {
       content,
