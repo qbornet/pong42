@@ -6,9 +6,10 @@ import Status from '../Status/Status';
 interface ChatHeaderProps {
   className?: string;
   isConnected: boolean;
+  handleClick: () => any;
 }
 
-function ChatHeader({ className, isConnected }: ChatHeaderProps) {
+function ChatHeader({ className, isConnected, handleClick }: ChatHeaderProps) {
   const connect = () => {
     const sessionID = localStorage.getItem('sessionID');
     socket.auth = { username: 'toto', sessionID };
@@ -20,7 +21,7 @@ function ChatHeader({ className, isConnected }: ChatHeaderProps) {
       className={`${className} flex w-[336px] flex-wrap content-center items-center justify-center gap-x-24 gap-y-1 rounded-t-3xl p-5 shadow-pong shadow-pong-blue-100 backdrop-blur`}
     >
       <Category type="chat" />
-      <ArrowToggler onClick={() => undefined} />
+      <ArrowToggler onClick={handleClick} />
       <Status
         position="start"
         severity={isConnected ? 'ok' : 'err'}

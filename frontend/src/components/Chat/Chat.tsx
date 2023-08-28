@@ -21,6 +21,7 @@ function Chat() {
   const messageEndRef = useRef(null);
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [messages, setMessages] = useState<ChatInfo[]>([]);
+  const [close, setClose] = useState<boolean>(true);
 
   useEffect(() => {
     const onConnect = () => setIsConnected(true);
@@ -85,8 +86,16 @@ function Chat() {
 
   return (
     <div>
-      <div className="hide-scrollbar h-[758px] w-fit shrink-0 flex-col-reverse items-center justify-end overflow-y-scroll rounded-t-3xl bg-pong-blue-300">
-        <ChatHeader className="absolute z-30" isConnected={isConnected} />
+      <div
+        className={`hide-scrollbar ${
+          close ? '' : 'h-[758px]'
+        } w-fit shrink-0 flex-col-reverse items-center justify-end overflow-y-scroll rounded-t-3xl bg-pong-blue-300`}
+      >
+        <ChatHeader
+          className="absolute z-30"
+          isConnected={isConnected}
+          handleClick={() => setClose(!close)}
+        />
         <div className="invisible h-24">
           <ChatMessage
             message=""
@@ -96,7 +105,11 @@ function Chat() {
             profilePictureUrl=""
           />
         </div>
-        <ChatFeed messages={messages} />
+        {close ? (
+          <div className="mx-2 mt-1 flex w-80 flex-shrink-0 rounded-lg p-3 text-left" />
+        ) : (
+          <ChatFeed messages={messages} />
+        )}
         <div ref={messageEndRef} />
       </div>
       <SendMessageInput />
