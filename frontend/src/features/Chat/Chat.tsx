@@ -38,10 +38,12 @@ function Chat() {
       };
       setMessages((previous) => [...previous, chatInfo]);
     };
+
     const onSession = ({ sessionID, userID }: Session) => {
       localStorage.setItem('sessionID', sessionID);
       socket.userID = userID;
     };
+
     const onUsers = (users: any) => {
       const sender = users.find((user: any) => user.userID !== socket.userID);
       let msgs: any = [];
@@ -67,6 +69,10 @@ function Chat() {
     socket.on('private message', onPrivateMessage);
     socket.on('session', onSession);
     socket.on('users', onUsers);
+
+    const sessionID = localStorage.getItem('sessionID');
+    socket.auth = { username: 'toto', sessionID };
+    socket.connect();
 
     return () => {
       socket.off('connect', onConnect);
@@ -111,6 +117,7 @@ function Chat() {
           <div ref={messageEndRef} />
         </Hide>
       </div>
+
       <Hide condition={close}>
         <SendMessageInput />
       </Hide>
