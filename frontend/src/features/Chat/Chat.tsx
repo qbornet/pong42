@@ -70,10 +70,6 @@ function Chat() {
     socket.on('session', onSession);
     socket.on('users', onUsers);
 
-    const sessionID = localStorage.getItem('sessionID');
-    socket.auth = { username: 'toto', sessionID };
-    socket.connect();
-
     return () => {
       socket.off('connect', onConnect);
       socket.off('disconnect', onDisconnect);

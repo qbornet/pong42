@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import socket from '../../services/socket';
 import ArrowToggler from '../ArrowToggler/ArrowToggler';
 import Category from '../Category/Category';
@@ -16,6 +17,10 @@ function ChatHeader({ className, isConnected, handleClick }: ChatHeaderProps) {
     socket.connect();
   };
   const disconnect = () => socket.disconnect();
+
+  useEffect(() => {
+    connect();
+  });
   return (
     <div
       className={`${className} flex w-[336px] items-center justify-center rounded-3xl rounded-t-3xl shadow-pong shadow-pong-blue-100`}
