@@ -2,7 +2,11 @@ import { FaTelegramPlane } from 'react-icons/fa';
 import { useState } from 'react';
 import socket from '../../services/socket';
 
-function SendMessageInput() {
+interface SendMessageInputProps {
+  to: string;
+}
+
+function SendMessageInput({ to }: SendMessageInputProps) {
   const [message, setMessage] = useState('');
   // const [isLoading, setIsLoading] = useState(false);
 
@@ -11,7 +15,7 @@ function SendMessageInput() {
     // setIsLoading(true);
     const data = {
       content: message,
-      to: '7af3bdcf-98bc-47e4-8b61-4c85dd738731'
+      to
     };
     socket.timeout(5000).emit('private message', data, () => {
       // setIsLoading(false);

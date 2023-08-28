@@ -25,6 +25,7 @@ function Chat() {
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [messages, setMessages] = useState<ChatInfo[]>([]);
   const [close, setClose] = useState<boolean>(true);
+  const [messageReiceivers, setMessageReiceivers] = useState<string>('');
 
   useEffect(() => {
     const onConnect = () => setIsConnected(true);
@@ -117,7 +118,7 @@ function Chat() {
       </div>
 
       <Hide condition={close}>
-        <SendMessageInput />
+        <SendMessageInput to={messageReiceivers} />
       </Hide>
     </div>
   );
