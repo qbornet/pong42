@@ -388,5 +388,47 @@ describe('ChatGateway', () => {
       client1.disconnect();
       client2.disconnect();
     });
+
+    it('receives message from itself', async () => {
+      const client0 = getClientSocket({ username: 'toto' });
+      const client1 = getClientSocket({ username: 'tata' });
+
+      interface Session {
+        userID: string;
+        sessionID: string;
+      }
+
+      let session0: Session;
+      let session1: Session;
+
+      client0.on('session', (session) => {
+        session0 = session;
+      });
+
+      client1.on('session', (session) => {
+        session1 = session;
+      });
+
+      client0.connect();
+      client1.connect();
+
+      await Promise.all([
+        expectEvent(client0, 'connect'),
+        expectEvent(client1, 'connect'),
+        expectEvent(client0, 'session'),
+        expectEvent(client1, 'session')
+      ]);
+
+      client0.emit('private message', {
+        content: 'some private infos: 42',
+        to: session1.userID
+      });
+
+      await expectEvent(client1, 'private message');
+      await expectEvent(client0, 'private message');
+
+      client0.disconnect();
+      client1.disconnect();
+    });
   });
 });

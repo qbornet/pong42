@@ -146,7 +146,7 @@ export default class ChatGateway
       messageID: ChatGateway.randomId(),
       to
     };
-    socket.to(to).to(socket.userID).emit('private message', message);
+    this.io.to(to).to(socket.userID).emit('private message', message);
     this.messageStore.saveMessage(message);
   }
 
