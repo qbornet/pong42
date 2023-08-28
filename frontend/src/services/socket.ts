@@ -12,10 +12,22 @@ const socket = io(URL, {
   transports: ['websocket', 'polling']
 }) as PongSocket;
 
-socket.onAny((event, ...args) => {
+socket.on('connect', () => {
   /* eslint-disable */
   console.log('connected');
+  /* eslint-enable */
+});
+
+socket.on('disconnect', () => {
+  /* eslint-disable */
+  console.log('disconnected');
+  /* eslint-enable */
+});
+
+socket.onAny((event, ...args) => {
+  /* eslint-disable */
   console.log(event, args);
+  console.log(event);
   /* eslint-enable */
 });
 

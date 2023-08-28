@@ -25,7 +25,8 @@ function Chat() {
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [messages, setMessages] = useState<ChatInfo[]>([]);
   const [close, setClose] = useState<boolean>(true);
-  const [messageReiceivers, setMessageReiceivers] = useState<string>('');
+  const [users, setUsers] = useState<any>([]);
+  const [people, setPeople] = useState<any>(undefined);
 
   useEffect(() => {
     const onConnect = () => setIsConnected(true);
@@ -47,24 +48,17 @@ function Chat() {
       socket.userID = userID;
     };
 
-    const onUsers = (users: any) => {
-      const sender = users.find((user: any) => user.userID !== socket.userID);
-      let msgs: any = [];
-      sender.messages.map((message: any) => {
-        msgs = [
-          ...msgs,
-          {
-            messageID: message.messageID,
-            message: message.content,
-            time: formatTimeMessage(message.date),
-            username: sender.username,
-            level: 42,
-            profilePictureUrl: 'starwatcher.jpg'
-          }
-        ];
-        return message;
-      });
-      setMessages(() => msgs);
+    const onUsers = (data: any) => {
+      // Narrow data any type to users type here
+      setUsers(data);
+    };
+
+    const onUserDisconnected = () => {
+      // Narrow data any type to { userID }
+    };
+
+    const onUserConnected = () => {
+      // Narrow data any type to { userID, username }
     };
 
     socket.on('connect', onConnect);
@@ -72,6 +66,8 @@ function Chat() {
     socket.on('private message', onPrivateMessage);
     socket.on('session', onSession);
     socket.on('users', onUsers);
+    socket.on('user connected', onUserConnected);
+    socket.on('user disconnected', onUserDisconnected);
 
     return () => {
       socket.off('connect', onConnect);
@@ -79,6 +75,8 @@ function Chat() {
       socket.off('private message', onPrivateMessage);
       socket.off('session', onSession);
       socket.off('users', onUsers);
+      socket.off('user connected', onUserConnected);
+      socket.off('user disconnected', onUserDisconnected);
     };
   }, []);
 
@@ -89,6 +87,29 @@ function Chat() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, close]);
+
+  useEffect(() => {
+    setPeople(users.find((user: any) => user.userID !== socket.userID));
+    if (!people) {
+      return;
+    }
+    let msgs: any = [];
+    people.messages.map((message: any) => {
+      msgs = [
+        ...msgs,
+        {
+          messageID: message.messageID,
+          message: message.content,
+          time: formatTimeMessage(message.date),
+          username: people.username,
+          level: 42,
+          profilePictureUrl: 'starwatcher.jpg'
+        }
+      ];
+      return message;
+    });
+    setMessages(() => msgs);
+  }, [users, people]);
 
   return (
     <div className="w-fit overflow-hidden rounded-3xl">
@@ -118,7 +139,7 @@ function Chat() {
       </div>
 
       <Hide condition={close}>
-        <SendMessageInput to={messageReiceivers} />
+        <SendMessageInput to={people ? people.userID : ''} />
       </Hide>
     </div>
   );
