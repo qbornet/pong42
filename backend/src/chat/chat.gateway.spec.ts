@@ -57,6 +57,16 @@ describe('ChatGateway', () => {
       const socket = getClientSocket({
         username: 'toto'
       });
+
+      let session: {
+        userID: string;
+        sessionID: string;
+      };
+
+      socket.on('session', (sess) => {
+        session = sess;
+      });
+
       socket.connect();
       await expectEvent(socket, 'connect');
       socket.disconnect();
@@ -65,10 +75,10 @@ describe('ChatGateway', () => {
       expect(logSpy).toHaveBeenCalledTimes(2);
 
       expect(calls[0].length).toBe(1);
-      expect(calls[0][0]).toMatch('Client id:');
+      expect(calls[0][0]).toMatch(`ClientId: ${session.userID} connected`);
 
       expect(calls[1].length).toBe(1);
-      expect(calls[1][0]).toMatch('Nb clients:');
+      expect(calls[1][0]).toMatch('Nb clients: 1');
     });
 
     it('cannot connect without username', async () => {
@@ -338,10 +348,6 @@ describe('ChatGateway', () => {
       client0 = getClientSocket({
         username: 'toto',
         sessionID: session0.sessionID
-      });
-
-      client0.on('users', (data) => {
-        console.log(data);
       });
 
       client0.connect();
