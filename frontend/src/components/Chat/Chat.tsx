@@ -4,6 +4,7 @@ import ChatHeader from '../ChatHeader/ChatHeader';
 import ChatMessage from '../ChatMessage/ChatMessage';
 import SendMessageInput from '../SendMessageInput/SendMessageInput';
 import socket from '../../services/socket';
+import Hide from '../Hide/Hide';
 
 interface Message {
   content: string;
@@ -92,7 +93,7 @@ function Chat() {
         }  w-fit shrink-0 flex-col-reverse items-center justify-end overflow-y-scroll rounded-t-3xl bg-pong-blue-300`}
       >
         <ChatHeader
-          className="absolute z-30 mt-2"
+          className="absolute z-30"
           isConnected={isConnected}
           handleClick={() => setClose(!close)}
         />
@@ -105,16 +106,14 @@ function Chat() {
             profilePictureUrl=""
           />
         </div>
-        {close ? (
-          ''
-        ) : (
-          <>
-            <ChatFeed messages={messages} />
-            <div ref={messageEndRef} />
-          </>
-        )}
+        <Hide condition={close}>
+          <ChatFeed messages={messages} />
+          <div ref={messageEndRef} />
+        </Hide>
       </div>
-      {close ? '' : <SendMessageInput />}
+      <Hide condition={close}>
+        <SendMessageInput />
+      </Hide>
     </div>
   );
 }
