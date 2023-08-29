@@ -108,7 +108,8 @@ export default class ChatGateway
     socket.emit('users', users);
     socket.broadcast.emit('user connected', {
       userID: socket.userID,
-      username: socket.username
+      username: socket.username,
+      connected: this.sessionStore.findSession(socket.sessionID)
     });
     socket.emit('session', {
       sessionID: socket.sessionID,
