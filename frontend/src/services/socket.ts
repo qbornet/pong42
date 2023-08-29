@@ -27,7 +27,6 @@ socket.on('disconnect', () => {
 socket.onAny((event, ...args) => {
   /* eslint-disable */
   console.log(event, args);
-  console.log(event);
   /* eslint-enable */
 });
 

@@ -30,10 +30,12 @@ function SendMessageInput({ to }: SendMessageInputProps) {
     <form
       onSubmit={handleSubmit}
       className="flex h-14 w-[336px] flex-shrink-0 items-center justify-between gap-y-24 bg-pong-blue-400 px-5"
+      autoComplete="off"
     >
       <input
         type="text"
         id="UserEmail"
+        autoComplete="false"
         placeholder="Send Message..."
         value={message}
         onChange={(event) => setMessage(event.target.value)}
