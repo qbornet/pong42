@@ -23,17 +23,15 @@ function ChatMessage({
   const [clicked, setClicked] = useState(false);
   return (
     <div
-      className={`mx-2 my-1 flex w-80 flex-shrink-0 rounded-lg text-left ${
-        noBgColor ? '' : 'bg-pong-blue-400'
-      } p-3`}
+      className={`${noBgColor ? '' : 'bg-pong-blue-400'}
+        mx-2 my-1 flex w-80 flex-shrink-0 rounded-lg p-3 text-left `}
+      onClick={() => setClicked(!clicked)}
+      role="presentation"
     >
       <div className="min-w-fit">
         <ProfilePicture size="xs" url={profilePictureUrl} level={level} />
       </div>
-      <div
-        className="flex-grow cursor-pointer px-2"
-        onClick={() => setClicked(!clicked)}
-      >
+      <div className="flex-grow cursor-pointer px-2">
         <div className="flex items-center justify-between">
           <p className="text-sm font-bold text-pong-blue-100">{username}</p>
           <p className="text-sm font-bold text-pong-blue-100">{time}</p>
