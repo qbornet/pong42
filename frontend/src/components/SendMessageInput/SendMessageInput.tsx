@@ -12,6 +12,9 @@ function SendMessageInput({ to }: SendMessageInputProps) {
 
   const handleSubmit = (event: any) => {
     event.preventDefault();
+    if (message.length === 0) {
+      return;
+    }
     // setIsLoading(true);
     const data = {
       content: message,

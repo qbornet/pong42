@@ -89,7 +89,6 @@ function Chat() {
   }, [messages, close]);
 
   useEffect(() => {
-    setPeople(users.find((user: any) => user.userID !== socket.userID));
     if (!people) {
       return;
     }
@@ -112,36 +111,57 @@ function Chat() {
   }, [users, people]);
 
   return (
-    <div className="w-fit overflow-hidden rounded-3xl">
-      <div
-        className={`hide-scrollbar ${
-          close ? '' : 'h-[758px] max-h-[90vh]'
-        }  w-fit shrink-0 flex-col-reverse items-center justify-end overflow-y-scroll rounded-t-3xl bg-pong-blue-300`}
-      >
-        <ChatHeader
-          className="absolute z-30"
-          isConnected={isConnected}
-          handleClick={() => setClose(!close)}
-        />
-        <div className="invisible h-24">
-          <ChatMessage
-            message=""
-            time=""
-            username=""
-            level={0}
-            profilePictureUrl=""
+    <>
+      <div>
+        {users.map((user: any) => {
+          if (user.userID !== socket.userID) {
+            return (
+              <p key={user.userID}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPeople(user);
+                  }}
+                >
+                  {user.userID}
+                </button>
+              </p>
+            );
+          }
+          return '';
+        })}
+      </div>
+      <div className="w-fit overflow-hidden rounded-3xl">
+        <div
+          className={`hide-scrollbar ${
+            close ? '' : 'h-[758px] max-h-[90vh]'
+          }  w-fit shrink-0 flex-col-reverse items-center justify-end overflow-y-scroll rounded-t-3xl bg-pong-blue-300`}
+        >
+          <ChatHeader
+            className="absolute z-30"
+            isConnected={isConnected}
+            handleClick={() => setClose(!close)}
           />
+          <div className="invisible h-24">
+            <ChatMessage
+              message=""
+              time=""
+              username=""
+              level={0}
+              profilePictureUrl=""
+            />
+          </div>
+          <Hide condition={close}>
+            <ChatFeed messages={messages} />
+            <div ref={messageEndRef} />
+          </Hide>
         </div>
+
         <Hide condition={close}>
-          <ChatFeed messages={messages} />
-          <div ref={messageEndRef} />
+          <SendMessageInput to={people ? people.userID : ''} />
         </Hide>
       </div>
-
-      <Hide condition={close}>
-        <SendMessageInput to={people ? people.userID : ''} />
-      </Hide>
-    </div>
+    </>
   );
 }
 
