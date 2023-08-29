@@ -89,7 +89,7 @@ function Chat() {
   }, [messages, close]);
 
   useEffect(() => {
-    if (!people) {
+    if (people === undefined) {
       return;
     }
     let msgs: any = [];
@@ -107,12 +107,13 @@ function Chat() {
       ];
       return message;
     });
-    setMessages(() => msgs);
+    setMessages((previous) => msgs.concat(previous));
   }, [users, people]);
 
   return (
     <>
       <div>
+        <h2>Contact List</h2>
         {users.map((user: any) => {
           if (user.userID !== socket.userID) {
             return (
