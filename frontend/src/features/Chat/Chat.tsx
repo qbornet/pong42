@@ -26,7 +26,7 @@ function Chat() {
   const [messages, setMessages] = useState<ChatInfo[]>([]);
   const [close, setClose] = useState<boolean>(true);
   const [users, setUsers] = useState<any>([]);
-  const [people, setPeople] = useState<any>(undefined);
+  const [contact, setContact] = useState<any>(undefined);
   const [contactListOpen, setContactListOpen] = useState<boolean>(true);
 
   const messageEndRef = useScroll(messages, close);
@@ -93,7 +93,7 @@ function Chat() {
 
   useEffect(() => {
     if (isConnected === false) {
-      setPeople(undefined);
+      setContact(undefined);
       setUsers([]);
       setMessages([]);
       setContactListOpen(true);
@@ -101,18 +101,18 @@ function Chat() {
   }, [isConnected]);
 
   useEffect(() => {
-    if (people === undefined || people.messages === undefined) {
+    if (contact === undefined || contact.messages === undefined) {
       return;
     }
     let msgs: any = [];
-    people.messages.map((message: any) => {
+    contact.messages.map((message: any) => {
       msgs = [
         ...msgs,
         {
           messageID: message.messageID,
           message: message.content,
           time: formatTimeMessage(message.date),
-          username: people.username,
+          username: contact.username,
           level: 42,
           profilePictureUrl: 'starwatcher.jpg'
         }
@@ -120,7 +120,7 @@ function Chat() {
       return message;
     });
     setMessages((previous) => msgs.concat(previous));
-  }, [users, people]);
+  }, [users, contact]);
 
   return (
     <div className="w-fit overflow-hidden rounded-3xl">
@@ -154,7 +154,7 @@ function Chat() {
                       <button
                         type="button"
                         onClick={() => {
-                          setPeople(user);
+                          setContact(user);
                           setContactListOpen(false);
                         }}
                       >
@@ -176,7 +176,7 @@ function Chat() {
       </div>
 
       <Hide condition={close}>
-        <SendMessageInput to={people ? people.userID : ''} />
+        <SendMessageInput to={contact ? contact.userID : ''} />
       </Hide>
     </div>
   );
