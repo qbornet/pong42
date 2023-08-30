@@ -7,7 +7,10 @@ import Status from '../Status/Status';
 interface ChatHeaderProps {
   className?: string;
   isConnected: boolean;
-  handleClick: () => any;
+  handleClick: {
+    toggleArrow: () => any;
+    contactList: () => any;
+  };
 }
 
 function ChatHeader({ className, isConnected, handleClick }: ChatHeaderProps) {
@@ -26,8 +29,8 @@ function ChatHeader({ className, isConnected, handleClick }: ChatHeaderProps) {
       className={`${className} flex w-[336px] items-center justify-center rounded-3xl rounded-t-3xl shadow-pong shadow-pong-blue-100`}
     >
       <div className="gp-y-1 flex flex-wrap content-center items-center justify-center gap-x-24 gap-y-2 rounded-3xl py-5 backdrop-blur">
-        <Category type="chat" />
-        <ArrowToggler onClick={handleClick} />
+        <Category onClick={handleClick.contactList} type="chat" />
+        <ArrowToggler onClick={handleClick.toggleArrow} />
         <Status
           position="start"
           severity={isConnected ? 'ok' : 'err'}

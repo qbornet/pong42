@@ -34,7 +34,10 @@ function Chat() {
         <ChatHeader
           className="absolute z-30"
           isConnected={isConnected}
-          handleClick={() => setClose(!close)}
+          handleClick={{
+            toggleArrow: () => setClose(!close),
+            contactList: () => setContactListOpen(true)
+          }}
         />
         <div className="invisible h-24">
           <ChatMessage

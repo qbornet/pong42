@@ -4,6 +4,7 @@ import { BsQuestionCircle } from 'react-icons/bs';
 
 interface CategoryProps {
   type: 'chat' | 'home' | 'leader' | 'support';
+  onClick: () => any;
 }
 
 const iconStyle = 'w-8 h-8 text-pong-blue-100';
@@ -27,13 +28,17 @@ const categories = {
   }
 };
 
-function Category({ type = 'chat' }: CategoryProps) {
+function Category({ type = 'chat', onClick }: CategoryProps) {
   const { about, icon } = categories[type];
   return (
-    <div className="inline-flex items-end justify-center gap-6">
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex items-end justify-center gap-6"
+    >
       {icon}
       <p className="text-center text-base font-bold text-white">{about}</p>
-    </div>
+    </button>
   );
 }
 
