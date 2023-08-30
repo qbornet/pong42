@@ -48,11 +48,11 @@ function Chat() {
         <Hide condition={close}>
           {contactListOpen ? (
             <div>
-              <h2>Contact List</h2>
+              <h2 className="text-white">Contact List</h2>
               {contactList.map((user: any) => {
                 if (user.userID !== socket.userID) {
                   return (
-                    <p key={user.userID}>
+                    <p className="text-white" key={user.userID}>
                       <button
                         type="button"
                         onClick={() => {

@@ -31,7 +31,7 @@ function ChatMessage({
       <div className="min-w-fit">
         <ProfilePicture size="xs" url={profilePictureUrl} level={level} />
       </div>
-      <div className="flex-grow cursor-pointer px-2">
+      <div className="w-1 flex-grow cursor-pointer break-words px-2">
         <div className="flex items-center justify-between">
           <p className="text-sm font-bold text-pong-blue-100">{username}</p>
           <p className="text-sm font-bold text-pong-blue-100">{time}</p>
