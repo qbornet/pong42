@@ -8,9 +8,10 @@ import SendMessageInput from '../../components/SendMessageInput/SendMessageInput
 import { formatTimeMessage } from '../../utils/functions/parsing';
 import { useScroll } from '../../utils/hooks/useScroll';
 import { useSocket } from '../../utils/hooks/useSocket';
+import { useConnected } from '../../utils/hooks/useConnected';
 
 function Chat() {
-  const [isConnected, setIsConnected] = useState(socket.connected);
+  const [isConnected, setIsConnected] = useConnected();
   const [messages, setMessages] = useState<ChatInfo[]>([]);
   const [close, setClose] = useState<boolean>(true);
   const [contactList, setContactList] = useState<any>([]);
