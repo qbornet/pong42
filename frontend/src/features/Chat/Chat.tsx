@@ -1,22 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import socket from '../../services/socket';
 import ChatFeed, { ChatInfo } from '../../components/ChatFeed/ChatFeed';
 import ChatHeader from '../../components/ChatHeader/ChatHeader';
 import ChatMessage from '../../components/ChatMessage/ChatMessage';
 import Hide from '../../components/Hide/Hide';
 import SendMessageInput from '../../components/SendMessageInput/SendMessageInput';
-import { formatTimeMessage } from '../../utils/functions/parsing';
 import { useScroll } from '../../utils/hooks/useScroll';
 import { useSocket } from '../../utils/hooks/useSocket';
 import { useConnected } from '../../utils/hooks/useConnected';
+import { useContact } from '../../utils/hooks/useContact';
 
 function Chat() {
   const [messages, setMessages] = useState<ChatInfo[]>([]);
   const [close, setClose] = useState<boolean>(true);
   const [contactList, setContactList] = useState<any>([]);
-  const [contact, setContact] = useState<any>(undefined);
   const [contactListOpen, setContactListOpen] = useState<boolean>(true);
-
+  const [contact, setContact] = useContact(setMessages, contactList);
   const [isConnected, setIsConnected] = useConnected(
     setContactList,
     setContact,
@@ -24,29 +23,8 @@ function Chat() {
     setContactListOpen
   );
   useSocket(setIsConnected, setMessages, setContactList);
-  const messageEndRef = useScroll(messages, close);
 
-  useEffect(() => {
-    if (contact === undefined || contact.messages === undefined) {
-      return;
-    }
-    let msgs: any = [];
-    contact.messages.map((message: any) => {
-      msgs = [
-        ...msgs,
-        {
-          messageID: message.messageID,
-          message: message.content,
-          time: formatTimeMessage(message.date),
-          username: contact.username,
-          level: 42,
-          profilePictureUrl: 'starwatcher.jpg'
-        }
-      ];
-      return message;
-    });
-    setMessages((previous) => msgs.concat(previous));
-  }, [contactList, contact]);
+  const messageEndRef = useScroll(messages, close);
 
   return (
     <div className="w-fit overflow-hidden rounded-3xl">
