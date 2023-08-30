@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import socket from '../../services/socket';
 import ChatFeed, { ChatInfo } from '../../components/ChatFeed/ChatFeed';
 import ChatHeader from '../../components/ChatHeader/ChatHeader';
@@ -6,6 +6,7 @@ import ChatMessage from '../../components/ChatMessage/ChatMessage';
 import Hide from '../../components/Hide/Hide';
 import SendMessageInput from '../../components/SendMessageInput/SendMessageInput';
 import { formatTimeMessage } from '../../utils/functions/parsing';
+import { useScroll } from '../../utils/hooks/useScroll';
 
 interface Message {
   content: string;
@@ -21,13 +22,14 @@ interface Session {
 }
 
 function Chat() {
-  const messageEndRef = useRef(null);
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [messages, setMessages] = useState<ChatInfo[]>([]);
   const [close, setClose] = useState<boolean>(true);
   const [users, setUsers] = useState<any>([]);
   const [people, setPeople] = useState<any>(undefined);
   const [contactListOpen, setContactListOpen] = useState<boolean>(true);
+
+  const messageEndRef = useScroll(messages, close);
 
   useEffect(() => {
     const onConnect = () => setIsConnected(true);
@@ -89,10 +91,6 @@ function Chat() {
     };
   }, [users]);
 
-  const scrollToBottom = () => {
-    messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   useEffect(() => {
     if (isConnected === false) {
       setPeople(undefined);
@@ -101,10 +99,6 @@ function Chat() {
       setContactListOpen(true);
     }
   }, [isConnected]);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, close]);
 
   useEffect(() => {
     if (people === undefined || people.messages === undefined) {
@@ -162,7 +156,6 @@ function Chat() {
                         onClick={() => {
                           setPeople(user);
                           setContactListOpen(false);
-                          scrollToBottom();
                         }}
                       >
                         {user.userID}
