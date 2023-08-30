@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { formatTimeMessage } from '../functions/parsing';
 
-export function useContact(setMessages: any, contactList: any) {
+export function useContact(setMessages: any) {
   const [contact, setContact] = useState<any>(undefined);
 
   useEffect(() => {
@@ -24,7 +24,7 @@ export function useContact(setMessages: any, contactList: any) {
       return message;
     });
     setMessages((previous: any) => msgs.concat(previous));
-  }, [contactList, contact, setMessages]);
+  }, [contact, setMessages]);
 
   return { contact, setContact };
 }

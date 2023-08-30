@@ -14,8 +14,7 @@ function Chat() {
   const [messages, setMessages] = useState<ChatInfo[]>([]);
   const [contactList, setContactList] = useState<any>([]);
   const [contactListOpen, setContactListOpen] = useState<boolean>(true);
-
-  const { contact, setContact } = useContact(setMessages, contactList);
+  const { contact, setContact } = useContact(setMessages);
   const { isConnected, setIsConnected } = useConnected(
     setContactList,
     setContact,
