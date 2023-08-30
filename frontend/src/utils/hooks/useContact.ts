@@ -26,7 +26,7 @@ export function useContact(setMessages: any, contactList: any) {
     setMessages((previous: any) => msgs.concat(previous));
   }, [contactList, contact, setMessages]);
 
-  return [contact, setContact];
+  return { contact, setContact };
 }
 
 export default {};

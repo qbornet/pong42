@@ -1,15 +1,17 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export function useScroll(...dependencies: any[]) {
-  const ref = useRef<any>(null);
+  const [close, setClose] = useState<boolean>(true);
+
+  const messageEndRef = useRef<any>(null);
   useEffect(() => {
     const scrollToBottom = () => {
-      ref.current?.scrollIntoView({ behavior: 'smooth' });
+      messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
     scrollToBottom();
   }, [dependencies]);
 
-  return ref;
+  return { messageEndRef, close, setClose };
 }
 
 export default {};

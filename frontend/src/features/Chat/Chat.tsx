@@ -12,19 +12,18 @@ import { useContact } from '../../utils/hooks/useContact';
 
 function Chat() {
   const [messages, setMessages] = useState<ChatInfo[]>([]);
-  const [close, setClose] = useState<boolean>(true);
   const [contactList, setContactList] = useState<any>([]);
   const [contactListOpen, setContactListOpen] = useState<boolean>(true);
-  const [contact, setContact] = useContact(setMessages, contactList);
-  const [isConnected, setIsConnected] = useConnected(
+
+  const { contact, setContact } = useContact(setMessages, contactList);
+  const { isConnected, setIsConnected } = useConnected(
     setContactList,
     setContact,
     setMessages,
     setContactListOpen
   );
   useSocket(setIsConnected, setMessages, setContactList);
-
-  const messageEndRef = useScroll(messages, close);
+  const { messageEndRef, close, setClose } = useScroll(messages);
 
   return (
     <div className="w-fit overflow-hidden rounded-3xl">

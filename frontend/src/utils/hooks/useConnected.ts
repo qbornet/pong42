@@ -24,7 +24,7 @@ export function useConnected(
     setContactList
   ]);
 
-  return [isConnected, setIsConnected];
+  return { isConnected, setIsConnected };
 }
 
 export default {};
