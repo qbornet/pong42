@@ -25,53 +25,47 @@ function Chat() {
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [messages, setMessages] = useState<ChatInfo[]>([]);
   const [close, setClose] = useState<boolean>(true);
-  const [users, setUsers] = useState<any>([]);
+  const [contactList, setContactList] = useState<any>([]);
   const [contact, setContact] = useState<any>(undefined);
   const [contactListOpen, setContactListOpen] = useState<boolean>(true);
 
   const messageEndRef = useScroll(messages, close);
 
+  const onConnect = () => setIsConnected(true);
+  const onDisconnect = () => {
+    setIsConnected(false);
+  };
+  const onPrivateMessage = (value: Message) => {
+    const chatInfo: ChatInfo = {
+      username: 'toto',
+      time: formatTimeMessage(value.date),
+      message: value.content,
+      profilePictureUrl: 'starwatcher.jpg',
+      level: 42,
+      messageID: value.messageID
+    };
+    setMessages((previous) => [...previous, chatInfo]);
+  };
+
+  const onSession = ({ sessionID, userID }: Session) => {
+    localStorage.setItem('sessionID', sessionID);
+    socket.userID = userID;
+  };
+
+  const onUsers = (data: any) => {
+    // Narrow data any type to users type here
+    setContactList(data);
+  };
+
+  const onUserDisconnected = () => {
+    // Narrow data any type to { userID }
+  };
+
+  const onUserConnected = () => {
+    // Narrow data any type here
+  };
+
   useEffect(() => {
-    const onConnect = () => setIsConnected(true);
-    const onDisconnect = () => {
-      setIsConnected(false);
-    };
-    const onPrivateMessage = (value: Message) => {
-      const chatInfo: ChatInfo = {
-        username: 'toto',
-        time: formatTimeMessage(value.date),
-        message: value.content,
-        profilePictureUrl: 'starwatcher.jpg',
-        level: 42,
-        messageID: value.messageID
-      };
-      setMessages((previous) => [...previous, chatInfo]);
-    };
-
-    const onSession = ({ sessionID, userID }: Session) => {
-      localStorage.setItem('sessionID', sessionID);
-      socket.userID = userID;
-    };
-
-    const onUsers = (data: any) => {
-      // Narrow data any type to users type here
-      setUsers(data);
-    };
-
-    const onUserDisconnected = () => {
-      // Narrow data any type to { userID }
-    };
-
-    const onUserConnected = (data: any) => {
-      // Narrow data any type to { userID, username }
-      const { userID, username, connected } = data;
-
-      if (users.find((user: any) => user.userID === userID) === undefined) {
-        const newUsers = users.concat({ userID, username, connected });
-        setUsers(newUsers);
-      }
-    };
-
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
     socket.on('private message', onPrivateMessage);
@@ -89,12 +83,12 @@ function Chat() {
       socket.off('user connected', onUserConnected);
       socket.off('user disconnected', onUserDisconnected);
     };
-  }, [users]);
+  }, []);
 
   useEffect(() => {
     if (isConnected === false) {
       setContact(undefined);
-      setUsers([]);
+      setContactList([]);
       setMessages([]);
       setContactListOpen(true);
     }
@@ -120,7 +114,7 @@ function Chat() {
       return message;
     });
     setMessages((previous) => msgs.concat(previous));
-  }, [users, contact]);
+  }, [contactList, contact]);
 
   return (
     <div className="w-fit overflow-hidden rounded-3xl">
@@ -147,7 +141,7 @@ function Chat() {
           {contactListOpen ? (
             <div>
               <h2>Contact List</h2>
-              {users.map((user: any) => {
+              {contactList.map((user: any) => {
                 if (user.userID !== socket.userID) {
                   return (
                     <p key={user.userID}>
