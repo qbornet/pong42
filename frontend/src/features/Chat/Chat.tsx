@@ -7,19 +7,7 @@ import Hide from '../../components/Hide/Hide';
 import SendMessageInput from '../../components/SendMessageInput/SendMessageInput';
 import { formatTimeMessage } from '../../utils/functions/parsing';
 import { useScroll } from '../../utils/hooks/useScroll';
-
-interface Message {
-  content: string;
-  messageID: string;
-  date: Date;
-  from: string;
-  to: string;
-}
-
-interface Session {
-  sessionID: string;
-  userID: string;
-}
+import { useSocket } from '../../utils/hooks/useSocket';
 
 function Chat() {
   const [isConnected, setIsConnected] = useState(socket.connected);
@@ -29,61 +17,8 @@ function Chat() {
   const [contact, setContact] = useState<any>(undefined);
   const [contactListOpen, setContactListOpen] = useState<boolean>(true);
 
+  useSocket(setIsConnected, setMessages, setContactList);
   const messageEndRef = useScroll(messages, close);
-
-  const onConnect = () => setIsConnected(true);
-  const onDisconnect = () => {
-    setIsConnected(false);
-  };
-  const onPrivateMessage = (value: Message) => {
-    const chatInfo: ChatInfo = {
-      username: 'toto',
-      time: formatTimeMessage(value.date),
-      message: value.content,
-      profilePictureUrl: 'starwatcher.jpg',
-      level: 42,
-      messageID: value.messageID
-    };
-    setMessages((previous) => [...previous, chatInfo]);
-  };
-
-  const onSession = ({ sessionID, userID }: Session) => {
-    localStorage.setItem('sessionID', sessionID);
-    socket.userID = userID;
-  };
-
-  const onUsers = (data: any) => {
-    // Narrow data any type to users type here
-    setContactList(data);
-  };
-
-  const onUserDisconnected = () => {
-    // Narrow data any type to { userID }
-  };
-
-  const onUserConnected = () => {
-    // Narrow data any type here
-  };
-
-  useEffect(() => {
-    socket.on('connect', onConnect);
-    socket.on('disconnect', onDisconnect);
-    socket.on('private message', onPrivateMessage);
-    socket.on('session', onSession);
-    socket.on('users', onUsers);
-    socket.on('user connected', onUserConnected);
-    socket.on('user disconnected', onUserDisconnected);
-
-    return () => {
-      socket.off('connect', onConnect);
-      socket.off('disconnect', onDisconnect);
-      socket.off('private message', onPrivateMessage);
-      socket.off('session', onSession);
-      socket.off('users', onUsers);
-      socket.off('user connected', onUserConnected);
-      socket.off('user disconnected', onUserDisconnected);
-    };
-  }, []);
 
   useEffect(() => {
     if (isConnected === false) {
