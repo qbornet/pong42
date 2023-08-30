@@ -11,24 +11,20 @@ import { useSocket } from '../../utils/hooks/useSocket';
 import { useConnected } from '../../utils/hooks/useConnected';
 
 function Chat() {
-  const [isConnected, setIsConnected] = useConnected();
   const [messages, setMessages] = useState<ChatInfo[]>([]);
   const [close, setClose] = useState<boolean>(true);
   const [contactList, setContactList] = useState<any>([]);
   const [contact, setContact] = useState<any>(undefined);
   const [contactListOpen, setContactListOpen] = useState<boolean>(true);
 
+  const [isConnected, setIsConnected] = useConnected(
+    setContactList,
+    setContact,
+    setMessages,
+    setContactListOpen
+  );
   useSocket(setIsConnected, setMessages, setContactList);
   const messageEndRef = useScroll(messages, close);
-
-  useEffect(() => {
-    if (isConnected === false) {
-      setContact(undefined);
-      setContactList([]);
-      setMessages([]);
-      setContactListOpen(true);
-    }
-  }, [isConnected]);
 
   useEffect(() => {
     if (contact === undefined || contact.messages === undefined) {
