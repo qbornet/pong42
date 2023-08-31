@@ -104,6 +104,7 @@ export function useSocket() {
       socket.off('users', onUsers);
       socket.off('user connected', onUserConnected);
       socket.off('user disconnected', onUserDisconnected);
+      setPrivateMessage(undefined);
     };
   }, [setPrivateMessage, setContactList, setIsConnected]);
 

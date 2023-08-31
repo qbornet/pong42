@@ -22,7 +22,7 @@ function Chat() {
       };
       setContact(newContact);
     }
-  }, [privateMessage]);
+  }, [privateMessage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="w-fit overflow-hidden rounded-3xl">
