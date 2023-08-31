@@ -19,7 +19,7 @@ function isPrivateMessage(data: any): data is PrivateMessage {
   );
 }
 
-interface Session {
+export interface Session {
   sessionID: string;
   userID: string;
 }
@@ -28,7 +28,7 @@ function isSession(data: any): data is Session {
   return data.sessionID !== undefined && data.userID !== undefined;
 }
 
-interface Contact {
+export interface Contact {
   username: string;
   userID: string;
   messages: PrivateMessage[];
@@ -44,7 +44,7 @@ function isContact(data: any): data is Contact {
   );
 }
 
-type ContactList = Contact[];
+export type ContactList = Contact[];
 
 function isContactList(data: any): data is ContactList {
   if (Array.isArray(data)) {
@@ -54,9 +54,7 @@ function isContactList(data: any): data is ContactList {
 }
 
 export function useSocket() {
-  const [privateMessage, setPrivateMessage] = useState<
-    PrivateMessage | undefined
-  >(undefined);
+  const [privateMessage, setPrivateMessage] = useState<PrivateMessage>();
   const [contactList, setContactList] = useState<any>([]);
   const [isConnected, setIsConnected] = useState<boolean>(true);
 

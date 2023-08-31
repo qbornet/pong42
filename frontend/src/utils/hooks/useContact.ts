@@ -1,8 +1,13 @@
 import { useEffect, useState } from 'react';
 import { formatTimeMessage } from '../functions/parsing';
+import { Contact, PrivateMessage } from './useSocket';
+import { ChatInfo } from '../../components/ChatFeed/ChatFeed';
 
-export function useContact(setMessages: any) {
-  const [contact, setContact] = useState<any>(undefined);
+export function useMessages(
+  contact: Contact | undefined,
+  privateMessage: PrivateMessage
+) {
+  const [messages, setMessages] = useState<ChatInfo[]>([]);
 
   useEffect(() => {
     if (contact === undefined || contact.messages === undefined) {
@@ -24,9 +29,23 @@ export function useContact(setMessages: any) {
       return message;
     });
     setMessages((previous: any) => msgs.concat(previous));
-  }, [contact, setMessages]);
+  }, [contact]);
 
-  return { contact, setContact };
+  useEffect(() => {
+    if (privateMessage) {
+      const chatInfo: ChatInfo = {
+        username: 'toto',
+        time: formatTimeMessage(privateMessage.date),
+        message: privateMessage.content,
+        profilePictureUrl: 'starwatcher.jpg',
+        level: 42,
+        messageID: privateMessage.messageID
+      };
+      setMessages((previous: any) => [...previous, chatInfo]);
+    }
+  }, [privateMessage]);
+
+  return [messages];
 }
 
 export default {};

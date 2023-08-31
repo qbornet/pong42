@@ -1,33 +1,26 @@
 import { useEffect, useState } from 'react';
 import socket from '../../services/socket';
-import ChatFeed, { ChatInfo } from '../../components/ChatFeed/ChatFeed';
+import ChatFeed from '../../components/ChatFeed/ChatFeed';
 import ChatHeader from '../../components/ChatHeader/ChatHeader';
 import ChatMessage from '../../components/ChatMessage/ChatMessage';
 import Hide from '../../components/Hide/Hide';
 import SendMessageInput from '../../components/SendMessageInput/SendMessageInput';
-import { useScroll } from '../../utils/hooks/useScroll';
-import { useSocket } from '../../utils/hooks/useSocket';
-import { useContact } from '../../utils/hooks/useContact';
-import { formatTimeMessage } from '../../utils/functions/parsing';
+import { Contact, useSocket } from '../../utils/hooks/useSocket';
 
 function Chat() {
-  const [privateMessage, contactList, isConnected] = useSocket();
-  const [messages, setMessages] = useState<ChatInfo[]>([]);
   const [contactListOpen, setContactListOpen] = useState<boolean>(true);
-  const { contact, setContact } = useContact(setMessages);
-  const { messageEndRef, close, setClose } = useScroll(messages);
+  const [contact, setContact] = useState<Contact>();
+  const [close, setClose] = useState<boolean>(true);
+
+  const [privateMessage, contactList, isConnected] = useSocket();
 
   useEffect(() => {
-    if (privateMessage) {
-      const chatInfo: ChatInfo = {
-        username: 'toto',
-        time: formatTimeMessage(privateMessage.date),
-        message: privateMessage.content,
-        profilePictureUrl: 'starwatcher.jpg',
-        level: 42,
-        messageID: privateMessage.messageID
+    if (contact?.messages && privateMessage) {
+      const newContact = {
+        ...contact,
+        messages: contact.messages.concat(privateMessage)
       };
-      setMessages((previous: any) => [...previous, chatInfo]);
+      setContact(newContact);
     }
   }, [privateMessage]);
 
@@ -79,10 +72,7 @@ function Chat() {
               })}
             </div>
           ) : (
-            <>
-              <ChatFeed messages={messages} />
-              <div ref={messageEndRef} />
-            </>
+            <ChatFeed contact={contact} />
           )}
         </Hide>
       </div>

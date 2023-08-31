@@ -1,8 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 export function useScroll(...dependencies: any[]) {
-  const [close, setClose] = useState<boolean>(true);
-
   const messageEndRef = useRef<any>(null);
   useEffect(() => {
     const scrollToBottom = () => {
@@ -11,7 +9,7 @@ export function useScroll(...dependencies: any[]) {
     scrollToBottom();
   }, [dependencies]);
 
-  return { messageEndRef, close, setClose };
+  return messageEndRef;
 }
 
 export default {};

@@ -1,22 +1,19 @@
 import ChatMessage from '../ChatMessage/ChatMessage';
-
-export interface ChatInfo {
-  username: string;
-  time: string;
-  message: string;
-  profilePictureUrl: string;
-  level: number;
-  messageID: string;
-}
+import { Contact } from '../../utils/hooks/useSocket';
+import { useMessages } from '../../utils/hooks/useMessages';
+import { useScroll } from '../../utils/hooks/useScroll';
 
 interface ChatFeedProps {
-  messages: ChatInfo[];
+  contact: Contact | undefined;
 }
 
-function ChatFeed({ messages }: ChatFeedProps) {
+function ChatFeed({ contact }: ChatFeedProps) {
+  const messages = useMessages(contact);
+  const messageEndRef = useScroll(messages);
+
   return (
     <div>
-      {messages.map((chat: ChatInfo, index: number) => {
+      {messages.map((chat, index: number) => {
         if (index % 2) {
           return (
             <ChatMessage
@@ -41,6 +38,7 @@ function ChatFeed({ messages }: ChatFeedProps) {
           />
         );
       })}
+      <div ref={messageEndRef} />
     </div>
   );
 }
