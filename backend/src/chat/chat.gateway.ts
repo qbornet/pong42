@@ -105,15 +105,15 @@ export default class ChatGateway
         messages: messagesPerUser.get(session.userID) || []
       });
     });
+    socket.emit('session', {
+      sessionID: socket.sessionID,
+      userID: socket.userID
+    });
     socket.emit('users', users);
     socket.broadcast.emit('user connected', {
       userID: socket.userID,
       username: socket.username,
       connected: this.sessionStore.findSession(socket.sessionID)
-    });
-    socket.emit('session', {
-      sessionID: socket.sessionID,
-      userID: socket.userID
     });
   }
 
