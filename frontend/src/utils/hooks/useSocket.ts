@@ -28,6 +28,31 @@ function isSession(data: any): data is Session {
   return data.sessionID !== undefined && data.userID !== undefined;
 }
 
+interface Contact {
+  username: string;
+  userID: string;
+  messages: PrivateMessage[];
+  connected: boolean;
+}
+
+function isContact(data: any): data is Contact {
+  return (
+    data.username !== undefined &&
+    data.userID !== undefined &&
+    data.messages !== undefined &&
+    data.connected !== undefined
+  );
+}
+
+type ContactList = Contact[];
+
+function isContactList(data: any): data is ContactList {
+  if (Array.isArray(data)) {
+    return data.some((d: any) => isContact(d) === false) === false;
+  }
+  return false;
+}
+
 export function useSocket(setIsConnected: any) {
   const [privateMessage, setPrivateMessage] = useState<
     PrivateMessage | undefined
@@ -59,17 +84,14 @@ export function useSocket(setIsConnected: any) {
     };
 
     const onUsers = (data: any) => {
-      // Narrow data any type to users type here
-      setContactList(data);
+      if (isContactList(data)) {
+        setContactList(data);
+      }
     };
 
-    const onUserDisconnected = () => {
-      // Narrow data any type to { userID }
-    };
+    const onUserDisconnected = () => {};
 
-    const onUserConnected = () => {
-      // Narrow data any type here
-    };
+    const onUserConnected = () => {};
 
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);

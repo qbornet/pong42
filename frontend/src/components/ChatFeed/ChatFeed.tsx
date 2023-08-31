@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import ChatMessage from '../ChatMessage/ChatMessage';
 
 export interface ChatInfo {

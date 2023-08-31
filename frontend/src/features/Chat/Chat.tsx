@@ -14,7 +14,6 @@ function Chat() {
   const [messages, setMessages] = useState<ChatInfo[]>([]);
   const [isConnected, setIsConnected] = useState<boolean>(true);
   const [contactListOpen, setContactListOpen] = useState<boolean>(true);
-
   const { contact, setContact } = useContact(setMessages);
   const [privateMessage, contactList] = useSocket(setIsConnected);
   const { messageEndRef, close, setClose } = useScroll(messages);
