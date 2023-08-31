@@ -53,16 +53,16 @@ function isContactList(data: any): data is ContactList {
   return false;
 }
 
-export function useSocket(setIsConnected: any) {
+export function useSocket() {
   const [privateMessage, setPrivateMessage] = useState<
     PrivateMessage | undefined
   >(undefined);
   const [contactList, setContactList] = useState<any>([]);
+  const [isConnected, setIsConnected] = useState<boolean>(true);
 
   useEffect(() => {
     const onConnect = () => setIsConnected(true);
     const onDisconnect = () => setIsConnected(false);
-
     const onPrivateMessage = (data: any) => {
       if (isPrivateMessage(data)) {
         setPrivateMessage({
@@ -74,7 +74,6 @@ export function useSocket(setIsConnected: any) {
         });
       }
     };
-
     const onSession = (data: any) => {
       if (isSession(data)) {
         const { userID, sessionID } = data;
@@ -82,16 +81,13 @@ export function useSocket(setIsConnected: any) {
         socket.userID = userID;
       }
     };
-
     const onUsers = (data: any) => {
       if (isContactList(data)) {
         const listOfContact = data.filter((d) => d.userID !== socket.userID);
         setContactList(listOfContact);
       }
     };
-
     const onUserDisconnected = () => {};
-
     const onUserConnected = () => {};
 
     socket.on('connect', onConnect);
@@ -113,7 +109,7 @@ export function useSocket(setIsConnected: any) {
     };
   }, [setPrivateMessage, setContactList, setIsConnected]);
 
-  return [privateMessage, contactList];
+  return [privateMessage, contactList, isConnected];
 }
 
 export default {};

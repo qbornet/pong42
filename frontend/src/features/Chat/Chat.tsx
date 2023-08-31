@@ -11,11 +11,10 @@ import { useContact } from '../../utils/hooks/useContact';
 import { formatTimeMessage } from '../../utils/functions/parsing';
 
 function Chat() {
+  const [privateMessage, contactList, isConnected] = useSocket();
   const [messages, setMessages] = useState<ChatInfo[]>([]);
-  const [isConnected, setIsConnected] = useState<boolean>(true);
   const [contactListOpen, setContactListOpen] = useState<boolean>(true);
   const { contact, setContact } = useContact(setMessages);
-  const [privateMessage, contactList] = useSocket(setIsConnected);
   const { messageEndRef, close, setClose } = useScroll(messages);
 
   useEffect(() => {
