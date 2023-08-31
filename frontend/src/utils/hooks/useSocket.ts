@@ -28,14 +28,12 @@ function isSession(data: any): data is Session {
   return data.sessionID !== undefined && data.userID !== undefined;
 }
 
-export function useSocket(
-  setIsConnected: any,
-  setMessages: any,
-  setContactList: any
-) {
+export function useSocket(setIsConnected: any) {
   const [privateMessage, setPrivateMessage] = useState<
     PrivateMessage | undefined
   >(undefined);
+  const [contactList, setContactList] = useState<any>([]);
+
   useEffect(() => {
     const onConnect = () => setIsConnected(true);
     const onDisconnect = () => setIsConnected(false);
@@ -90,9 +88,9 @@ export function useSocket(
       socket.off('user connected', onUserConnected);
       socket.off('user disconnected', onUserDisconnected);
     };
-  }, [setPrivateMessage, setContactList, setIsConnected, setMessages]);
+  }, [setPrivateMessage, setContactList, setIsConnected]);
 
-  return [privateMessage];
+  return [privateMessage, contactList];
 }
 
 export default {};

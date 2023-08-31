@@ -7,26 +7,16 @@ import Hide from '../../components/Hide/Hide';
 import SendMessageInput from '../../components/SendMessageInput/SendMessageInput';
 import { useScroll } from '../../utils/hooks/useScroll';
 import { useSocket } from '../../utils/hooks/useSocket';
-import { useConnected } from '../../utils/hooks/useConnected';
 import { useContact } from '../../utils/hooks/useContact';
 import { formatTimeMessage } from '../../utils/functions/parsing';
 
 function Chat() {
   const [messages, setMessages] = useState<ChatInfo[]>([]);
-  const [contactList, setContactList] = useState<any>([]);
+  const [isConnected, setIsConnected] = useState<boolean>(true);
   const [contactListOpen, setContactListOpen] = useState<boolean>(true);
+
   const { contact, setContact } = useContact(setMessages);
-  const { isConnected, setIsConnected } = useConnected(
-    setContactList,
-    setContact,
-    setMessages,
-    setContactListOpen
-  );
-  const [privateMessage] = useSocket(
-    setIsConnected,
-    setMessages,
-    setContactList
-  );
+  const [privateMessage, contactList] = useSocket(setIsConnected);
   const { messageEndRef, close, setClose } = useScroll(messages);
 
   useEffect(() => {
@@ -100,7 +90,10 @@ function Chat() {
       </div>
 
       <Hide condition={close}>
-        <SendMessageInput to={contact ? contact.userID : ''} />
+        <SendMessageInput
+          to={contact ? contact.userID : ''}
+          isConnected={isConnected}
+        />
       </Hide>
     </div>
   );

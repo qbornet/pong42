@@ -4,25 +4,25 @@ import socket from '../../services/socket';
 
 interface SendMessageInputProps {
   to: string;
+  isConnected: boolean;
 }
 
-function SendMessageInput({ to }: SendMessageInputProps) {
+function SendMessageInput({ to, isConnected }: SendMessageInputProps) {
   const [message, setMessage] = useState('');
   // const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = (event: any) => {
     event.preventDefault();
-    if (message.length === 0) {
-      return;
+    if (message.length !== 0 && isConnected) {
+      // setIsLoading(true);
+      const data = {
+        content: message,
+        to
+      };
+      socket.timeout(5000).emit('private message', data, () => {
+        // setIsLoading(false);
+      });
     }
-    // setIsLoading(true);
-    const data = {
-      content: message,
-      to
-    };
-    socket.timeout(5000).emit('private message', data, () => {
-      // setIsLoading(false);
-    });
     setMessage('');
   };
 
