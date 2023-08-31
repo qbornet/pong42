@@ -1,14 +1,22 @@
-import { useEffect } from 'react';
-import { ChatInfo } from '../../components/ChatFeed/ChatFeed';
+import { useEffect, useState } from 'react';
 import socket from '../../services/socket';
-import { formatTimeMessage } from '../functions/parsing';
 
-interface Message {
+export interface PrivateMessage {
   content: string;
-  messageID: string;
-  date: Date;
   from: string;
   to: string;
+  date: Date;
+  messageID: string;
+}
+
+function isPrivateMessage(data: any): data is PrivateMessage {
+  return (
+    data.content !== undefined &&
+    data.from !== undefined &&
+    data.to !== undefined &&
+    data.date !== undefined &&
+    data.messageID !== undefined
+  );
 }
 
 interface Session {
@@ -16,31 +24,40 @@ interface Session {
   userID: string;
 }
 
+function isSession(data: any): data is Session {
+  return data.sessionID !== undefined && data.userID !== undefined;
+}
+
 export function useSocket(
   setIsConnected: any,
   setMessages: any,
   setContactList: any
 ) {
+  const [privateMessage, setPrivateMessage] = useState<
+    PrivateMessage | undefined
+  >(undefined);
   useEffect(() => {
     const onConnect = () => setIsConnected(true);
-    const onDisconnect = () => {
-      setIsConnected(false);
-    };
-    const onPrivateMessage = (value: Message) => {
-      const chatInfo: ChatInfo = {
-        username: 'toto',
-        time: formatTimeMessage(value.date),
-        message: value.content,
-        profilePictureUrl: 'starwatcher.jpg',
-        level: 42,
-        messageID: value.messageID
-      };
-      setMessages((previous: any) => [...previous, chatInfo]);
+    const onDisconnect = () => setIsConnected(false);
+
+    const onPrivateMessage = (data: any) => {
+      if (isPrivateMessage(data)) {
+        setPrivateMessage({
+          content: data.content,
+          from: data.from,
+          to: data.to,
+          date: data.date,
+          messageID: data.messageID
+        });
+      }
     };
 
-    const onSession = ({ sessionID, userID }: Session) => {
-      localStorage.setItem('sessionID', sessionID);
-      socket.userID = userID;
+    const onSession = (data: any) => {
+      if (isSession(data)) {
+        const { userID, sessionID } = data;
+        localStorage.setItem('sessionID', sessionID);
+        socket.userID = userID;
+      }
     };
 
     const onUsers = (data: any) => {
@@ -73,7 +90,9 @@ export function useSocket(
       socket.off('user connected', onUserConnected);
       socket.off('user disconnected', onUserDisconnected);
     };
-  }, [setContactList, setIsConnected, setMessages]);
+  }, [setPrivateMessage, setContactList, setIsConnected, setMessages]);
+
+  return [privateMessage];
 }
 
 export default {};

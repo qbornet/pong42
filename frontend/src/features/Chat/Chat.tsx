@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import socket from '../../services/socket';
 import ChatFeed, { ChatInfo } from '../../components/ChatFeed/ChatFeed';
 import ChatHeader from '../../components/ChatHeader/ChatHeader';
@@ -9,6 +9,7 @@ import { useScroll } from '../../utils/hooks/useScroll';
 import { useSocket } from '../../utils/hooks/useSocket';
 import { useConnected } from '../../utils/hooks/useConnected';
 import { useContact } from '../../utils/hooks/useContact';
+import { formatTimeMessage } from '../../utils/functions/parsing';
 
 function Chat() {
   const [messages, setMessages] = useState<ChatInfo[]>([]);
@@ -21,8 +22,26 @@ function Chat() {
     setMessages,
     setContactListOpen
   );
-  useSocket(setIsConnected, setMessages, setContactList);
+  const [privateMessage] = useSocket(
+    setIsConnected,
+    setMessages,
+    setContactList
+  );
   const { messageEndRef, close, setClose } = useScroll(messages);
+
+  useEffect(() => {
+    if (privateMessage) {
+      const chatInfo: ChatInfo = {
+        username: 'toto',
+        time: formatTimeMessage(privateMessage.date),
+        message: privateMessage.content,
+        profilePictureUrl: 'starwatcher.jpg',
+        level: 42,
+        messageID: privateMessage.messageID
+      };
+      setMessages((previous: any) => [...previous, chatInfo]);
+    }
+  }, [privateMessage]);
 
   return (
     <div className="w-fit overflow-hidden rounded-3xl">
