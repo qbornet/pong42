@@ -85,7 +85,8 @@ export function useSocket(setIsConnected: any) {
 
     const onUsers = (data: any) => {
       if (isContactList(data)) {
-        setContactList(data);
+        const listOfContact = data.filter((d) => d.userID !== socket.userID);
+        setContactList(listOfContact);
       }
     };
 

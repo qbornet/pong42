@@ -44,7 +44,7 @@ function Chat() {
           isConnected={isConnected}
           handleClick={{
             toggleArrow: () => setClose(!close),
-            contactList: () => setContactListOpen(true)
+            openContactList: () => setContactListOpen(true)
           }}
         />
         <div className="invisible h-24">
