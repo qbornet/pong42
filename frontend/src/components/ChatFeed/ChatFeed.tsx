@@ -5,9 +5,10 @@ import { useScroll } from '../../utils/hooks/useScroll';
 
 interface ChatFeedProps {
   contact: Contact | undefined;
+  isConnected: boolean;
 }
 
-function ChatFeed({ contact }: ChatFeedProps) {
+function ChatFeed({ contact, isConnected }: ChatFeedProps) {
   const messages = useMessages(contact);
   const messageEndRef = useScroll(messages);
 

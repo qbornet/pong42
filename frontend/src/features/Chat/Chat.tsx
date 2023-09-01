@@ -6,21 +6,38 @@ import ChatMessage from '../../components/ChatMessage/ChatMessage';
 import Hide from '../../components/Hide/Hide';
 import SendMessageInput from '../../components/SendMessageInput/SendMessageInput';
 import { Contact, useSocket } from '../../utils/hooks/useSocket';
+import { useContact } from '../../utils/hooks/useContact';
 
 function Chat() {
   const [contactListOpen, setContactListOpen] = useState<boolean>(true);
-  const [contact, setContact] = useState<Contact>();
   const [close, setClose] = useState<boolean>(true);
 
-  const [privateMessage, contactList, isConnected] = useSocket();
+  const [contactList, setContactList, privateMessage, isConnected] =
+    useSocket();
+  const [contact, setContact] = useContact(contactList, isConnected);
 
   useEffect(() => {
-    if (contact?.messages && privateMessage) {
-      const newContact = {
-        ...contact,
-        messages: contact.messages.concat(privateMessage)
-      };
-      setContact(newContact);
+    if (privateMessage && contactList) {
+      const newContactList = contactList.map((c: Contact) => {
+        if (
+          c.userID === privateMessage.from ||
+          c.userID === privateMessage.to
+        ) {
+          const newContact = {
+            ...c,
+            messages: c.messages.concat(privateMessage)
+          };
+          if (
+            contact?.userID === privateMessage.to ||
+            privateMessage.from === contact?.userID
+          ) {
+            setContact(newContact);
+          }
+          return newContact;
+        }
+        return c;
+      });
+      setContactList(newContactList);
     }
   }, [privateMessage]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -52,7 +69,8 @@ function Chat() {
           {contactListOpen ? (
             <div>
               <h2 className="text-white">Contact List</h2>
-              {contactList.map((user: any) => {
+              <p className="text-red-400">{socket.userID}</p>
+              {contactList?.map((user: any) => {
                 if (user.userID !== socket.userID) {
                   return (
                     <p className="text-white" key={user.userID}>

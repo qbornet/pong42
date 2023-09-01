@@ -3,7 +3,10 @@ import { Contact } from './useSocket';
 import { ChatInfo } from './ChatInfo.interfaces';
 import { formatTimeMessage } from '../functions/parsing';
 
-export function useMessages(contact: Contact | undefined): ChatInfo[] {
+export function useMessages(
+  contact: Contact | undefined,
+  isConnected: boolean
+): ChatInfo[] {
   const [messages, setMessages] = useState<ChatInfo[]>([]);
 
   useEffect(() => {
@@ -23,7 +26,7 @@ export function useMessages(contact: Contact | undefined): ChatInfo[] {
       setMessages(formatedMessages);
     }
     return () => setMessages([]);
-  }, [contact]);
+  }, [contact, isConnected]);
 
   return messages;
 }

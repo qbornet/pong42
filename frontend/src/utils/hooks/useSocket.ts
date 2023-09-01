@@ -108,7 +108,7 @@ export function useSocket() {
     };
   }, [setPrivateMessage, setContactList, setIsConnected]);
 
-  return [privateMessage, contactList, isConnected];
+  return [contactList, setContactList, privateMessage, isConnected];
 }
 
 export default {};
