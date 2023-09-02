@@ -367,6 +367,16 @@ describe('ChatGateway', () => {
         fail('it should not reach here');
       });
 
+      interface Session {
+        userID: string;
+        sessionID: string;
+      }
+      let session1: Session;
+
+      client1.on('session', (session) => {
+        session1 = session;
+      });
+
       client0.connect();
       client1.connect();
       client2.connect();
@@ -379,7 +389,7 @@ describe('ChatGateway', () => {
 
       client0.emit('private message', {
         content: 'some private infos: 42',
-        to: client1.id
+        to: session1.userID
       });
 
       await expectEvent(client1, 'private message');

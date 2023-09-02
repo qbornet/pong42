@@ -10,7 +10,7 @@ import {
   WebSocketServer
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { Logger } from '@nestjs/common';
+import { Logger, ParseUUIDPipe } from '@nestjs/common';
 import { Session } from './session-store/session-store.interface';
 import InMemorySessionStoreService from './session-store/in-memory-session-store/in-memory-session-store.service';
 import Config, { Env } from '../config/configuration';
@@ -134,7 +134,7 @@ export default class ChatGateway
 
   @SubscribeMessage('private message')
   handlePrivateMessage(
-    @MessageBody('to') to: string,
+    @MessageBody('to', new ParseUUIDPipe()) to: string,
     @MessageBody('content') content: string,
     @ConnectedSocket() socket: ChatSocket
   ) {
