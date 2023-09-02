@@ -10,12 +10,22 @@ import {
   WebSocketServer
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { Logger, ParseUUIDPipe } from '@nestjs/common';
+import {
+  Logger,
+  ParseUUIDPipe,
+  UseFilters,
+  UsePipes,
+  ValidationError,
+  ValidationPipe
+} from '@nestjs/common';
 import { Session } from './session-store/session-store.interface';
 import InMemorySessionStoreService from './session-store/in-memory-session-store/in-memory-session-store.service';
 import Config, { Env } from '../config/configuration';
 import { ChatSocket } from './chat.interface';
 import InMemoryMessageStoreService from './message-store/in-memory-message-store/in-memory-message-store.service';
+import { MessageDto } from './dto/MessageDto.dto';
+import { ValidationException } from './filters/validation.exception';
+import { ChatFilter } from './filters/chat.filter';
 
 function webSocketOptions() {
   const config = Config();
@@ -80,7 +90,7 @@ export default class ChatGateway
     this.logger.log('Initialized');
   }
 
-  handleConnection(socket: ChatSocket, ...args: any[]) {
+  handleConnection(socket: ChatSocket) {
     this.logger.log(`ClientId: ${socket.userID} connected`);
     this.logger.log(`Nb clients: ${this.io.sockets.sockets.size}`);
 
@@ -133,9 +143,11 @@ export default class ChatGateway
   }
 
   @SubscribeMessage('private message')
+  @UsePipes()
+  @UseFilters(ChatFilter)
   handlePrivateMessage(
-    @MessageBody('to', new ParseUUIDPipe()) to: string,
-    @MessageBody('content') content: string,
+    @MessageBody('to', ParseUUIDPipe) to: string,
+    @MessageBody('content') content: MessageDto,
     @ConnectedSocket() socket: ChatSocket
   ) {
     this.logger.log(

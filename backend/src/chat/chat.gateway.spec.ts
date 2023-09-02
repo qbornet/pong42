@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import SessionStoreModule from './session-store/session-store.module';
 import ChatGateway from './chat.gateway';
 import { createNestApp, expectEvent, getClientSocket } from './chat.helper';
@@ -10,49 +10,32 @@ const testedModule = {
 };
 
 describe('ChatGateway', () => {
-  describe('App initilization', () => {
-    let gateway: ChatGateway;
-    let app: INestApplication;
-    let logSpy: jest.SpyInstance;
+  let gateway: ChatGateway;
+  let app: INestApplication;
+  let logSpy: jest.SpyInstance;
 
-    beforeAll(async () => {
-      app = await createNestApp(testedModule);
-      gateway = app.get<ChatGateway>(ChatGateway);
-      logSpy = jest.spyOn(gateway.getLogger(), 'log');
-      app.listen(3000);
-    });
+  beforeEach(async () => {
+    jest.clearAllMocks();
+    app = await createNestApp(testedModule);
+    app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+    gateway = app.get<ChatGateway>(ChatGateway);
+    logSpy = jest.spyOn(gateway.getLogger(), 'log');
+    app.listen(3000);
+  });
+  afterEach(async () => {
+    await app.close();
+  });
 
-    afterAll(async () => {
-      await app.close();
-    });
-
-    it('should initialize the app', () => {
-      expect(gateway).toBeDefined();
-      expect(logSpy).toHaveBeenCalledTimes(1);
-      expect(logSpy).toHaveBeenCalledWith('Initialized');
-    });
+  it('should initialize the app', () => {
+    expect(gateway).toBeDefined();
+    expect(logSpy).toHaveBeenCalledTimes(1);
+    expect(logSpy).toHaveBeenCalledWith('Initialized');
   });
 
   describe('Single client connection', () => {
-    let gateway: ChatGateway;
-    let app: INestApplication;
-    let logSpy: jest.SpyInstance;
-
-    beforeEach(async () => {
-      app = await createNestApp(testedModule);
-      gateway = app.get<ChatGateway>(ChatGateway);
-      logSpy = jest.spyOn(gateway.getLogger(), 'log');
-      app.listen(3000);
-    });
-
     beforeEach(() => {
       jest.clearAllMocks();
     });
-
-    afterEach(async () => {
-      await app.close();
-    });
-
     it('should connect', async () => {
       const socket = getClientSocket({
         username: 'toto'
@@ -206,22 +189,6 @@ describe('ChatGateway', () => {
   });
 
   describe('At least one client connected', () => {
-    let gateway: ChatGateway;
-    let app: INestApplication;
-    let logSpy: jest.SpyInstance;
-
-    beforeEach(async () => {
-      app = await createNestApp(testedModule);
-      gateway = app.get<ChatGateway>(ChatGateway);
-      logSpy = jest.spyOn(gateway.getLogger(), 'log');
-      app.listen(3000);
-      jest.clearAllMocks();
-    });
-
-    afterEach(async () => {
-      await app.close();
-    });
-
     it('already connected client receive new connected client information', async () => {
       const client0 = getClientSocket({ username: 'toto' });
       const client1 = getClientSocket({ username: 'tata' });
@@ -408,12 +375,7 @@ describe('ChatGateway', () => {
         sessionID: string;
       }
 
-      let session0: Session;
       let session1: Session;
-
-      client0.on('session', (session) => {
-        session0 = session;
-      });
 
       client1.on('session', (session) => {
         session1 = session;
@@ -439,6 +401,84 @@ describe('ChatGateway', () => {
 
       client0.disconnect();
       client1.disconnect();
+    });
+  });
+
+  describe('Two clients are connected, sending each other information through the socket gateway', () => {
+    interface Session {
+      userID: string;
+      sessionID: string;
+    }
+    let session0: Session;
+    let session1: Session;
+    const client0 = getClientSocket({ username: 'toto' });
+    const client1 = getClientSocket({ username: 'tata' });
+
+    beforeEach(async () => {
+      client0.on('session', (session) => {
+        session0 = session;
+      });
+
+      client1.on('session', (session) => {
+        session1 = session;
+      });
+
+      client0.connect();
+      await Promise.all([
+        expectEvent(client0, 'connect'),
+        expectEvent(client0, 'session')
+      ]);
+
+      client1.connect();
+      await Promise.all([
+        expectEvent(client1, 'connect'),
+        expectEvent(client1, 'session')
+      ]);
+    });
+
+    afterEach(async () => {
+      client0.disconnect();
+      client1.disconnect();
+    });
+
+    it('should not accept invalid uuid', async () => {
+      client0.emit('private message', {
+        content: 'toto is sending you a message',
+        to: 'invalid'
+      });
+      await expectEvent(client0, 'error');
+
+      client0.emit('private message', {
+        content: 'toto is sending you a message',
+        to: ''
+      });
+      await expectEvent(client0, 'error');
+
+      client0.emit('private message', {
+        content: 'toto is sending you a message',
+        to: { userID: session1.userID }
+      });
+      await expectEvent(client0, 'error');
+
+      client0.emit('private message', {
+        content: 'toto is sending you a message',
+        to: `${session1.userID} `
+      });
+      await expectEvent(client0, 'error');
+
+      client0.emit('private message', {
+        content: 'toto is sending you a message',
+        to: client1.id
+      });
+      await expectEvent(client0, 'error');
+    });
+
+    it('should accept only non empty string message', async () => {
+      client0.emit('private message', {
+        content: '',
+        to: session1.userID
+      });
+      await expectEvent(client0, 'error');
     });
   });
 });
