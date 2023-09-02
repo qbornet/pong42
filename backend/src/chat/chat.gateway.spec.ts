@@ -478,6 +478,11 @@ describe('ChatGateway', () => {
         content: '',
         to: session1.userID
       });
+
+      client0.on('error', (error) => {
+        expect(error.status).toBe(400);
+        expect(error.message).toBe('Bad Request Exception');
+      });
       await expectEvent(client0, 'error');
     });
   });

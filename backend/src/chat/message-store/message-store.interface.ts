@@ -1,8 +1,7 @@
 import { UserID } from '../chat.interface';
-import { MessageDto } from '../dto/MessageDto.dto';
 
 export interface Message {
-  content: MessageDto;
+  content: string;
   from: UserID;
   to: UserID;
 }

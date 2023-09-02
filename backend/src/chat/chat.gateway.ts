@@ -12,10 +12,10 @@ import {
 import { Server } from 'socket.io';
 import {
   Logger,
+  ParseIntPipe,
   ParseUUIDPipe,
   UseFilters,
   UsePipes,
-  ValidationError,
   ValidationPipe
 } from '@nestjs/common';
 import { Session } from './session-store/session-store.interface';
@@ -24,7 +24,6 @@ import Config, { Env } from '../config/configuration';
 import { ChatSocket } from './chat.interface';
 import InMemoryMessageStoreService from './message-store/in-memory-message-store/in-memory-message-store.service';
 import { MessageDto } from './dto/MessageDto.dto';
-import { ValidationException } from './filters/validation.exception';
 import { ChatFilter } from './filters/chat.filter';
 
 function webSocketOptions() {
@@ -143,13 +142,12 @@ export default class ChatGateway
   }
 
   @SubscribeMessage('private message')
-  @UsePipes()
   @UseFilters(ChatFilter)
   handlePrivateMessage(
-    @MessageBody('to', ParseUUIDPipe) to: string,
-    @MessageBody('content') content: MessageDto,
+    @MessageBody(new ValidationPipe()) data: MessageDto,
     @ConnectedSocket() socket: ChatSocket
   ) {
+    const { to, content } = data;
     this.logger.log(
       `Incoming private message from ${socket.userID} to ${to} with content: ${content}`
     );
