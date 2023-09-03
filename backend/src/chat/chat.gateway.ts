@@ -144,10 +144,10 @@ export default class ChatGateway
   @SubscribeMessage('private message')
   @UseFilters(ChatFilter)
   handlePrivateMessage(
-    @MessageBody(new ValidationPipe()) data: MessageDto,
+    @MessageBody(new ValidationPipe()) messageDto: MessageDto,
     @ConnectedSocket() socket: ChatSocket
   ) {
-    const { to, content } = data;
+    const { to, content } = messageDto;
     this.logger.log(
       `Incoming private message from ${socket.userID} to ${to} with content: ${content}`
     );

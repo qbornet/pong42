@@ -1,10 +1,7 @@
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Contact, ContactList } from './useSocket';
 
-export function useContact(
-  contactList: ContactList,
-  isConnected: boolean
-): [Contact | undefined, Dispatch<SetStateAction<Contact | undefined>>] {
+export function useContact(contactList: ContactList, isConnected: boolean) {
   const [contact, setContact] = useState<Contact>();
 
   useEffect(() => {

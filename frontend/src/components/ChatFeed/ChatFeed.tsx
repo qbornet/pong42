@@ -9,7 +9,7 @@ interface ChatFeedProps {
 }
 
 function ChatFeed({ contact, isConnected }: ChatFeedProps) {
-  const messages = useMessages(contact);
+  const messages = useMessages(contact, isConnected);
   const messageEndRef = useScroll(messages);
 
   return (
