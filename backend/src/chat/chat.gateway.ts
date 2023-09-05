@@ -10,26 +10,18 @@ import {
   WebSocketServer
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import {
-  Logger,
-  ParseIntPipe,
-  ParseUUIDPipe,
-  UseFilters,
-  UsePipes,
-  ValidationPipe
-} from '@nestjs/common';
+import { Logger, UseFilters, ValidationPipe } from '@nestjs/common';
 import { Session } from './session-store/session-store.interface';
 import InMemorySessionStoreService from './session-store/in-memory-session-store/in-memory-session-store.service';
-import Config, { Env } from '../config/configuration';
+import { Config, Env } from '../config/configuration';
 import { ChatSocket } from './chat.interface';
 import InMemoryMessageStoreService from './message-store/in-memory-message-store/in-memory-message-store.service';
 import { MessageDto } from './dto/MessageDto.dto';
 import { ChatFilter } from './filters/chat.filter';
 
 function webSocketOptions() {
-  const config = Config();
   const options = {};
-  if (config.env === Env.Dev) {
+  if (Config.env === Env.Dev) {
     return {
       cors: {
         origin: 'http://localhost:5173',
@@ -41,7 +33,7 @@ function webSocketOptions() {
   return options;
 }
 
-@WebSocketGateway(Config().port, webSocketOptions())
+@WebSocketGateway(webSocketOptions())
 export default class ChatGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
