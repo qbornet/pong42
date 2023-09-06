@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Contact, ContactList } from './useSocket';
+import { Contact, ContactList } from './useStatus';
 
 export function useContact(contactList: ContactList, isConnected: boolean) {
   const [contact, setContact] = useState<Contact>();

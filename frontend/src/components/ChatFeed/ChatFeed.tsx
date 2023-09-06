@@ -1,5 +1,5 @@
 import ChatMessage from '../ChatMessage/ChatMessage';
-import { Contact } from '../../utils/hooks/useSocket';
+import { Contact } from '../../utils/hooks/useStatus';
 import { useMessages } from '../../utils/hooks/useMessages';
 import { useScroll } from '../../utils/hooks/useScroll';
 

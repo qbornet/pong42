@@ -59,7 +59,7 @@ interface Status {
   privateMessage: PrivateMessage | undefined;
 }
 
-export function useSocket(): [Status, Dispatch<SetStateAction<Status>>] {
+export function useStatus(): [Status, Dispatch<SetStateAction<Status>>] {
   const defaultStatus = {
     isConnected: false,
     contactList: [],

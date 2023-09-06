@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Contact } from './useSocket';
+import { Contact } from './useStatus';
 import { ChatInfo } from './ChatInfo.interfaces';
 import { formatTimeMessage } from '../functions/parsing';
 

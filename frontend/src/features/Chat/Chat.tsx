@@ -5,41 +5,48 @@ import ChatHeader from '../../components/ChatHeader/ChatHeader';
 import ChatMessage from '../../components/ChatMessage/ChatMessage';
 import Hide from '../../components/Hide/Hide';
 import SendMessageInput from '../../components/SendMessageInput/SendMessageInput';
-import { Contact, useSocket } from '../../utils/hooks/useSocket';
+import { Contact, useStatus } from '../../utils/hooks/useStatus';
 import { useContact } from '../../utils/hooks/useContact';
 
 function Chat() {
   const [contactListOpen, setContactListOpen] = useState<boolean>(true);
   const [close, setClose] = useState<boolean>(true);
 
-  const [contactList, setContactList, privateMessage, isConnected] =
-    useSocket();
-  const [contact, setContact] = useContact(contactList, isConnected);
+  const [status, setStatus] = useStatus();
+  const [contact, setContact] = useContact(
+    status.contactList,
+    status.isConnected
+  );
 
   useEffect(() => {
-    if (privateMessage && contactList) {
-      const newContactList = contactList.map((c: Contact) => {
-        if (
-          c.userID === privateMessage.from ||
-          c.userID === privateMessage.to
-        ) {
-          const newContact = {
-            ...c,
-            messages: c.messages.concat(privateMessage)
-          };
-          if (
-            contact?.userID === privateMessage.to ||
-            privateMessage.from === contact?.userID
-          ) {
-            setContact(newContact);
-          }
-          return newContact;
-        }
-        return c;
-      });
-      setContactList(newContactList);
+    if (!status.privateMessage || !status.contactList) {
+      return;
     }
-  }, [privateMessage]);
+    const newContactList = status.contactList.map((c: Contact) => {
+      if (
+        c.userID === status.privateMessage?.from ||
+        c.userID === status.privateMessage?.to
+      ) {
+        const newContact = {
+          ...c,
+          messages: c.messages.concat(status.privateMessage)
+        };
+        if (
+          contact?.userID === status.privateMessage.to ||
+          status.privateMessage.from === contact?.userID
+        ) {
+          setContact(newContact);
+        }
+        return newContact;
+      }
+      return c;
+    });
+    setStatus({
+      isConnected: status.isConnected,
+      privateMessage: status.privateMessage,
+      contactList: newContactList
+    });
+  }, [status.privateMessage]);
 
   return (
     <div className="w-fit overflow-hidden rounded-3xl">
@@ -50,7 +57,7 @@ function Chat() {
       >
         <ChatHeader
           className="absolute z-30"
-          isConnected={isConnected}
+          isConnected={status.isConnected}
           handleClick={{
             toggleArrow: () => setClose(!close),
             openContactList: () => setContactListOpen(true)
@@ -70,7 +77,7 @@ function Chat() {
             <div>
               <h2 className="text-white">Contact List</h2>
               <p className="text-red-400">{socket.userID}</p>
-              {contactList?.map((user: any) => {
+              {status.contactList?.map((user: any) => {
                 if (user.userID !== socket.userID) {
                   return (
                     <p className="text-white" key={user.userID}>
@@ -98,7 +105,7 @@ function Chat() {
       <Hide condition={close}>
         <SendMessageInput
           to={contact ? contact.userID : ''}
-          isConnected={isConnected}
+          isConnected={status.isConnected}
         />
       </Hide>
     </div>
