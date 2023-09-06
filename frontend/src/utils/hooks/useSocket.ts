@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import socket from '../../services/socket';
 
 export interface PrivateMessage {
@@ -53,23 +53,36 @@ function isContactList(data: any): data is ContactList {
   return false;
 }
 
-export function useSocket() {
-  const [privateMessage, setPrivateMessage] = useState<PrivateMessage>();
-  const [contactList, setContactList] = useState<any>([]);
-  const [isConnected, setIsConnected] = useState<boolean>(true);
+interface Status {
+  isConnected: boolean;
+  contactList: Contact[];
+  privateMessage: PrivateMessage | undefined;
+}
+
+export function useSocket(): [Status, Dispatch<SetStateAction<Status>>] {
+  const defaultStatus = {
+    isConnected: false,
+    contactList: [],
+    privateMessage: undefined
+  };
+  const [status, setStatus] = useState<Status>(defaultStatus);
 
   useEffect(() => {
-    const onConnect = () => setIsConnected(true);
-    const onDisconnect = () => setIsConnected(false);
+    const onConnect = () => setStatus((s) => ({ ...s, isConnected: true }));
+    const onDisconnect = () => setStatus((s) => ({ ...s, isConnected: false }));
     const onPrivateMessage = (data: any) => {
       if (isPrivateMessage(data)) {
-        setPrivateMessage({
+        const privateMessage = {
           content: data.content,
           from: data.from,
           to: data.to,
           date: data.date,
           messageID: data.messageID
-        });
+        };
+        setStatus((s) => ({
+          ...s,
+          privateMessage
+        }));
       }
     };
     const onSession = (data: any) => {
@@ -81,8 +94,8 @@ export function useSocket() {
     };
     const onUsers = (data: any) => {
       if (isContactList(data)) {
-        const listOfContact = data.filter((d) => d.userID !== socket.userID);
-        setContactList(listOfContact);
+        const contactList = data.filter((d) => d.userID !== socket.userID);
+        setStatus((s) => ({ ...s, contactList }));
       }
     };
     const onUserDisconnected = () => {};
@@ -104,11 +117,15 @@ export function useSocket() {
       socket.off('users', onUsers);
       socket.off('user connected', onUserConnected);
       socket.off('user disconnected', onUserDisconnected);
-      setPrivateMessage(undefined);
+      setStatus({
+        isConnected: false,
+        contactList: [],
+        privateMessage: undefined
+      });
     };
-  }, [setPrivateMessage, setContactList, setIsConnected]);
+  }, []);
 
-  return [contactList, setContactList, privateMessage, isConnected];
+  return [status, setStatus];
 }
 
 export default {};

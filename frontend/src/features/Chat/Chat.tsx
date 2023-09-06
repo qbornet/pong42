@@ -39,7 +39,7 @@ function Chat() {
       });
       setContactList(newContactList);
     }
-  }, [privateMessage]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [privateMessage]);
 
   return (
     <div className="w-fit overflow-hidden rounded-3xl">
