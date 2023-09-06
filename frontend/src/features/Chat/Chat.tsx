@@ -13,15 +13,13 @@ function Chat() {
   const [close, setClose] = useState<boolean>(true);
 
   const [status, setStatus] = useStatus();
-  const [contact, setContact] = useContact(
-    status.contactList,
-    status.isConnected
-  );
+  const [contact, setContact] = useContact(status);
 
   useEffect(() => {
     if (!status.privateMessage || !status.contactList) {
       return;
     }
+
     const newContactList = status.contactList.map((c: Contact) => {
       if (
         c.userID === status.privateMessage?.from ||

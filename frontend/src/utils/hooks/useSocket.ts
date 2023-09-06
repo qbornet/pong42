@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import socket from '../../services/socket';
 
 export interface PrivateMessage {
@@ -53,21 +53,18 @@ function isContactList(data: any): data is ContactList {
   return false;
 }
 
-export interface Status {
+interface Status {
   isConnected: boolean;
   contactList: Contact[];
   privateMessage: PrivateMessage | undefined;
 }
 
 export function useStatus(): [Status, Dispatch<SetStateAction<Status>>] {
-  const defaultStatus = useMemo(
-    () => ({
-      isConnected: true,
-      contactList: [],
-      privateMessage: undefined
-    }),
-    []
-  );
+  const defaultStatus = {
+    isConnected: false,
+    contactList: [],
+    privateMessage: undefined
+  };
   const [status, setStatus] = useState<Status>(defaultStatus);
 
   useEffect(() => {
@@ -120,9 +117,13 @@ export function useStatus(): [Status, Dispatch<SetStateAction<Status>>] {
       socket.off('users', onUsers);
       socket.off('user connected', onUserConnected);
       socket.off('user disconnected', onUserDisconnected);
-      setStatus(defaultStatus);
+      setStatus({
+        isConnected: false,
+        contactList: [],
+        privateMessage: undefined
+      });
     };
-  }, [defaultStatus]);
+  }, []);
 
   return [status, setStatus];
 }
