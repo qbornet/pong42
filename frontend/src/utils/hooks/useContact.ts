@@ -12,7 +12,7 @@ export function useContact(contactList: ContactList, isConnected: boolean) {
         }
       });
     }
-  }, [contactList]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [contactList, isConnected, contact?.userID]);
 
   return [contact, setContact];
 }
