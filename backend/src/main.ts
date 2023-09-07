@@ -1,9 +1,15 @@
 import { NestFactory } from '@nestjs/core';
-import Config from './config/configuration';
-import AppModule from './app.module';
+import cookieParser from 'cookie-parser';
+import { RedirectionFilter } from './filter/redirect-exception.filter';
+import { HttpExceptionFilter } from './filter/http-exception.filter';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
+  // app start
   const app = await NestFactory.create(AppModule);
-  await app.listen(Config().port);
+  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalFilters(new RedirectionFilter());
+  app.use(cookieParser());
+  await app.listen(3000);
 }
 bootstrap();

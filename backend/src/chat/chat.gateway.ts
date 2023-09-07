@@ -29,7 +29,7 @@ function webSocketOptions() {
   return options;
 }
 
-@WebSocketGateway(Config().port, webSocketOptions())
+@WebSocketGateway(parseInt(process.env.PORT! || '3001', 10), webSocketOptions())
 export default class ChatGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {

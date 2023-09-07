@@ -2,26 +2,28 @@ import { Module } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { ConfigModule } from '@nestjs/config';
-import DatabaseModule from './database/database.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
 import ChatModule from './chat/chat.module';
-import AppService from './app.service';
-import AppController from './app.controller';
-import configuration from './config/configuration';
+import envSchema from './env.validation';
 
 @Module({
   imports: [
-    DatabaseModule,
     ConfigModule.forRoot({
+      isGlobal: true,
+      cache: true,
       envFilePath: ['.env'],
-      load: [configuration]
+      validationSchema: envSchema
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'client'),
       exclude: ['/api(.*)']
     }),
-    ChatModule
+    ChatModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService]
 })
-export default class AppModule {}
+export class AppModule { }
