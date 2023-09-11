@@ -20,6 +20,15 @@ function Chat() {
       return;
     }
 
+    const updateContact = (newContact: Contact) => {
+      if (
+        contact?.userID === status?.privateMessage?.to ||
+        status?.privateMessage?.from === contact?.userID
+      ) {
+        setContact(newContact);
+      }
+    };
+
     const newContactList = status.contactList.map((c: Contact) => {
       if (
         c.userID === status.privateMessage?.from ||
@@ -27,14 +36,9 @@ function Chat() {
       ) {
         const newContact = {
           ...c,
-          messages: c.messages.concat(status.privateMessage)
+          messages: [...c.messages, status.privateMessage]
         };
-        if (
-          contact?.userID === status.privateMessage.to ||
-          status.privateMessage.from === contact?.userID
-        ) {
-          setContact(newContact);
-        }
+        updateContact(newContact);
         return newContact;
       }
       return c;
