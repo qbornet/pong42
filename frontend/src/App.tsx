@@ -1,9 +1,10 @@
-import Chat from './components/Chat';
+import LoginPage from './components/LoginPage';
+// import './components/LoginPage.css';
 
 function App() {
   return (
-    <div>
-      <Chat />
+    <div className="h-screen·bg-[url('./images/background.png')]·bg-cover·bg-center">
+      <LoginPage />
     </div>
   );
 }
