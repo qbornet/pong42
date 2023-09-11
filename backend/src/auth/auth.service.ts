@@ -1,15 +1,29 @@
-import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  HttpException,
+  HttpStatus,
+  Logger,
+  UnauthorizedException
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import axios, { AxiosResponse } from 'axios';
 import * as bcrypt from 'bcrypt';
-import { Request } from 'express';
+import { authenticator } from 'otplib';
+import { toFileStream } from 'qrcode';
+import { Request, Response } from 'express';
 import IUsers from 'src/database/service/interface/users';
 import { CONST_URL } from './constants';
 import { UsersService } from '../database/service/users.service';
 
 type CreateUserDto = { email: string; username: string; password: string };
-type UpdateUserDto = { email?: string; username?: string; apiToken?: string };
+type UpdateUserDto = {
+  email?: string;
+  username?: string;
+  apiToken?: string;
+  twoAuthSecret?: string;
+  twoAuthOn?: boolean;
+};
 
 export enum MethodCookie {
   DEFAULT = 1, // getTokenFromCookie
@@ -27,6 +41,42 @@ export class AuthService {
     private readonly configService: ConfigService
   ) {
     this.logger.log('AuthService Init...');
+  }
+
+  // generate QrCode
+  async pipeQrCodeStream(stream: Response, optAuthUrl: string) {
+    return toFileStream(stream, optAuthUrl);
+  }
+
+  // generate 2FA Secret for the user
+  async generate2FASecret(user: IUsers) {
+    const secret = authenticator.generateSecret();
+    const optAuthUrl = authenticator.keyuri(
+      user.email,
+      'ft_transcendence',
+      secret
+    );
+
+    await this.updateUser(user, { twoAuthSecret: secret });
+    return {
+      secret,
+      optAuthUrl
+    };
+  }
+
+  // login 2Fa
+  async loginWith2Fa(userWithoutPsw: Partial<IUsers>) {
+    const payload = {
+      email: userWithoutPsw.email,
+      username: userWithoutPsw.username,
+      twoAuthOn: userWithoutPsw.twoAuth!.twoAuthOn!
+    };
+
+    return {
+      email: payload.email,
+      username: payload.username,
+      access_token: this.jwtService.sign(payload)
+    };
   }
 
   // login method
@@ -53,9 +103,24 @@ export class AuthService {
       if (!user) return null;
       const isMatch = await bcrypt.compare(pass, user.password);
 
-      // eslint-disable-line @typescript-eslint/no-unused-vars
-      const { password, ...userWithoutPassword } = user;
-      return isMatch ? userWithoutPassword : null;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, twoAuthOn, twoAuthSecret, ...userInfo } = user;
+
+      let defaultAuthOn: boolean = false;
+      let defaultAuthSecret: string | undefined;
+
+      // i have to do this because typescript fuck me
+      if (twoAuthOn) defaultAuthOn = true;
+      if (twoAuthSecret) defaultAuthSecret = twoAuthSecret;
+
+      const properFormatUser: Partial<IUsers> = {
+        ...userInfo,
+        twoAuth: {
+          twoAuthOn: defaultAuthOn,
+          twoAuthSecret: defaultAuthSecret
+        }
+      };
+      return isMatch ? properFormatUser : null;
     } catch (e) {
       return null;
     }
@@ -161,6 +226,9 @@ export class AuthService {
   getTokenFromCookieCreateProfile(request: Request) {
     const tokenAndHash: string = request.cookies.api_token;
     const [token, hash] = tokenAndHash.split('|');
+    if (!token || !hash) {
+      throw new HttpException('Missing Token', HttpStatus.FORBIDDEN);
+    }
 
     const valid = bcrypt.compareSync(token, hash);
     if (!valid) {
@@ -170,5 +238,17 @@ export class AuthService {
       );
     }
     return token;
+  }
+
+  // verify the two-auth code with secret
+  twoAuthCodeValid(twoAuthCode: string, user: IUsers) {
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+
+    return authenticator.verify({
+      token: twoAuthCode,
+      secret: user.twoAuth.twoAuthSecret!
+    });
   }
 }

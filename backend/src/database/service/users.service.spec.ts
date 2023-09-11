@@ -102,7 +102,7 @@ describe('UsersService', () => {
     it('should return null when trying to create a user with same name', async () => {
       const obj: IUsers = {
         email: 'roberto@roberto.com',
-        name: 'toto',
+        username: 'toto',
         password: 'toto123'
       };
       const result = await service.createUser(obj);
@@ -112,7 +112,7 @@ describe('UsersService', () => {
     it('should return null when trying to create a user with same email', async () => {
       const obj: IUsers = {
         email: 'toto@toto.com',
-        name: 'albert',
+        username: 'albert',
         password: 'toto123'
       };
       const result = await service.createUser(obj);
