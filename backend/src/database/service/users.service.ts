@@ -1,61 +1,145 @@
 import { Injectable } from '@nestjs/common';
-import { Users, Prisma } from '@prisma/client';
-import PrismaService from './prisma.service';
+import { Prisma } from '@prisma/client';
+import { PrismaService } from './prisma.service';
+import IUsers from './interface/users';
 
 @Injectable()
-export default class UsersService {
+export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async getUserById(id: number) {
-    return this.prisma.users.findUnique({
-      where: {
-        id
-      }
-    });
-  }
-
-  async getUser(username?: string, email?: string) {
-    let ret = null;
-    if (username !== undefined && email !== undefined) {
-      ret = this.prisma.users.findUnique({
+  async getUserById(id: string) {
+    try {
+      return await this.prisma.users.findUnique({
         where: {
-          name: username,
-          email
+          id
         }
       });
-    } else if (email !== undefined) {
-      ret = this.prisma.users.findUnique({
-        where: {
-          email
-        }
-      });
-    } else if (username !== undefined) {
-      ret = this.prisma.users.findUnique({
-        where: {
-          name: username
-        }
-      });
+    } catch (e: any) {
+      return null;
     }
-    return ret;
   }
 
-  async deleteUser(id: number): Promise<Users> {
-    return this.prisma.users.delete({
-      where: {
-        id
+  async getUser(user: Partial<IUsers>) {
+    try {
+      let ret = null;
+      if (user.username !== undefined && user.email !== undefined) {
+        ret = this.prisma.users.findUnique({
+          where: {
+            username: user.username,
+            email: user.email
+          }
+        });
+      } else if (user.email !== undefined) {
+        ret = this.prisma.users.findUnique({
+          where: {
+            email: user.email
+          }
+        });
+      } else if (user.username !== undefined) {
+        ret = this.prisma.users.findUnique({
+          where: {
+            username: user.username
+          }
+        });
       }
-    });
+      return await ret;
+    } catch (e: any) {
+      return null;
+    }
   }
 
-  async updateUser(id: number, user: Prisma.UsersUpdateInput): Promise<Users> {
-    return this.prisma.users.update({
-      where: {
-        id
-      },
-      data: {
-        ...user
+  async deleteUserById(id: string) {
+    try {
+      return await this.prisma.users.delete({
+        where: {
+          id
+        }
+      });
+    } catch (e: any) {
+      return null;
+    }
+  }
+
+  async deleteUser(user: Partial<IUsers>) {
+    try {
+      let ret = null;
+      if (user.username !== undefined && user.email !== undefined) {
+        ret = this.prisma.users.delete({
+          where: {
+            username: user.username,
+            email: user.email
+          }
+        });
+      } else if (user.username !== undefined) {
+        ret = this.prisma.users.delete({
+          where: {
+            username: user.username
+          }
+        });
+      } else if (user.email !== undefined) {
+        ret = this.prisma.users.delete({
+          where: {
+            email: user.email
+          }
+        });
       }
-    });
+      return await ret;
+    } catch (e: any) {
+      return null;
+    }
+  }
+
+  async updateUserById(id: string, user: Prisma.UsersUpdateInput) {
+    try {
+      return await this.prisma.users.update({
+        where: {
+          id
+        },
+        data: {
+          ...user
+        }
+      });
+    } catch (e: any) {
+      return null;
+    }
+  }
+
+  async updateUser(user: Partial<IUsers>, updateUser: Prisma.UsersUpdateInput) {
+    try {
+      let ret = null;
+      if (user.username !== undefined && user.email !== undefined) {
+        ret = this.prisma.users.update({
+          where: {
+            username: user.username,
+            email: user.email
+          },
+          data: {
+            ...updateUser
+          }
+        });
+      } else if (user.username !== undefined) {
+        ret = this.prisma.users.update({
+          where: {
+            username: user.username
+          },
+          data: {
+            ...updateUser
+          }
+        });
+      } else if (user.email !== undefined) {
+        ret = this.prisma.users.update({
+          where: {
+            email: user.email
+          },
+          data: {
+            ...updateUser
+          }
+        });
+      }
+      return await ret;
+    } catch (e: any) {
+      return null;
+    }
   }
 
   async createUser(user: Prisma.UsersCreateInput) {

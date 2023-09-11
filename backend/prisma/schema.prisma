@@ -11,8 +11,11 @@ datasource db {
 }
 
 model Users {
-    id              Int @default(autoincrement()) @id
+    id              String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
     email           String @unique
-    name            String @unique
+    username        String @unique
     password        String
+    twoAuthOn       Boolean @default(false)
+    twoAuthSecret   String?
+    apiToken        String?
 }

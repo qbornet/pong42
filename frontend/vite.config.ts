@@ -4,9 +4,7 @@ import eslint from 'vite-plugin-eslint';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  server: {
-    open: true
-  },
+  server: {},
   plugins: [
     react(),
     // so when you do npm run dev no crash occurs just tell you the error.
@@ -14,7 +12,8 @@ export default defineConfig({
       ...eslint({
         cache: true,
         failOnWarning: false,
-        failOnError: false
+        failOnError: false,
+        exclude: ['/virtual:/**', '/node_modules/**']
       }),
       apply: 'serve',
       enforce: 'post'
