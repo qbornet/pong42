@@ -7,6 +7,7 @@
     "module": "commonjs",
     "declaration": true,
     "removeComments": true,
+    "esModuleInterop": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
@@ -14,6 +15,12 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": ".",
+    "paths": {
+      "*": ["*"],
+      "@api": ["src/auth/guards/api.guard"],
+      "@jwt": ["src/auth/guards/jwt-auth.guard"],
+      "@node_env": ["src/env"]
+    },
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
