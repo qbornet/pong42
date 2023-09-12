@@ -34,6 +34,7 @@ module.exports = {
     'react/react-in-jsx-scope': 'off',
     'react/jsx-uses-react': 'off',
     'comma-dangle': 'off',
+    'eol-last': 'off',
     'operator-linebreak': ['error', 'after'],
     'object-curly-newline': 'off',
     '@typescript-eslint/comma-dangle': 'off',
