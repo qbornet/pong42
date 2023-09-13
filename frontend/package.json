@@ -16,10 +16,14 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "localforage": "^1.10.0",
+    "match-sorter": "^6.3.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.10.1",
-    "socket.io-client": "^4.7.1"
+    "react-router-dom": "^6.15.0",
+    "socket.io-client": "^4.7.1",
+    "sort-by": "^0.0.2"
   },
   "devDependencies": {
     "@storybook/addon-essentials": "^7.2.2",

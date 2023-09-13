@@ -22,7 +22,12 @@ import { JwtAuthGuard } from '@jwt';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { ContentValidationPipe, createSchema } from './pipes/validation.pipe';
 import { CreateDto } from './dto/create-dto';
-import { CONST_INFO_URL, CONST_LOCAL_LOGIN, CONST_SALT } from './constants';
+import {
+  CONST_FRONTEND_URL,
+  CONST_INFO_URL,
+  CONST_LOCAL_LOGIN,
+  CONST_SALT
+} from './constants';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
@@ -138,7 +143,7 @@ export class AuthController {
         sameSite: 'lax',
         httpOnly: true
       });
-      res.status(301).redirect('/auth/create_profile');
+      res.status(301).redirect(CONST_FRONTEND_URL);
     } else {
       const usernameAndHash = `${user.username}|${hash}`;
       res.cookie('api_token', usernameAndHash, {
