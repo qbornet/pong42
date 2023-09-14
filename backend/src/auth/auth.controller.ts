@@ -143,18 +143,20 @@ export class AuthController {
         sameSite: 'lax',
         httpOnly: true
       });
-      res.status(301).redirect(CONST_FRONTEND_URL);
-    } else {
-      const usernameAndHash = `${user.username}|${hash}`;
-      res.cookie('api_token', usernameAndHash, {
-        maxAge: token.expires_in * 1000,
-        sameSite: 'lax',
-        httpOnly: true
-      });
-      await this.authService.updateUser(user, { apiToken: token.access_token });
-      if (user && user.twoAuthOn) res.status(301).redirect('/auth/2fa-login');
-      res.status(301).redirect('/auth/login');
+      return res.status(301).redirect(`${CONST_FRONTEND_URL}/signup`);
     }
+    const usernameAndHash = `${user.username}|${hash}`;
+    res.cookie('api_token', usernameAndHash, {
+      maxAge: token.expires_in * 1000,
+      sameSite: 'lax',
+      httpOnly: true
+    });
+    await this.authService.updateUser(user, {
+      apiToken: token.access_token
+    });
+    return user.twoAuthOn
+      ? res.status(301).redirect('/auth/2fa-login')
+      : res.status(301).redirect('/auth/login');
   }
 
   // this might change in the future.
@@ -193,6 +195,7 @@ export class AuthController {
         apiToken: token
       };
 
+      this.logger.log(`User Created:\n${JSON.stringify(updatedUser, null, 4)}`);
       const promise = await this.authService.createUser(updatedUser);
       if (!promise) {
         return res.status(HttpStatus.FORBIDDEN).json({
@@ -217,16 +220,23 @@ export class AuthController {
         password: user.password
       };
 
+      this.logger.debug('before login axios');
       const jsonWebToken = await axios
-        .post(CONST_LOCAL_LOGIN, JSON.stringify(loginInfo), {
+        .post(CONST_LOCAL_LOGIN, loginInfo, {
           headers: {
             Cookie: `api_token=${usernameAndHash}`,
             'Content-Type': 'application/json'
           }
         })
         .then((response: AxiosResponse) => response.data);
+      this.logger.debug('after login axios');
+      this.logger.debug('Setting header authorization...');
       res.setHeader('Authorization', `Bearer ${jsonWebToken.access_token}`);
-      return res.status(HttpStatus.CREATED).json({ message: 'ok' });
+      this.logger.debug('Header authorization set...');
+      this.logger.debug('return response');
+      return res
+        .status(HttpStatus.CREATED)
+        .json({ message: 'ok', access_token: jsonWebToken.access_token });
     } catch (e) {
       throw new HttpException(`${e.message}`, e.code);
     }

@@ -35,6 +35,7 @@ module.exports = {
     'react/jsx-uses-react': 'off',
     'comma-dangle': 'off',
     'eol-last': 'off',
+    'import/prefer-default-export': 'off',
     'operator-linebreak': ['error', 'after'],
     'object-curly-newline': 'off',
     '@typescript-eslint/comma-dangle': 'off',
