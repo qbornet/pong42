@@ -53,6 +53,7 @@ export default function LoginForm() {
           <InputField type="username" label="Username" />
           <InputField type="password" label="Password" />
           <InputField type="password" label="Confirm Password" name="confirm" />
+          <InputField type="checkbox" label="Two Authenticator" name="twofa" />
           <button
             className="mt-7 h-[40px] w-full rounded-[15px] border border-blue-pong-1 bg-blue-pong-4 p-1 font-roboto text-[14px] font-bold text-white"
             type="submit"
@@ -66,7 +67,7 @@ export default function LoginForm() {
 }
 
 /*
-export default function LoginForm(props: {
+export default function joginForm(props: {
   email: string;
   setEmail: React.Dispatch<React.SetStateAction<string>>;
   password: string;

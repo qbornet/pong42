@@ -53,27 +53,6 @@ export class AuthController {
     return this.authService.pipeQrCodeStream(res, optAuthUrl);
   }
 
-  @Post('2fa-turn-on')
-  @UseGuards(ApiGuard, JwtAuthGuard)
-  @HttpCode(200)
-  async turnOnTwoAuthFactor(
-    @Req() req: any,
-    @Res() res: any,
-    @Body('twoFactorAuthCode') twoFactorAuthCode: string
-  ) {
-    const isCodeValid = this.authService.twoAuthCodeValid(
-      twoFactorAuthCode,
-      req.user
-    );
-    if (!isCodeValid) {
-      throw new UnauthorizedException('Wrong authentication code');
-    }
-    await this.authService.updateUser(req.user, {
-      twoAuthOn: true
-    });
-    res.json({ message: 'ok' });
-  }
-
   @Get('2fa-login')
   @UseGuards(ApiGuard)
   @HttpCode(200)
@@ -111,11 +90,8 @@ export class AuthController {
   @Post('login')
   @UseGuards(ApiGuard, LocalAuthGuard)
   @HttpCode(200)
-  async login(@Req() req: any, @Res({ passthrough: true }) res: any) {
-    const jsonWebToken = await this.authService.login(req.user);
-
-    res.setHeader('Authorization', `Bearer ${jsonWebToken.access_token}`);
-    return jsonWebToken;
+  async login(@Req() req: any) {
+    return this.authService.login(req.user);
   }
 
   @Get('callback')
@@ -192,10 +168,10 @@ export class AuthController {
         email,
         username: user.username,
         password: passwordHash,
+        twoAuthOn: user.twoAuth === 'on',
         apiToken: token
       };
 
-      this.logger.log(`User Created:\n${JSON.stringify(updatedUser, null, 4)}`);
       const promise = await this.authService.createUser(updatedUser);
       if (!promise) {
         return res.status(HttpStatus.FORBIDDEN).json({
@@ -220,7 +196,6 @@ export class AuthController {
         password: user.password
       };
 
-      this.logger.debug('before login axios');
       const jsonWebToken = await axios
         .post(CONST_LOCAL_LOGIN, loginInfo, {
           headers: {
@@ -229,11 +204,7 @@ export class AuthController {
           }
         })
         .then((response: AxiosResponse) => response.data);
-      this.logger.debug('after login axios');
-      this.logger.debug('Setting header authorization...');
       res.setHeader('Authorization', `Bearer ${jsonWebToken.access_token}`);
-      this.logger.debug('Header authorization set...');
-      this.logger.debug('return response');
       return res
         .status(HttpStatus.CREATED)
         .json({ message: 'ok', access_token: jsonWebToken.access_token });

@@ -9,6 +9,7 @@ export async function action(props: { request: Request }) {
   const username = user.username.toString();
   const password = user.password.toString();
   const confirm = user.confirm.toString();
+  const twoAuth = user.twofa === undefined ? 'off' : 'on';
 
   if (username === '' || password === '' || confirm === '') {
     throw new Error('No field should be empty');
@@ -47,12 +48,13 @@ export async function action(props: { request: Request }) {
   };
   const data = {
     username,
-    password
+    password,
+    twoAuth
   };
   const result = await axios
     .post(`${CONST_BACKEND_URL}/auth/create_profile`, data, config)
     .then((res: AxiosResponse) => res.data);
 
   localStorage.setItem('jwt', result.access_token);
-  return redirect('/profile');
+  return twoAuth === 'on' ? redirect('/2fa-validation') : redirect('/profile');
 }

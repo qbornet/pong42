@@ -4,10 +4,29 @@ export default function InputField(props: {
   name?: string;
 }) {
   const { label, type, name } = props;
+  if (type === 'checkbox') {
+    return (
+      <div className="p-[1px]">
+        <input
+          type={type}
+          name={name !== undefined ? name : type}
+          id={label}
+          className="dark:bg-bluepong-2 mr-[0.25rem] mt-2 h-4 w-4 rounded bg-blue-pong-3 text-blue-pong-1 focus:ring-2 focus:ring-blue-pong-1 dark:border-blue-pong-2 dark:ring-offset-blue-pong-3 dark:focus:ring-blue-pong-2"
+        />
+        <label
+          className="font-roboto text-[15px] text-sm font-bold text-blue-pong-1"
+          htmlFor={label}
+        >
+          {label}
+        </label>
+      </div>
+    );
+  }
+
   return (
     <div className="p-[1px]">
       <label
-        className="font-roboto text-[15px] font-bold text-blue-pong-1"
+        className="font-roboto text-[15px] text-sm font-bold text-blue-pong-1"
         htmlFor={label}
       >
         {label}
