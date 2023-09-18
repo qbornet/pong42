@@ -5,27 +5,27 @@ export interface PrivateMessage {
   content: string;
   from: string;
   to: string;
-  date: Date;
-  messageID: string;
+  createdAt: Date;
+  id: string;
 }
 
 function isPrivateMessage(data: any): data is PrivateMessage {
   return (
     data.content !== undefined &&
-    data.from !== undefined &&
-    data.to !== undefined &&
-    data.date !== undefined &&
-    data.messageID !== undefined
+    data.senderId !== undefined &&
+    data.receiverId !== undefined &&
+    data.createdAt !== undefined &&
+    data.id !== undefined
   );
 }
 
 export interface Session {
-  sessionID: string;
   userID: string;
+  username: string;
 }
 
 function isSession(data: any): data is Session {
-  return data.sessionID !== undefined && data.userID !== undefined;
+  return data.userID !== undefined && data.username !== undefined;
 }
 
 export interface Contact {
@@ -72,24 +72,16 @@ export function useStatus(): [Status, Dispatch<SetStateAction<Status>>] {
     const onDisconnect = () => setStatus((s) => ({ ...s, isConnected: false }));
     const onPrivateMessage = (data: any) => {
       if (isPrivateMessage(data)) {
-        const privateMessage = {
-          content: data.content,
-          from: data.from,
-          to: data.to,
-          date: data.date,
-          messageID: data.messageID
-        };
         setStatus((s) => ({
           ...s,
-          privateMessage
+          privateMessage: data
         }));
       }
     };
     const onSession = (data: any) => {
       if (isSession(data)) {
-        const { userID, sessionID } = data;
-        localStorage.setItem('sessionID', sessionID);
-        socket.userID = userID;
+        socket.userID = data.userID;
+        socket.username = data.username;
       }
     };
     const onUsers = (data: any) => {

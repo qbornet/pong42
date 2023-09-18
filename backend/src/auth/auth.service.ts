@@ -12,7 +12,7 @@ import * as bcrypt from 'bcrypt';
 import { authenticator } from 'otplib';
 import { toFileStream } from 'qrcode';
 import { Request, Response } from 'express';
-import IUsers from 'src/database/service/interface/users';
+import { IUsers } from 'src/database/service/interface/users';
 import { CONST_URL } from './constants';
 import { UsersService } from '../database/service/users.service';
 
@@ -114,7 +114,7 @@ export class AuthService {
       if (twoAuthSecret) defaultAuthSecret = twoAuthSecret;
 
       const properFormatUser: Partial<IUsers> = {
-        ...userInfo,
+        ...(userInfo as Partial<IUsers>),
         twoAuth: {
           twoAuthOn: defaultAuthOn,
           twoAuthSecret: defaultAuthSecret
@@ -151,11 +151,29 @@ export class AuthService {
       headers: { Authorization: `Bearer ${token}` }
     };
 
-    const info = await axios
-      .get('https://api.intra.42.fr/v2/me', config)
-      .then((res: AxiosResponse) => res.data);
-    const { email } = info;
-    return this.usersService.getUser({ email });
+    try {
+      const res: AxiosResponse = await axios.get(
+        'https://api.intra.42.fr/v2/me',
+        config
+      );
+      const { email } = res.data;
+      return await this.usersService.getUser({ email });
+    } catch (error) {
+      this.logger.warn(error);
+      return null;
+    }
+  }
+
+  async findUserByJWT(token: string) {
+    try {
+      this.jwtService.verify(token);
+      const payload: any = this.jwtService.decode(token);
+      const { email } = payload;
+      return await this.usersService.getUser({ email });
+    } catch (error) {
+      this.logger.warn(error);
+      return null;
+    }
   }
 
   // get Token from api 42

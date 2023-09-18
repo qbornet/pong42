@@ -24,6 +24,7 @@ import { ContentValidationPipe, createSchema } from './pipes/validation.pipe';
 import { CreateDto } from './dto/create-dto';
 import { CONST_INFO_URL, CONST_LOCAL_LOGIN, CONST_SALT } from './constants';
 import { AuthService } from './auth.service';
+import { IUsers } from 'src/database/service/interface/users';
 
 @Controller('auth')
 export class AuthController {
@@ -146,7 +147,9 @@ export class AuthController {
         sameSite: 'lax',
         httpOnly: true
       });
-      await this.authService.updateUser(user, { apiToken: token.access_token });
+      await this.authService.updateUser(user as Partial<IUsers>, {
+        apiToken: token.access_token
+      });
       if (user && user.twoAuthOn) res.status(301).redirect('/auth/2fa-login');
       res.status(301).redirect('/auth/login');
     }

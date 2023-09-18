@@ -1,13 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from './prisma.service';
-import IUsers from './interface/users';
+import { IUsers } from './interface/users';
+import { UUID } from '../../utils/types';
 
 @Injectable()
 export class UsersService {
+  private logger = new Logger(UsersService.name);
+
   constructor(private prisma: PrismaService) {}
 
-  async getUserById(id: string) {
+  async getUserById(id: UUID) {
     try {
       return await this.prisma.users.findUnique({
         where: {
@@ -15,40 +18,52 @@ export class UsersService {
         }
       });
     } catch (e: any) {
+      this.logger.warn(e);
+      return null;
+    }
+  }
+
+  async getAllUsers() {
+    try {
+      return await this.prisma.users.findMany();
+    } catch (e: any) {
+      this.logger.warn(e);
       return null;
     }
   }
 
   async getUser(user: Partial<IUsers>) {
     try {
-      let ret = null;
       if (user.username !== undefined && user.email !== undefined) {
-        ret = this.prisma.users.findUnique({
+        return await this.prisma.users.findUnique({
           where: {
             username: user.username,
             email: user.email
           }
         });
-      } else if (user.email !== undefined) {
-        ret = this.prisma.users.findUnique({
+      }
+      if (user.email !== undefined) {
+        return await this.prisma.users.findUnique({
           where: {
             email: user.email
           }
         });
-      } else if (user.username !== undefined) {
-        ret = this.prisma.users.findUnique({
+      }
+      if (user.username !== undefined) {
+        return await this.prisma.users.findUnique({
           where: {
             username: user.username
           }
         });
       }
-      return await ret;
+      return null;
     } catch (e: any) {
+      this.logger.warn(e);
       return null;
     }
   }
 
-  async deleteUserById(id: string) {
+  async deleteUserById(id: UUID) {
     try {
       return await this.prisma.users.delete({
         where: {
@@ -56,6 +71,7 @@ export class UsersService {
         }
       });
     } catch (e: any) {
+      this.logger.warn(e);
       return null;
     }
   }
@@ -85,6 +101,7 @@ export class UsersService {
       }
       return await ret;
     } catch (e: any) {
+      this.logger.warn(e);
       return null;
     }
   }
@@ -100,6 +117,7 @@ export class UsersService {
         }
       });
     } catch (e: any) {
+      this.logger.warn(e);
       return null;
     }
   }
@@ -138,6 +156,7 @@ export class UsersService {
       }
       return await ret;
     } catch (e: any) {
+      this.logger.warn(e);
       return null;
     }
   }
@@ -148,6 +167,43 @@ export class UsersService {
         data: user
       });
     } catch (e: any) {
+      this.logger.warn(e);
+      return null;
+    }
+  }
+
+  async setChatConnected(id: UUID) {
+    try {
+      return await this.prisma.users.update({
+        where: {
+          id
+        },
+        data: {
+          connectedChat: {
+            set: true
+          }
+        }
+      });
+    } catch (e: any) {
+      this.logger.warn(e);
+      return null;
+    }
+  }
+
+  async setChatDisonnected(id: UUID) {
+    try {
+      return await this.prisma.users.update({
+        where: {
+          id
+        },
+        data: {
+          connectedChat: {
+            set: false
+          }
+        }
+      });
+    } catch (e: any) {
+      this.logger.warn(e);
       return null;
     }
   }

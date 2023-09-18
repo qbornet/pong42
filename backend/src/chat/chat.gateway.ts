@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
 import {
   ConnectedSocket,
   MessageBody,
@@ -11,37 +10,31 @@ import {
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { Logger, UseFilters, ValidationPipe } from '@nestjs/common';
-import { Session } from './session-store/session-store.interface';
-import InMemorySessionStoreService from './session-store/in-memory-session-store/in-memory-session-store.service';
-import { Config, Env } from '../config/configuration';
-import { ChatSocket } from './chat.interface';
-import InMemoryMessageStoreService from './message-store/in-memory-message-store/in-memory-message-store.service';
-import { MessageDto } from './dto/MessageDto.dto';
+import {
+  ChatSocket,
+  PublicChatMessage,
+  PublicChatUser
+} from './chat.interface';
+import { PrivateMessageDto } from './dto/MessageDto.dto';
 import { ChatFilter } from './filters/chat.filter';
+import { MessageService } from '../database/service/message.service';
+import { UsersService } from '../database/service/users.service';
+import { UUID } from '../utils/types';
 
-function webSocketOptions() {
-  const options = {};
-  if (Config.env === Env.Dev) {
-    return {
-      cors: {
-        origin: 'http://localhost:5173',
-        transports: ['websocket', 'polling']
-      },
-      ...options
-    };
-  }
-  return options;
-}
+// WebSocketGateways are instantiated from the SocketIoAdapter (inside src/adapters)
+// inside this IoAdapter there is authentification process with JWT
+// validation using the AuthModule. Be aware of this in case you are
+// stuck not understanding what is happenning.
 
-@WebSocketGateway(webSocketOptions())
+@WebSocketGateway()
 export default class ChatGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   private readonly logger = new Logger(ChatGateway.name);
 
   constructor(
-    private sessionStore: InMemorySessionStoreService<string, Session>,
-    private messageStore: InMemoryMessageStoreService
+    private usersService: UsersService,
+    private messageService: MessageService
   ) {}
 
   getLogger(): Logger {
@@ -51,110 +44,108 @@ export default class ChatGateway
   @WebSocketServer() io: Server;
 
   afterInit() {
-    this.io.use((socket: ChatSocket, next) => {
-      const { sessionID } = socket.handshake.auth;
-      if (sessionID) {
-        const session = this.sessionStore.findSession(sessionID);
-        if (session) {
-          session.connected = true;
-          socket.sessionID = sessionID;
-          socket.userID = session.userID;
-          socket.username = session.username;
-          return next();
-        }
-      }
-      const { username } = socket.handshake.auth;
-      if (!username) {
-        return next(new Error('invalid username'));
-      }
-      socket.sessionID = ChatGateway.randomId();
-      socket.userID = ChatGateway.randomId();
-      socket.username = username;
-      this.sessionStore.saveSession(socket.sessionID, {
-        userID: socket.userID,
-        username,
-        connected: true,
-        messages: []
-      });
-      return next();
-    });
     this.logger.log('Initialized');
   }
 
-  handleConnection(socket: ChatSocket) {
-    this.logger.log(`ClientId: ${socket.userID} connected`);
+  async handleConnection(socket: ChatSocket) {
+    this.logger.log(`ClientId: ${socket.user.id} connected`);
     this.logger.log(`Nb clients: ${this.io.sockets.sockets.size}`);
 
-    const users: Session[] = [];
-    const messagesPerUser = new Map();
-    this.messageStore.findMessageForUser(socket.userID).forEach((message) => {
-      const { from, to } = message;
-      const otherUser = socket.userID === from ? to : from;
-      if (messagesPerUser.has(otherUser)) {
-        messagesPerUser.get(otherUser).push(message);
+    this.usersService.setChatConnected(socket.user.id!);
+
+    socket.join(socket.user.id!);
+
+    const messagesPerUser = new Map<UUID, PublicChatMessage[]>();
+    const messages = await this.messageService.getMessageByUserId(
+      socket.user.id!
+    );
+    const privateUsers = await this.usersService.getAllUsers();
+
+    const mapUserIdUsername = new Map<UUID, string>();
+    if (privateUsers) {
+      privateUsers.forEach((user) => {
+        mapUserIdUsername.set(user.id as UUID, user.username);
+      });
+    }
+
+    messages!.forEach((message) => {
+      const otherUser =
+        socket.user.id === message.senderId
+          ? message.receiverId
+          : message.senderId;
+      const sender = mapUserIdUsername.get(message.senderId as UUID);
+      const receiver = mapUserIdUsername.get(message.receiverId as UUID);
+      const publicMessage: PublicChatMessage = {
+        content: message.content,
+        sender: sender!,
+        receiver: receiver!,
+        id: message.id as UUID,
+        createdAt: message.createdAt
+      };
+      if (messagesPerUser.has(otherUser as UUID)) {
+        messagesPerUser.get(otherUser as UUID)?.push(publicMessage);
       } else {
-        messagesPerUser.set(otherUser, [message]);
+        messagesPerUser.set(otherUser as UUID, [publicMessage]);
       }
     });
 
-    socket.join(socket.userID);
-    this.sessionStore.findAllSession().forEach((session: Session) => {
-      users.push({
-        userID: session.userID,
-        username: session.username,
-        connected: session.connected,
-        messages: messagesPerUser.get(session.userID) || []
+    const publicUsers: PublicChatUser[] = [];
+    if (privateUsers) {
+      privateUsers!.forEach((user) => {
+        publicUsers.push({
+          userID: user.id as UUID,
+          connected: user.connectedChat,
+          username: user.username!,
+          messages: messagesPerUser.get(user.id as UUID) || []
+        });
       });
-    });
+    }
     socket.emit('session', {
-      sessionID: socket.sessionID,
-      userID: socket.userID
+      userID: socket.user.id
     });
-    socket.emit('users', users);
+    socket.emit('users', publicUsers);
+
     socket.broadcast.emit('user connected', {
-      userID: socket.userID,
-      username: socket.username,
-      connected: this.sessionStore.findSession(socket.sessionID)
+      userID: socket.user.id,
+      username: socket.user.username
     });
   }
 
   async handleDisconnect(socket: ChatSocket) {
-    this.logger.log(`ClientId: ${socket.userID} disconnected`);
+    this.logger.log(`ClientId: ${socket.user.id} disconnected`);
     this.logger.log(`Nb clients: ${this.io.sockets.sockets.size}`);
 
-    const matchingSockets = await this.io.in(socket.userID).fetchSockets();
+    this.usersService.setChatDisonnected(socket.user.id!);
+
+    const matchingSockets = await this.io.in(socket.user.id!).fetchSockets();
 
     if (matchingSockets.length === 0) {
-      socket.broadcast.emit('user disconnected', socket.userID);
-      const session = this.sessionStore.findSession(socket.sessionID);
-      if (session) {
-        session.connected = false;
-      }
+      socket.broadcast.emit('user disconnected', socket.user.id);
     }
   }
 
   @SubscribeMessage('private message')
   @UseFilters(ChatFilter)
-  handlePrivateMessage(
-    @MessageBody(new ValidationPipe()) messageDto: MessageDto,
+  async handlePrivateMessage(
+    @MessageBody(new ValidationPipe()) messageDto: PrivateMessageDto,
     @ConnectedSocket() socket: ChatSocket
   ) {
-    const { to, content } = messageDto;
+    const { receiverId, content } = messageDto;
+    const senderId = socket.user.id!;
     this.logger.log(
-      `Incoming private message from ${socket.userID} to ${to} with content: ${content}`
+      `Incoming private message from ${senderId} to ${receiverId} with content: ${content}`
     );
-    const message = {
+    const message = await this.messageService.createMessage({
       content,
-      from: socket.userID,
-      messageID: ChatGateway.randomId(),
-      date: new Date(),
-      to
-    };
-    this.io.to(to).to(socket.userID).emit('private message', message);
-    this.messageStore.saveMessage(message);
-  }
+      senderId,
+      receiverId
+    });
 
-  static randomId(): string {
-    return uuidv4();
+    if (message) {
+      this.io
+        .to(receiverId)
+        .to(socket.user.id!)
+        .emit('private message', message);
+    }
   }
 }

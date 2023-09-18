@@ -18,7 +18,7 @@ function ChatFeed({ contact, isConnected }: ChatFeedProps) {
         if (index % 2) {
           return (
             <ChatMessage
-              key={chat.messageID}
+              key={chat.id}
               message={chat.message}
               time={chat.time}
               username={chat.username}
@@ -30,7 +30,7 @@ function ChatFeed({ contact, isConnected }: ChatFeedProps) {
         }
         return (
           <ChatMessage
-            key={chat.messageID}
+            key={chat.id}
             message={chat.message}
             time={chat.time}
             username={chat.username}

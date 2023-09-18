@@ -1,3 +1,4 @@
+// eslint-disable-next-line
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import SessionStoreModule from './session-store/session-store.module';
 import ChatGateway from './chat.gateway';
@@ -74,7 +75,6 @@ describe('ChatGateway', () => {
       const socket = getClientSocket({ username: 'toto' });
       socket.on('users', (data) => {
         expect(data.length).toBe(1);
-        expect(data[0]).toHaveProperty('userID');
         expect(data[0]).toHaveProperty('username');
       });
       socket.connect();
@@ -86,17 +86,6 @@ describe('ChatGateway', () => {
       const socket = getClientSocket({ username: 'toto' });
       socket.on('user connected', () => {
         fail('it should not reach here');
-      });
-      socket.connect();
-      await expectEvent(socket, 'connect');
-      socket.disconnect();
-    });
-
-    it('receives sessionID userID when connect', async () => {
-      const socket = getClientSocket({ username: 'toto' });
-      socket.on('session', (session) => {
-        expect(session).toHaveProperty('userID');
-        expect(session).toHaveProperty('sessionID');
       });
       socket.connect();
       await expectEvent(socket, 'connect');
@@ -141,6 +130,7 @@ describe('ChatGateway', () => {
       };
 
       client0.on('session', (session) => {
+        console.log(session);
         session0 = session;
       });
 

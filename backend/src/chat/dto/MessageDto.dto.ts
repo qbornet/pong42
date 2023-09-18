@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
 
-export class MessageDto {
+export class PrivateMessageDto {
   @IsNotEmpty()
   @IsString()
   readonly content: string;
@@ -8,7 +8,5 @@ export class MessageDto {
   @IsNotEmpty()
   @IsString()
   @IsUUID()
-  readonly to: string;
+  readonly receiverId: string;
 }
-
-export default {};

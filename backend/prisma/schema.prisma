@@ -18,4 +18,13 @@ model Users {
     twoAuthOn       Boolean @default(false)
     twoAuthSecret   String?
     apiToken        String?
+    connectedChat   Boolean @default(false)
+}
+
+model Message {
+  id                  String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  content             String
+  senderId            String @db.Uuid
+  receiverId          String @db.Uuid
+  createdAt           DateTime @default(now())
 }
