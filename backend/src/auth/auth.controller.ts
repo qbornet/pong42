@@ -48,9 +48,9 @@ export class AuthController {
   @Post('2fa-generate')
   @UseGuards(ApiGuard, JwtAuthGuard)
   @HttpCode(200)
-  async generate2Fa(@Req() req: any, @Res() res: any) {
+  async generate2Fa(@Req() req: any) {
     const { optAuthUrl } = await this.authService.generate2FASecret(req.user);
-    return this.authService.pipeQrCodeStream(res, optAuthUrl);
+    return this.authService.generateQrCodeDataUrl(optAuthUrl);
   }
 
   @Get('2fa-login')
@@ -119,8 +119,10 @@ export class AuthController {
         sameSite: 'lax',
         httpOnly: true
       });
-      return res.status(301).redirect(`${CONST_FRONTEND_URL}/signup`);
+      res.status(301).redirect(`${CONST_FRONTEND_URL}/signup`);
+      return;
     }
+
     const usernameAndHash = `${user.username}|${hash}`;
     res.cookie('api_token', usernameAndHash, {
       maxAge: token.expires_in * 1000,
@@ -130,9 +132,13 @@ export class AuthController {
     await this.authService.updateUser(user, {
       apiToken: token.access_token
     });
-    return user.twoAuthOn
-      ? res.status(301).redirect('/auth/2fa-login')
-      : res.status(301).redirect('/auth/login');
+
+    // res should not be return to avoid cerciluar dependicy
+    if (user.twoAuthOn) {
+      res.status(301).redirect('/auth/2fa-login');
+      return;
+    }
+    res.status(301).redirect('/auth/login');
   }
 
   // this might change in the future.
@@ -157,6 +163,7 @@ export class AuthController {
         headers: { Authorization: `Bearer ${token}` }
       };
 
+      this.logger.debug('in createUser() or post create_profile route 1st');
       const info = await axios
         .get('https://api.intra.42.fr/v2/me', config)
         .then((resp: AxiosResponse) => resp.data);
@@ -174,11 +181,13 @@ export class AuthController {
 
       const promise = await this.authService.createUser(updatedUser);
       if (!promise) {
-        return res.status(HttpStatus.FORBIDDEN).json({
+        res.status(HttpStatus.FORBIDDEN).json({
           message: 'Failed to create user, user might already exist.'
         });
+        return;
       }
 
+      this.logger.debug('in createUser() or post create_profile route 2nd');
       const tokenInfo = await axios
         .get(CONST_INFO_URL, config)
         .then((resp: AxiosResponse) => resp.data);
@@ -196,6 +205,7 @@ export class AuthController {
         password: user.password
       };
 
+      this.logger.debug('in createUser() or post create_profile route 3rd');
       const jsonWebToken = await axios
         .post(CONST_LOCAL_LOGIN, loginInfo, {
           headers: {
@@ -204,8 +214,7 @@ export class AuthController {
           }
         })
         .then((response: AxiosResponse) => response.data);
-      res.setHeader('Authorization', `Bearer ${jsonWebToken.access_token}`);
-      return res
+      res
         .status(HttpStatus.CREATED)
         .json({ message: 'ok', access_token: jsonWebToken.access_token });
     } catch (e) {

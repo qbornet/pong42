@@ -1,6 +1,7 @@
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { action as loginAction } from './components/LoginPage/login.action';
+import { loader as twoAuthLoader } from './components/LoginPage/twoAuth.loader';
 import LoginPage from './components/LoginPage/LoginPage';
 import LoginForm from './components/LoginPage/LoginForm';
 import ErrorLoginPage from './components/LoginPage/ErrorLoginPage';
@@ -21,7 +22,8 @@ const router = createBrowserRouter([
   },
   {
     path: '/2fa-validation',
-    element: <ValidationTwoAuth />
+    element: <ValidationTwoAuth />,
+    loader: twoAuthLoader
   }
 ]);
 

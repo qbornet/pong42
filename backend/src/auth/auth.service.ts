@@ -10,8 +10,8 @@ import { JwtService } from '@nestjs/jwt';
 import axios, { AxiosResponse } from 'axios';
 import * as bcrypt from 'bcrypt';
 import { authenticator } from 'otplib';
-import { toFileStream } from 'qrcode';
-import { Request, Response } from 'express';
+import { toDataURL } from 'qrcode';
+import { Request } from 'express';
 import IUsers from 'src/database/service/interface/users';
 import { CONST_URL } from './constants';
 import { UsersService } from '../database/service/users.service';
@@ -44,8 +44,8 @@ export class AuthService {
   }
 
   // generate QrCode
-  async pipeQrCodeStream(stream: Response, optAuthUrl: string) {
-    return toFileStream(stream, optAuthUrl);
+  async generateQrCodeDataUrl(optAuthUrl: string) {
+    return toDataURL(optAuthUrl);
   }
 
   // generate 2FA Secret for the user
@@ -151,6 +151,7 @@ export class AuthService {
       headers: { Authorization: `Bearer ${token}` }
     };
 
+    this.logger.debug('in findUserWithToken()');
     const info = await axios
       .get('https://api.intra.42.fr/v2/me', config)
       .then((res: AxiosResponse) => res.data);
@@ -165,6 +166,7 @@ export class AuthService {
 
     if (clientId !== undefined && clientSecret !== undefined) {
       try {
+        this.logger.debug('in callbackToken()');
         const promise = await axios
           .postForm(CONST_URL, {
             grant_type: 'authorization_code',
@@ -174,7 +176,7 @@ export class AuthService {
             redirect_uri: 'http://localhost:3000/auth/callback',
             state
           })
-          .then((res) => res.data);
+          .then((res: AxiosResponse) => res.data);
         return promise;
       } catch (e: any) {
         throw new HttpException(

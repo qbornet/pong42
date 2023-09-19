@@ -2,8 +2,10 @@ export default function InputField(props: {
   label: string;
   type: string;
   name?: string;
+  value?: string;
+  handleInput?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
-  const { label, type, name } = props;
+  const { label, type, name, handleInput, value } = props;
   if (type === 'checkbox') {
     return (
       <div className="p-[1px]">
@@ -11,6 +13,8 @@ export default function InputField(props: {
           type={type}
           name={name !== undefined ? name : type}
           id={label}
+          value={value}
+          onChange={handleInput}
           className="dark:bg-bluepong-2 mr-[0.25rem] mt-2 h-4 w-4 rounded bg-blue-pong-3 text-blue-pong-1 focus:ring-2 focus:ring-blue-pong-1 dark:border-blue-pong-2 dark:ring-offset-blue-pong-3 dark:focus:ring-blue-pong-2"
         />
         <label
