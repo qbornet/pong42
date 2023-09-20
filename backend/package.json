@@ -7,9 +7,9 @@
   "license": "UNLICENSED",
   "scripts": {
     "prebuild:db": "docker compose up --build -d db",
-    "build:db": "sleep 1 && npx prisma migrate dev --name build",
+    "build:db": "sleep 1 && npx prisma migrate dev",
     "prebuild:db-test": "docker compose up --build -d db-test",
-    "build:db-test": "sleep 1 && npx prisma migrate dev --name build",
+    "build:db-test": "sleep 1 && npx prisma migrate dev",
     "build": "npm run build:client && npm run build:server",
     "norm": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -29,6 +29,7 @@
     "down": "docker compose down -v"
   },
   "dependencies": {
+    "@nestjs/axios": "^3.0.0",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.0.0",
     "@nestjs/core": "^10.0.0",

@@ -14,8 +14,10 @@ import {
   Logger,
   UnauthorizedException
 } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
 import { Request, Response } from 'express';
-import axios, { AxiosResponse } from 'axios';
+import { AxiosResponse } from 'axios';
+import { lastValueFrom, map } from 'rxjs';
 import * as bcrypt from 'bcrypt';
 import { ApiGuard } from '@api';
 import { JwtAuthGuard } from '@jwt';
@@ -34,7 +36,10 @@ import { AuthService } from './auth.service';
 export class AuthController {
   private logger = new Logger('AuthController');
 
-  constructor(private readonly authService: AuthService) {
+  constructor(
+    private readonly authService: AuthService,
+    private readonly httpService: HttpService
+  ) {
     this.logger.log('AuthController Init...');
   }
 
@@ -164,9 +169,10 @@ export class AuthController {
       };
 
       this.logger.debug('in createUser() or post create_profile route 1st');
-      const info = await axios
+      const info$ = this.httpService
         .get('https://api.intra.42.fr/v2/me', config)
-        .then((resp: AxiosResponse) => resp.data);
+        .pipe(map((response: AxiosResponse) => response.data));
+      const info = await lastValueFrom(info$);
 
       const { email } = info;
       const salt = await bcrypt.genSalt(CONST_SALT);
@@ -188,10 +194,11 @@ export class AuthController {
       }
 
       this.logger.debug('in createUser() or post create_profile route 2nd');
-      const tokenInfo = await axios
+      const tokenInfo$ = this.httpService
         .get(CONST_INFO_URL, config)
-        .then((resp: AxiosResponse) => resp.data);
+        .pipe(map((response: AxiosResponse) => response.data));
 
+      const tokenInfo = await lastValueFrom(tokenInfo$);
       const hash = await bcrypt.hash(token, salt);
       const usernameAndHash = `${user.username}|${hash}`;
       res.cookie('api_token', usernameAndHash, {
@@ -206,14 +213,16 @@ export class AuthController {
       };
 
       this.logger.debug('in createUser() or post create_profile route 3rd');
-      const jsonWebToken = await axios
+      const jwt$ = this.httpService
         .post(CONST_LOCAL_LOGIN, loginInfo, {
           headers: {
             Cookie: `api_token=${usernameAndHash}`,
             'Content-Type': 'application/json'
           }
         })
-        .then((response: AxiosResponse) => response.data);
+        .pipe(map((response: AxiosResponse) => response.data));
+
+      const jsonWebToken = await lastValueFrom(jwt$);
       res.setHeader('Authorization', `Bearer ${jsonWebToken.access_token}`);
       res
         .status(HttpStatus.CREATED)
