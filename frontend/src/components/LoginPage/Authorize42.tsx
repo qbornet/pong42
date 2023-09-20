@@ -12,15 +12,15 @@ function generateRandomString(length: number) {
   return result;
 }
 
-export default function LoginWith42() {
+export default function Authorize42() {
   return (
-    <div className="pt-2">
+    <div>
       <a href={`${CONST_AUTHORIZE_URL}&state=${generateRandomString(32)}`}>
         <button
-          className="ml-[0.15rem] mr-[0.15rem] mt-2 flex h-[40px] w-full items-center justify-center rounded-[15px] border border-blue-pong-1 bg-green-login p-1 font-roboto text-[14px] font-bold text-white"
+          className="mt-4 flex h-[40px] w-full items-center justify-center rounded-[15px] border border-blue-pong-1 bg-green-login px-6 py-1 font-roboto text-[14px] font-bold text-white"
           type="button"
         >
-          <span className="pr-2"> Login With </span>
+          <span className="pr-2">Authorized </span>
           <img src={IMAGES.logo_png} width="24" height="24" alt="42" />
         </button>
       </a>

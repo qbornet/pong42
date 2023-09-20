@@ -1,6 +1,7 @@
+import { isAxiosError } from 'axios';
 import { useRouteError, isRouteErrorResponse } from 'react-router-dom';
 
-export default function ErrorLoginPage() {
+export default function ErrorValidation() {
   const error = useRouteError();
   let errorMessage: string = '';
   let errorCode: string = '';
@@ -8,6 +9,10 @@ export default function ErrorLoginPage() {
   if (isRouteErrorResponse(error)) {
     errorMessage = error.error?.message!;
     errorCode = error.status.toString(10);
+  } else if (isAxiosError(error)) {
+    const { response } = error;
+    errorCode = response ? response.data.statusCode : error.code;
+    errorMessage = response ? response.data.message : error.message;
   }
 
   return (
