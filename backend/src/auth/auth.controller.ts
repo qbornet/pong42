@@ -135,10 +135,10 @@ export class AuthController {
 
     // res should not be return to avoid cerciluar dependicy
     if (user.twoAuthOn) {
-      res.status(301).redirect('/auth/2fa-login');
+      res.status(301).redirect(`${CONST_FRONTEND_URL}/2fa-login`);
       return;
     }
-    res.status(301).redirect('/auth/login');
+    res.status(301).redirect(`${CONST_FRONTEND_URL}/login`);
   }
 
   // this might change in the future.
@@ -214,6 +214,7 @@ export class AuthController {
           }
         })
         .then((response: AxiosResponse) => response.data);
+      res.setHeader('Authorization', `Bearer ${jsonWebToken.access_token}`);
       res
         .status(HttpStatus.CREATED)
         .json({ message: 'ok', access_token: jsonWebToken.access_token });

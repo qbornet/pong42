@@ -1,4 +1,3 @@
-import * as crypto from 'crypto';
 import {
   ExceptionFilter,
   Catch,
@@ -7,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { RedirectionException } from 'src/exception/redirect-execption';
-import { CONST_CALLBACK_URL } from 'src/auth/constants';
+import { CONST_FRONTEND_URL } from 'src/auth/constants';
 
 @Catch(RedirectionException)
 export class RedirectionFilter implements ExceptionFilter {
@@ -16,7 +15,6 @@ export class RedirectionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const status = exception.getStatus();
 
-    const genState = crypto.randomBytes(32).toString('hex');
-    response.status(status).redirect(`${CONST_CALLBACK_URL}&state=${genState}`);
+    response.status(status).redirect(CONST_FRONTEND_URL);
   }
 }
