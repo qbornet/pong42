@@ -25,6 +25,11 @@ export class MessageService {
   async getMessageByUserId(id: UUID) {
     try {
       return await this.prisma.message.findMany({
+        orderBy: [
+          {
+            createdAt: 'asc'
+          }
+        ],
         where: {
           OR: [
             {
@@ -51,8 +56,26 @@ export class MessageService {
       return await this.prisma.message.create({
         data: message
       });
-    } catch (error: any) {
-      this.logger.warn(error);
+    } catch (e: any) {
+      this.logger.warn(e);
+      return null;
+    }
+  }
+
+  async createChannelMessage(message: Prisma.MessageCreateInput) {
+    try {
+      return await this.prisma.message.create({
+        data: {
+          content: message.content,
+          senderId: message.senderId,
+          receiverId: message.receiverId,
+          channel: {
+            connect: { id: message.receiverId }
+          }
+        }
+      });
+    } catch (e: any) {
+      this.logger.warn(e);
       return null;
     }
   }

@@ -1,3 +1,4 @@
+import * as bcrypt from 'bcrypt';
 import {
   ConnectedSocket,
   MessageBody,
@@ -9,23 +10,32 @@ import {
   WebSocketServer
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { Logger, UseFilters, ValidationPipe } from '@nestjs/common';
+import { Logger, UseFilters, UseGuards, ValidationPipe } from '@nestjs/common';
 import {
   ChatSocket,
   PublicChatMessage,
   PublicChatUser
 } from './chat.interface';
-import { PrivateMessageDto } from './dto/MessageDto.dto';
+import { PrivateMessageDto } from './dto/private-message.dto';
 import { ChatFilter } from './filters/chat.filter';
 import { MessageService } from '../database/service/message.service';
 import { UsersService } from '../database/service/users.service';
 import { UUID } from '../utils/types';
+import { CreateChannelDto } from './dto/create-channel.dto';
+import { ChannelService } from '../database/service/channel.service';
+import { JoinChannelDto } from './dto/join-channel.dto';
+import { JoinChannelGuard } from './guards/join-channel.guard';
+import { CONST_SALT } from '../auth/constants';
+import { CreateChannelGuard } from './guards/create-channel.guard';
+import { DeleteChannelDto } from './dto/delete-channel.dto';
+import { DeleteChannelGuard } from './guards/delete-channel.guard';
 
 // WebSocketGateways are instantiated from the SocketIoAdapter (inside src/adapters)
 // inside this IoAdapter there is authentification process with JWT
 // validation using the AuthModule. Be aware of this in case you are
 // stuck not understanding what is happenning.
 
+@UseFilters(ChatFilter)
 @WebSocketGateway()
 export default class ChatGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
@@ -34,7 +44,8 @@ export default class ChatGateway
 
   constructor(
     private usersService: UsersService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private channelService: ChannelService
   ) {}
 
   getLogger(): Logger {
@@ -43,7 +54,30 @@ export default class ChatGateway
 
   @WebSocketServer() io: Server;
 
-  afterInit() {
+  async afterInit() {
+    // /!\ To remove test only /!\
+    // await this.usersService.createUser({
+    //   id: 'ffa03160-6419-4e52-8879-f99e90eeca35',
+    //   email: 'jfrancai@student.42.fr',
+    //   username: 'jfrancai',
+    //   password: 'toto',
+    //   twoAuthOn: false,
+    //   twoAuthSecret: 'toto',
+    //   apiToken: 'toto',
+    //   connectedChat: false
+    // });
+
+    // await this.usersService.createUser({
+    //   id: '693e8fcf-915b-472d-beee-ed53fec63008',
+    //   email: 'toto@student.42.fr',
+    //   username: 'toto',
+    //   password: 'toto',
+    //   twoAuthOn: false,
+    //   twoAuthSecret: 'toto',
+    //   apiToken: 'toto',
+    //   connectedChat: false
+    // });
+    // /!\ To remove test only /!\
     this.logger.log('Initialized');
   }
 
@@ -125,7 +159,6 @@ export default class ChatGateway
   }
 
   @SubscribeMessage('private message')
-  @UseFilters(ChatFilter)
   async handlePrivateMessage(
     @MessageBody(new ValidationPipe()) messageDto: PrivateMessageDto,
     @ConnectedSocket() socket: ChatSocket
@@ -141,11 +174,112 @@ export default class ChatGateway
       receiverId
     });
 
-    if (message) {
-      this.io
-        .to(receiverId)
-        .to(socket.user.id!)
-        .emit('private message', message);
+    this.io.to(receiverId).to(socket.user.id!).emit('private message', message);
+  }
+
+  @UseGuards(CreateChannelGuard)
+  @SubscribeMessage('create channel')
+  async handleCreateChannel(
+    @MessageBody() channelDto: CreateChannelDto,
+    @ConnectedSocket() socket: ChatSocket
+  ) {
+    const { displayName, type, password } = channelDto;
+    const creatorId = socket.user.id!;
+    this.logger.log(
+      `Channel creation request from ${creatorId}: [displayName: ${displayName}] [type: ${type}]`
+    );
+    const chanDetail = {
+      displayName,
+      type,
+      creatorId,
+      admins: [creatorId],
+      password: ''
+    };
+    if (password) {
+      const salt = await bcrypt.genSalt(CONST_SALT);
+      const passwordHash = await bcrypt.hash(password, salt);
+      chanDetail.password = passwordHash;
     }
+    const privChan = await this.channelService.createChannel(chanDetail);
+    const pubChan = {
+      id: privChan.id,
+      type: privChan.type,
+      displayName: privChan.displayName,
+      createdAt: privChan.createdAt
+    };
+    socket.join(privChan.id);
+    this.io.to(socket.user.id!).emit('create channel', pubChan);
+  }
+
+  @UseGuards(DeleteChannelGuard)
+  @SubscribeMessage('delete channel')
+  async handleDeleteChannel(
+    @MessageBody() deleteChannelDto: DeleteChannelDto,
+    @ConnectedSocket() socket: ChatSocket
+  ) {
+    const { displayName } = deleteChannelDto;
+    const clientId = socket.user.id!;
+    this.logger.log(`Client ${clientId} request to delete chan ${displayName}`);
+
+    const deletedChan = await this.channelService.deleteChannelByName(
+      displayName
+    );
+    this.io.to(socket.user.id!).emit('delete channel', {
+      message: 'Channel deleted',
+      chanID: deletedChan!.id
+    });
+  }
+
+  @UseGuards(JoinChannelGuard)
+  @SubscribeMessage('join channel')
+  async handleJoinChannel(
+    @MessageBody() joinChannelDto: JoinChannelDto,
+    @ConnectedSocket() socket: ChatSocket
+  ) {
+    const { displayName } = joinChannelDto;
+    const clientId = socket.user.id!;
+    this.logger.log(`ClientId ${clientId} request to join chan ${displayName}`);
+    const channel = await this.channelService.getChanWithMessagesAndMembers(
+      displayName
+    );
+    if (channel) {
+      await this.channelService.updateChannelMembers(
+        channel.id as UUID,
+        socket.user.id!
+      );
+      const members: Partial<PublicChatUser>[] = channel.members.map((m) => ({
+        userID: m.id as UUID,
+        connected: m.connectedChat,
+        username: m.username
+      }));
+      socket.join(displayName);
+      this.io.to(channel.id).to(socket.user.id!).emit('join channel', {
+        message: 'user joining the channel',
+        displayName: channel.displayName,
+        userID: socket.user.id!,
+        chanID: channel.id,
+        messages: channel.messages,
+        members
+      });
+    }
+  }
+
+  @SubscribeMessage('channel message')
+  async handleChannelMessage(
+    @MessageBody(new ValidationPipe()) messageDto: PrivateMessageDto,
+    @ConnectedSocket() socket: ChatSocket
+  ) {
+    const { receiverId, content } = messageDto;
+    const senderId = socket.user.id!;
+    this.logger.log(
+      `Incoming channel message from ${senderId} to ${receiverId} with content: ${content}`
+    );
+    const message = await this.messageService.createChannelMessage({
+      content,
+      senderId,
+      receiverId
+    });
+
+    this.io.to(receiverId).to(socket.user.id!).emit('channel message', message);
   }
 }

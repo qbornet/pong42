@@ -27,8 +27,6 @@ function ChatHeader({ className, isConnected, handleClick }: ChatHeaderProps) {
     if (jwt) {
       const decodedToken: DecodedToken = jwt_decode(jwt!);
       socket.auth = {
-        username: decodedToken.username,
-        email: decodedToken.email,
         token: jwt
       };
       socket.username = decodedToken.username;
@@ -44,7 +42,7 @@ function ChatHeader({ className, isConnected, handleClick }: ChatHeaderProps) {
     <div
       className={`${className} flex w-[336px] items-center justify-center rounded-3xl rounded-t-3xl shadow-pong shadow-pong-blue-100`}
     >
-      <div className="gp-y-1 flex flex-wrap content-center items-center justify-center gap-x-24 gap-y-2 rounded-3xl py-5 backdrop-blur">
+      <div className="gp-y-1 flex flex-wrap content-center items-center justify-center gap-x-24 gap-y-2 rounded-3xl py-5">
         <Category onClick={handleClick.openContactList} type="chat" />
         <ArrowToggler onClick={handleClick.toggleArrow} />
         <Status
