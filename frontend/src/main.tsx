@@ -6,6 +6,7 @@ import LoginPage from './components/LoginPage/LoginPage';
 import LoginForm from './components/LoginPage/LoginForm';
 import ErrorLoginPage from './components/LoginPage/ErrorLoginPage';
 import ValidationTwoAuth from './components/LoginPage/ValidationTwoAuth';
+import Pong from './components/Pong/Pong'
 import './index.css';
 
 const router = createBrowserRouter([
@@ -24,6 +25,11 @@ const router = createBrowserRouter([
     path: '/2fa-validation',
     element: <ValidationTwoAuth />,
     loader: twoAuthLoader
+  },
+  //new
+  {
+    path: '/pong',
+    element: <Pong />
   }
 ]);
 
