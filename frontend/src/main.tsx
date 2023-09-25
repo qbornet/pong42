@@ -2,9 +2,9 @@ import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { action as loginAction } from './components/LoginPage/login.action';
 import { loader as twoAuthLoader } from './components/LoginPage/twoAuth.loader';
-import LoginPage from './components/LoginPage/LoginPage';
+// import LoginPage from './components/LoginPage/LoginPage';
 import LoginForm from './components/LoginPage/LoginForm';
-import ErrorLoginPage from './components/LoginPage/ErrorLoginPage';
+// import ErrorLoginPage from './components/LoginPage/ErrorLoginPage';
 import ValidationTwoAuth from './components/LoginPage/ValidationTwoAuth';
 import Pong from './components/Pong/Pong'
 import './index.css';
@@ -17,6 +17,18 @@ const router = createBrowserRouter([
   },
   {
     path: '/signup',
+    element: <CreateForm />,
+    errorElement: <CreateForm />,
+    action: createAction
+  },
+  {
+    path: '/2fa-validation',
+    element: <ValidationTwoAuth />,
+    errorElement: <ErrorValidation />,
+    loader: twoAuthLoader
+  },
+  {
+    path: '/login',
     element: <LoginForm />,
     errorElement: <LoginForm />,
     action: loginAction
@@ -30,6 +42,10 @@ const router = createBrowserRouter([
   {
     path: '/pong',
     element: <Pong />
+    path: '/2fa-login',
+    element: <LoginTwoAuthForm />,
+    errorElement: <LoginTwoAuthForm />,
+    action: loginTwoAuthAction
   }
 ]);
 

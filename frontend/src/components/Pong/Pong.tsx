@@ -61,12 +61,12 @@ useEffect(() => {
 
     function handleKeyDown(event: KeyboardEvent) {
         if (event.code === "ArrowUp") {
-            leftPaddle.y -= leftPaddle.dy * 20;
+            leftPaddle.y -= leftPaddle.dy * 10;
             if (leftPaddle.y < 0) {
                 leftPaddle.y = 0;
             }
         } else if (event.code === "ArrowDown") {
-            leftPaddle.y += leftPaddle.dy * 20;
+            leftPaddle.y += leftPaddle.dy * 10;
             if (leftPaddle.y + leftPaddle.height > canvas.height) {
                 leftPaddle.y = canvas.height - leftPaddle.height;
             }

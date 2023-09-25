@@ -5,7 +5,7 @@ import Header from './Header';
 import InputField from './InputField';
 import { isError } from '../../utils/functions/isError';
 
-export default function LoginForm() {
+export default function LoginTwoAuthForm() {
   const error = useRouteError();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   let errorCode: string = '';
@@ -24,6 +24,15 @@ export default function LoginForm() {
       }, 3000);
     }
   }, [error]);
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const allowedInput = /[0-9]/;
+
+    // only allowed input could be type or backspace
+    if (!allowedInput.test(e.key) && e.key !== 'Backspace') {
+      e.preventDefault();
+    }
+  };
 
   if (isRouteErrorResponse(error)) {
     const errorMessage = error.error?.message!;
@@ -58,6 +67,12 @@ export default function LoginForm() {
         <Form method="post" className="pt-4">
           <InputField type="username" label="Username" />
           <InputField type="password" label="Password" />
+          <InputField
+            type="text"
+            label="Code Validation"
+            name="twoFactorAuthCode"
+            handleInput={handleKeyPress}
+          />
           <button
             className="mt-7 h-[40px] w-full rounded-[15px] border border-blue-pong-1 bg-blue-pong-4 p-1 font-roboto text-[14px] font-bold text-white"
             type="submit"

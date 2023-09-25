@@ -7,8 +7,10 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import axios, { AxiosResponse } from 'axios';
+import { HttpService } from '@nestjs/axios';
+import { AxiosResponse } from 'axios';
 import * as bcrypt from 'bcrypt';
+import { lastValueFrom, map } from 'rxjs';
 import { authenticator } from 'otplib';
 import { toDataURL } from 'qrcode';
 import { Request } from 'express';
@@ -38,7 +40,8 @@ export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly httpService: HttpService
   ) {
     this.logger.log('AuthService Init...');
   }
@@ -152,9 +155,10 @@ export class AuthService {
     };
 
     this.logger.debug('in findUserWithToken()');
-    const info = await axios
+    const info$ = this.httpService
       .get('https://api.intra.42.fr/v2/me', config)
-      .then((res: AxiosResponse) => res.data);
+      .pipe(map((response: AxiosResponse) => response.data));
+    const info = await lastValueFrom(info$);
     const { email } = info;
     return this.usersService.getUser({ email });
   }
@@ -167,7 +171,7 @@ export class AuthService {
     if (clientId !== undefined && clientSecret !== undefined) {
       try {
         this.logger.debug('in callbackToken()');
-        const promise = await axios
+        const promise = await this.httpService.axiosRef
           .postForm(CONST_URL, {
             grant_type: 'authorization_code',
             client_id: clientId,
