@@ -1,4 +1,4 @@
-import { useLoaderData } from 'react-router-dom';
+import { useLoaderData, Link } from 'react-router-dom';
 import Header from './Header';
 
 export default function ValidationTwoAuth() {
@@ -13,12 +13,17 @@ export default function ValidationTwoAuth() {
             Scan the QR Code with Authenticator App
           </span>
           <img className="mt-1 pt-1" src={qrcode} alt="QRCODE" />
-          <button // need to add Link from react-router to redirect to profile page or home page
-            className="mt-3 h-[40px] w-full rounded-[15px] border border-blue-pong-1 bg-blue-pong-4 p-1 font-roboto text-[14px] font-bold text-white"
-            type="button"
+          <Link
+            to="/upload_img"
+            className="mt-3 h-[40px] w-full items-center justify-items-center rounded-[15px] border border-blue-pong-1 bg-blue-pong-4 p-1 text-center"
           >
-            FINISH
-          </button>
+            <button
+              className="pt-1 font-roboto text-[14px] font-bold text-white"
+              type="button"
+            >
+              FINISH
+            </button>
+          </Link>
         </div>
       </div>
     </div>

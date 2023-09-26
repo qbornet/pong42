@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { ImgModule } from './img/img.module';
 import ChatModule from './chat/chat.module';
 import envSchema from './env.validation';
 
@@ -21,7 +22,8 @@ import envSchema from './env.validation';
       exclude: ['/api(.*)']
     }),
     ChatModule,
-    AuthModule
+    AuthModule,
+    ImgModule
   ],
   controllers: [AppController],
   providers: [AppService]

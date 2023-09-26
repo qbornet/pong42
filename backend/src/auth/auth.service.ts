@@ -20,6 +20,7 @@ import { UsersService } from '../database/service/users.service';
 
 type CreateUserDto = { email: string; username: string; password: string };
 type UpdateUserDto = {
+  img?: string;
   email?: string;
   username?: string;
   apiToken?: string;

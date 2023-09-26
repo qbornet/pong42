@@ -56,5 +56,7 @@ export async function action(props: { request: Request }) {
     .then((res: AxiosResponse) => res.data);
 
   localStorage.setItem('jwt', result.access_token);
-  return twoAuth === 'on' ? redirect('/2fa-validation') : redirect('/home');
+  return twoAuth === 'on'
+    ? redirect('/2fa-validation') // eslint-disable-line
+    : redirect('/upload_img'); // eslint-disable-line
 }

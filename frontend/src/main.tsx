@@ -11,6 +11,7 @@ import LoginTwoAuthForm from './components/LoginPage/LoginTwoAuthForm';
 import ErrorCreatePage from './components/LoginPage/ErrorCreatePage';
 import ErrorValidation from './components/LoginPage/ErrorValidation';
 import ValidationTwoAuth from './components/LoginPage/ValidationTwoAuth';
+import UploadImg from './components/LoginPage/UploadImg';
 import './index.css';
 
 const router = createBrowserRouter([
@@ -36,12 +37,18 @@ const router = createBrowserRouter([
     element: <LoginForm />,
     errorElement: <LoginForm />,
     action: loginAction
+    // add loader to check if you are allowed to use the login route or you should 2fa-login
   },
   {
     path: '/2fa-login',
     element: <LoginTwoAuthForm />,
     errorElement: <LoginTwoAuthForm />,
     action: loginTwoAuthAction
+  },
+  {
+    path: '/upload_img',
+    element: <UploadImg />,
+    errorElement: <UploadImg />
   }
 ]);
 

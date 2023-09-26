@@ -5,4 +5,5 @@ export default interface IUsers {
   username: string;
   password: string;
   twoAuth: ITwoAuth;
+  img?: string;
 }
