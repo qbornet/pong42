@@ -7,7 +7,7 @@ import { useRef, useState } from 'react';
 import axios, { AxiosResponse, AxiosRequestConfig, AxiosError } from 'axios';
 import IMAGES from '@img';
 import { CONST_BACKEND_URL } from '@constant';
-import ErrorCreatePage from './ErrorCreatePage';
+import ErrorPage from './ErrorPage';
 import Header from './Header';
 
 // I dont use action for this one because i couldn't find a way to handle file upload with action.
@@ -71,7 +71,7 @@ export default function UploadImg() {
   };
 
   if (isRouteErrorResponse(error)) {
-    return <ErrorCreatePage />;
+    return <ErrorPage />;
   }
 
   return (

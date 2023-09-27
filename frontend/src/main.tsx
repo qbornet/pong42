@@ -8,7 +8,7 @@ import HomePage from './components/LoginPage/HomePage';
 import LoginForm from './components/LoginPage/LoginForm';
 import CreateForm from './components/LoginPage/CreateForm';
 import LoginTwoAuthForm from './components/LoginPage/LoginTwoAuthForm';
-import ErrorCreatePage from './components/LoginPage/ErrorCreatePage';
+import ErrorPage from './components/LoginPage/ErrorPage';
 import ErrorValidation from './components/LoginPage/ErrorValidation';
 import ValidationTwoAuth from './components/LoginPage/ValidationTwoAuth';
 import UploadImg from './components/LoginPage/UploadImg';
@@ -18,7 +18,7 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <HomePage />,
-    errorElement: <ErrorCreatePage />
+    errorElement: <ErrorPage />
   },
   {
     path: '/signup',
