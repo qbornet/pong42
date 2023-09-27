@@ -1,8 +1,8 @@
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { action as loginTwoAuthAction } from './components/LoginPage/loginTwoAuth.action';
-import { action as loginAction } from './components/LoginPage/login.action';
 import { action as createAction } from './components/LoginPage/create.action';
+import { action as loginAction } from './components/LoginPage/login.action';
 import { loader as twoAuthLoader } from './components/LoginPage/twoAuth.loader';
 import HomePage from './components/LoginPage/HomePage';
 import LoginForm from './components/LoginPage/LoginForm';
@@ -12,6 +12,7 @@ import ErrorPage from './components/LoginPage/ErrorPage';
 import ErrorValidation from './components/LoginPage/ErrorValidation';
 import ValidationTwoAuth from './components/LoginPage/ValidationTwoAuth';
 import UploadImg from './components/LoginPage/UploadImg';
+import Pong from './components/Pong/Pong';
 import './index.css';
 
 const router = createBrowserRouter([
@@ -40,6 +41,11 @@ const router = createBrowserRouter([
     // add loader to check if you are allowed to use the login route or you should 2fa-login
   },
   {
+    path: '/2fa-validation',
+    element: <ValidationTwoAuth />,
+    loader: twoAuthLoader
+  },
+  {
     path: '/2fa-login',
     element: <LoginTwoAuthForm />,
     errorElement: <LoginTwoAuthForm />,
@@ -49,6 +55,10 @@ const router = createBrowserRouter([
     path: '/upload_img',
     element: <UploadImg />,
     errorElement: <UploadImg />
+  },
+  {
+    path: '/pong',
+    element: <Pong />
   }
 ]);
 
