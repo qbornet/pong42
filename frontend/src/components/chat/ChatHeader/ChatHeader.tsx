@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import jwt_decode from 'jwt-decode';
-import socket from '../../services/socket';
+import socket from '../../../services/socket';
 import ArrowToggler from '../ArrowToggler/ArrowToggler';
 import Category from '../Category/Category';
 import Status from '../Status/Status';
@@ -8,9 +8,10 @@ import Status from '../Status/Status';
 interface ChatHeaderProps {
   className?: string;
   isConnected: boolean;
+  isChatClosed: boolean;
   handleClick: {
     toggleArrow: () => any;
-    openContactList: () => any;
+    changeView: () => any;
   };
 }
 
@@ -21,7 +22,12 @@ interface DecodedToken {
   exp: string;
 }
 
-function ChatHeader({ className, isConnected, handleClick }: ChatHeaderProps) {
+function ChatHeader({
+  className,
+  isConnected,
+  isChatClosed,
+  handleClick
+}: ChatHeaderProps) {
   const connect = () => {
     const jwt = localStorage.getItem('jwt');
     if (jwt) {
@@ -43,8 +49,8 @@ function ChatHeader({ className, isConnected, handleClick }: ChatHeaderProps) {
       className={`${className} flex w-[336px] items-center justify-center rounded-3xl rounded-t-3xl shadow-pong shadow-pong-blue-100`}
     >
       <div className="gp-y-1 flex flex-wrap content-center items-center justify-center gap-x-24 gap-y-2 rounded-3xl py-5">
-        <Category onClick={handleClick.openContactList} type="chat" />
-        <ArrowToggler onClick={handleClick.toggleArrow} />
+        <Category onClick={handleClick.changeView} type="chat" />
+        <ArrowToggler up={isChatClosed} onClick={handleClick.toggleArrow} />
         <Status
           position="start"
           severity={isConnected ? 'ok' : 'err'}

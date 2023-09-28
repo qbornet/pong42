@@ -1,7 +1,6 @@
 import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { ChannelType, Prisma } from '@prisma/client';
 import { PrismaService } from './prisma.service';
-import { UUID } from '../../utils/types';
 
 @Injectable()
 export class ChannelService {
@@ -10,18 +9,18 @@ export class ChannelService {
   constructor(private prisma: PrismaService) {}
 
   async createChannel(channel: Prisma.ChannelCreateInput) {
-    const { displayName, type, creatorId, admins, password } = channel;
+    const { chanName, type, creatorID, admins, password } = channel;
     try {
       return await this.prisma.channel.create({
         data: {
-          displayName,
+          chanName,
           type,
-          creatorId,
+          creatorID,
           admins,
           password,
           members: {
             connect: {
-              id: creatorId
+              id: creatorID
             }
           }
         }
@@ -34,7 +33,24 @@ export class ChannelService {
     }
   }
 
-  async getChanById(id: UUID) {
+  async updateChanType(id: string, type: ChannelType, password?: string) {
+    try {
+      return await this.prisma.channel.update({
+        where: {
+          id
+        },
+        data: {
+          type,
+          password
+        }
+      });
+    } catch (e) {
+      this.logger.warn(e);
+      return null;
+    }
+  }
+
+  async getChanById(id: string) {
     try {
       return await this.prisma.channel.findUnique({
         where: {
@@ -47,16 +63,15 @@ export class ChannelService {
     }
   }
 
-  async getDeepChanByName(displayName: string) {
+  async getChanWithInviteList(chanName: string) {
     try {
       return await this.prisma.channel.findUnique({
         where: {
-          displayName
+          chanName
         },
         include: {
           inviteList: true,
-          restrictList: true,
-          members: true
+          restrictList: true
         }
       });
     } catch (e) {
@@ -65,11 +80,27 @@ export class ChannelService {
     }
   }
 
-  async getChanWithMessages(displayName: string) {
+  async getChanWithRestrictList(chanName: string) {
     try {
       return await this.prisma.channel.findUnique({
         where: {
-          displayName
+          chanName
+        },
+        include: {
+          restrictList: true
+        }
+      });
+    } catch (e) {
+      this.logger.warn(e);
+      throw new ForbiddenException();
+    }
+  }
+
+  async getChanWithMessages(chanName: string) {
+    try {
+      return await this.prisma.channel.findUnique({
+        where: {
+          chanName
         },
         include: {
           messages: true
@@ -81,11 +112,11 @@ export class ChannelService {
     }
   }
 
-  async getChanWithMessagesAndMembers(displayName: string) {
+  async getChanWithMessagesAndMembers(chanName: string) {
     try {
       return await this.prisma.channel.findUnique({
         where: {
-          displayName
+          chanName
         },
         include: {
           messages: true,
@@ -98,11 +129,11 @@ export class ChannelService {
     }
   }
 
-  async getChanByName(displayName: string) {
+  async getChanByName(chanName: string) {
     try {
       return await this.prisma.channel.findUnique({
         where: {
-          displayName
+          chanName
         }
       });
     } catch (e) {
@@ -111,11 +142,11 @@ export class ChannelService {
     }
   }
 
-  async getChanWithMembers(displayName: string) {
+  async getChanWithMembers(chanName: string) {
     try {
       return await this.prisma.channel.findUnique({
         where: {
-          displayName
+          chanName
         },
         include: {
           members: true
@@ -127,11 +158,11 @@ export class ChannelService {
     }
   }
 
-  async updateChannelMembers(chanId: UUID, memberId: UUID) {
+  async addChannelMember(chanName: string, memberId: string) {
     try {
       return await this.prisma.channel.update({
         where: {
-          id: chanId
+          chanName
         },
         data: {
           members: {
@@ -145,11 +176,45 @@ export class ChannelService {
     }
   }
 
-  async deleteChannelByName(displayName: string) {
+  async removeChannelMember(chanName: string, memberId: string) {
+    try {
+      return await this.prisma.channel.update({
+        where: {
+          chanName
+        },
+        data: {
+          members: {
+            disconnect: { id: memberId }
+          }
+        }
+      });
+    } catch (e) {
+      this.logger.warn(e);
+      return null;
+    }
+  }
+
+  async updateAdmins(chanName: string, admins: string[]) {
+    try {
+      return await this.prisma.channel.update({
+        where: {
+          chanName
+        },
+        data: {
+          admins
+        }
+      });
+    } catch (e) {
+      this.logger.warn(e);
+      return null;
+    }
+  }
+
+  async deleteChannelByName(chanName: string) {
     try {
       return await this.prisma.channel.delete({
         where: {
-          displayName
+          chanName
         }
       });
     } catch (e) {

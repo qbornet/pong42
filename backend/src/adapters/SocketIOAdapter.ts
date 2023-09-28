@@ -6,7 +6,6 @@ import { ExtendedError } from 'socket.io/dist/namespace';
 import { AuthModule } from '../auth/auth.module';
 import { AuthService } from '../auth/auth.service';
 import { ChatSocket } from '../chat/chat.interface';
-import { IUsers } from '../database/service/interface/users';
 
 // Each WebSocketGateway is instantiated from this custom
 // IoAdapter, which do two things for now : config cors
@@ -28,7 +27,7 @@ const createTokenMiddleware =
 
     const user = await authService.findUserByJWT(token);
     if (user) {
-      socket.user = user as Partial<IUsers>;
+      socket.user = user;
       next();
     } else {
       logger.warn(

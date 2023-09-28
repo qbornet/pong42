@@ -1,3 +1,5 @@
 import { Reflector } from '@nestjs/core';
 
-export const Roles = Reflector.createDecorator<string[]>();
+export type RolesType = 'creator' | 'admin' | 'member' | 'stranger';
+
+export const Roles = Reflector.createDecorator<RolesType[]>();
