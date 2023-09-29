@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { ImgModule } from './img/img.module';
 import ChatModule from './chat/chat.module';
 import envSchema from './env.validation';
+import { PongModule } from './pong/pong.module';
 
 @Module({
   imports: [
@@ -21,9 +22,10 @@ import envSchema from './env.validation';
       rootPath: join(__dirname, '..', 'client'),
       exclude: ['/api(.*)']
     }),
-    ChatModule,
+    // ChatModule,
     AuthModule,
-    ImgModule
+    ImgModule,
+    PongModule
   ],
   controllers: [AppController],
   providers: [AppService]
