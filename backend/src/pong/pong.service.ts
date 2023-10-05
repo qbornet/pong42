@@ -42,7 +42,7 @@ export class PongService {
         return (this.ballState);
     }
 
-    handleKeyCode(keycode: string) {
+    handleKeyCode1(keycode: string) {
         if (keycode === "ArrowUp")
         {
             this.paddlePlayer1.y -= this.paddlePlayer1.dy * 10;
@@ -59,22 +59,40 @@ export class PongService {
             // this.logger.debug(this.paddlePlayer1.y)
         }
     }
-
+    
+    handleKeyCode2(keycode: string) {
+        if (keycode === "ArrowUp")
+        {
+            this.paddlePlayer2.y -= this.paddlePlayer2.dy * 10;
+            if (this.paddlePlayer2.y < 0) {
+                this.paddlePlayer2.y = 0;
+            }
+            // this.logger.debug(this.paddlePlayer2.y);
+        }
+        else if (keycode === "ArrowDown") {
+            this.paddlePlayer2.y += this.paddlePlayer2.dy * 10;
+            if (this.paddlePlayer2.y + this.paddlePlayer2.height > 700) {
+                this.paddlePlayer2.y = 700 - this.paddlePlayer2.height;
+            }
+            // this.logger.debug(this.paddlePlayer2.y)
+        }
+    }
+    
     resetBall() {
         this.ballState.x = 600;
         this.ballState.y = 350;
         this.ballState.dx = (Math.random() < 0.5 ? -1 : 1);
         this.ballState.dy = (Math.random() * 2 - 1);
     }
-
+    
     adjustBallAngle(paddleY: number) {
         let relativeIntersectY = this.ballState.y - (paddleY + 50);
         let normalizedIntersectY = relativeIntersectY / (50);
         let bounceAngle = normalizedIntersectY * (45 * (Math.PI / 180));
-    
+        
         this.ballState.dy = 2 * Math.sin(bounceAngle);
     }
-
+    
     startBroadcastingBallState(io: Server) {
         this.gameInterval = setInterval(() => {
             // Mettre à jour l'état de la balle ici 
@@ -85,32 +103,32 @@ export class PongService {
                 this.ballState.x - this.ballState.radius < this.paddlePlayer1.x + this.paddlePlayer1.width &&
                 this.ballState.y + this.ballState.radius > this.paddlePlayer1.y &&
                 this.ballState.y - this.ballState.radius < this.paddlePlayer1.y + this.paddlePlayer1.height
-            ) {
-                this.ballState.dx = -this.ballState.dx;
-                this.adjustBallAngle(this.paddlePlayer1.y);
-            }
-            //collisions raquette droite
-            if (
-                this.ballState.x + this.ballState.radius > this.paddlePlayer2.x &&
-                this.ballState.y + this.ballState.radius > this.paddlePlayer2.y &&
-                this.ballState.y - this.ballState.radius < this.paddlePlayer2.y + this.paddlePlayer2.height
-            ) {
-                this.ballState.dx = -this.ballState.dx;
-                this.adjustBallAngle(this.paddlePlayer2.y);
-            }
-
-            //gere la collision des parois hautes et basses
+                ) {
+                    this.ballState.dx = -this.ballState.dx;
+                    this.adjustBallAngle(this.paddlePlayer1.y);
+                }
+                //collisions raquette droite
+                if (
+                    this.ballState.x + this.ballState.radius > this.paddlePlayer2.x &&
+                    this.ballState.y + this.ballState.radius > this.paddlePlayer2.y &&
+                    this.ballState.y - this.ballState.radius < this.paddlePlayer2.y + this.paddlePlayer2.height
+                    ) {
+                        this.ballState.dx = -this.ballState.dx;
+                        this.adjustBallAngle(this.paddlePlayer2.y);
+                    }
+                    
+                    //gere la collision des parois hautes et basses
             if (
             this.ballState.y + this.ballState.radius > 700 ||
             this.ballState.y - this.ballState.radius < 0
             ) {
-            this.ballState.dy = -this.ballState.dy;
+                this.ballState.dy = -this.ballState.dy;
             }
-
+            
             //reinitalisation pos this.ballState quand point marque
             if (this.ballState.x + this.ballState.radius > 1200)
             {
-
+                
                 // this.logger.log('Joueur gauche a marque 1 Point !!!!!!!!!!!!');
                 this.scorePlayer1++;
                 io.emit('scorePlayer1', this.scorePlayer1)
@@ -124,6 +142,8 @@ export class PongService {
                 this.resetBall();
             }
             io.emit('ballState',this.ballState);
+            io.emit('paddleRight', this.paddlePlayer1);
+            io.emit('paddleLeft', this.paddlePlayer2);
         }, 3);
     }
 }

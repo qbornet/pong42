@@ -31,11 +31,16 @@ implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
     // this.pongService.startBroadcastingBallState(this.io);
   }
   
+  //checker pourquoi les socket des 2 clients sont mis a jour
   handleConnection(client: Socket, ...args: any[]): any {
-    if (this.players.length < 2) {
+    if (this.players.length === 0) {
       this.players.push(client);
-      client.emit('playerRole', this.players.length);
-    } else {
+      client.emit('playerRole', 1);
+    } else if (this.players.length === 1) {
+      this.players.push(client);
+      client.emit('playerRole', 2);
+    }
+    else if (this.players.length === 2) {
       client.emit('errorMessage', 'Room is full');
       client.disconnect();
     }
@@ -54,9 +59,14 @@ implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
   };
 
   //ecoute les touche d'appuie sur les fleches
-  @SubscribeMessage('paddleMovement')
-  handlePaddleMovement(client: Socket, keycode: string): void {
-    this.pongService.handleKeyCode(keycode);
+  @SubscribeMessage('paddleMovement1')
+  handlePaddleMovement1(client: Socket, keycode: string): void {
+    this.pongService.handleKeyCode1(keycode);
+  }
+
+  @SubscribeMessage('paddleMovement2')
+  handlePaddleMovement2(client: Socket, keycode: string): void {
+    this.pongService.handleKeyCode2(keycode);
   }
 
   @SubscribeMessage('message')
