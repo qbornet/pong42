@@ -11,19 +11,27 @@ export class PongService {
         dx: 1,
         dy: 1,
     };
-    private leftPaddleState = {
+    private paddlePlayer1 = {
         x: 10,
         y: 300,
         width: 10,
         height: 100,
         dy: 2,
-    }
-    private rightPaddleState = {
+    };
+    private paddlePlayer2 = {
         x: 1180,
         y: 300,
         width: 10,
         height: 100,
         dy: 2,
+    };
+
+    private scorePlayer1: number;
+    private scorePlayer2: number;
+
+    constructor() {
+        this.scorePlayer1 = 0;
+        this.scorePlayer2 = 0;
     }
 
     private readonly logger = new Logger(PongService.name);
@@ -34,21 +42,21 @@ export class PongService {
         return (this.ballState);
     }
 
-    handlePaddleMovement(keycode: string) {
+    handleKeyCode(keycode: string) {
         if (keycode === "ArrowUp")
         {
-            this.leftPaddleState.y -= this.leftPaddleState.dy * 10;
-            if (this.leftPaddleState.y < 0) {
-                this.leftPaddleState.y = 0;
+            this.paddlePlayer1.y -= this.paddlePlayer1.dy * 10;
+            if (this.paddlePlayer1.y < 0) {
+                this.paddlePlayer1.y = 0;
             }
-            this.logger.debug(this.leftPaddleState.y);
+            // this.logger.debug(this.paddlePlayer1.y);
         }
         else if (keycode === "ArrowDown") {
-            this.leftPaddleState.y += this.leftPaddleState.dy * 10;
-            if (this.leftPaddleState.y + this.leftPaddleState.height > 700) {
-                this.leftPaddleState.y = 700 - this.leftPaddleState.height;
+            this.paddlePlayer1.y += this.paddlePlayer1.dy * 10;
+            if (this.paddlePlayer1.y + this.paddlePlayer1.height > 700) {
+                this.paddlePlayer1.y = 700 - this.paddlePlayer1.height;
             }
-            this.logger.debug(this.leftPaddleState.y)
+            // this.logger.debug(this.paddlePlayer1.y)
         }
     }
 
@@ -74,43 +82,48 @@ export class PongService {
             this.ballState.y += this.ballState.dy;
             //collisions raquette gauche
             if (
-                this.ballState.x - this.ballState.radius < this.leftPaddleState.x + this.leftPaddleState.width &&
-                this.ballState.y + this.ballState.radius > this.leftPaddleState.y &&
-                this.ballState.y - this.ballState.radius < this.leftPaddleState.y + this.leftPaddleState.height
+                this.ballState.x - this.ballState.radius < this.paddlePlayer1.x + this.paddlePlayer1.width &&
+                this.ballState.y + this.ballState.radius > this.paddlePlayer1.y &&
+                this.ballState.y - this.ballState.radius < this.paddlePlayer1.y + this.paddlePlayer1.height
             ) {
                 this.ballState.dx = -this.ballState.dx;
-                this.adjustBallAngle(this.leftPaddleState.y);
+                this.adjustBallAngle(this.paddlePlayer1.y);
             }
             //collisions raquette droite
             if (
-                this.ballState.x + this.ballState.radius > this.rightPaddleState.x &&
-                this.ballState.y + this.ballState.radius > this.rightPaddleState.y &&
-                this.ballState.y - this.ballState.radius < this.rightPaddleState.y + this.rightPaddleState.height
+                this.ballState.x + this.ballState.radius > this.paddlePlayer2.x &&
+                this.ballState.y + this.ballState.radius > this.paddlePlayer2.y &&
+                this.ballState.y - this.ballState.radius < this.paddlePlayer2.y + this.paddlePlayer2.height
             ) {
                 this.ballState.dx = -this.ballState.dx;
-                this.adjustBallAngle(this.rightPaddleState.y);
+                this.adjustBallAngle(this.paddlePlayer2.y);
             }
 
             //gere la collision des parois hautes et basses
             if (
-             this.ballState.y + this.ballState.radius > 700 ||
-             this.ballState.y - this.ballState.radius < 0
+            this.ballState.y + this.ballState.radius > 700 ||
+            this.ballState.y - this.ballState.radius < 0
             ) {
-               this.ballState.dy = -this.ballState.dy;
+            this.ballState.dy = -this.ballState.dy;
             }
 
             //reinitalisation pos this.ballState quand point marque
             if (this.ballState.x + this.ballState.radius > 1200)
             {
-                this.logger.log('Joueur gauche a marque 1 Point !!!!!!!!!!!!');
+
+                // this.logger.log('Joueur gauche a marque 1 Point !!!!!!!!!!!!');
+                this.scorePlayer1++;
+                io.emit('scorePlayer1', this.scorePlayer1)
                 this.resetBall();
             }
             if (this.ballState.x + this.ballState.radius < 0)
             {
-                this.logger.log('joueur droit a marque 1 Point !!!!!!!!!!!!');
+                // this.logger.log('joueur droit a marque 1 Point !!!!!!!!!!!!');
+                this.scorePlayer2++;
+                io.emit('scorePlayer2', this.scorePlayer2);
                 this.resetBall();
             }
             io.emit('ballState',this.ballState);
-        }, 3); // met à jour toutes les 100 ms, à ajuster selon les besoins
+        }, 3);
     }
 }
