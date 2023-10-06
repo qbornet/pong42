@@ -6,6 +6,9 @@ import { io } from "socket.io-client";
 
 
 const socket = io('http://localhost:4000', { autoConnect: true, reconnection: false });
+socket.onAny((e) => {
+	console.log(e)
+})
 
 export default function Pong() {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -16,14 +19,14 @@ export default function Pong() {
         dy: 0
     })
     const [leftPaddle, setLeftPaddle] = useState({
-        x: 10,
+        x: 1180,
         y: 300,
         width: 10,
         height: 100,
         dy: 2,
     });
     const [rightPaddle, setRightPaddle] = useState({
-        x: 1180,
+        x: 10,
         y: 300,
         width: 10,
         height: 100,
@@ -80,7 +83,7 @@ export default function Pong() {
         }
 
         function handleKey(event: KeyboardEvent,) {
-            if (playerRole === 1) {
+            if (playerRole === 2) {
                 if (event.code === "ArrowUp"){
                     leftPaddle.y -= leftPaddle.dy * 10;
                     if (leftPaddle.y < 0) {
@@ -93,8 +96,8 @@ export default function Pong() {
                     }
                 }
                 console.log(playerRole + " " + event.code);              
-                socket.emit('paddleMovement1', event.code);
-            } else if (playerRole === 2) {
+                socket.emit('paddleMovement2', event.code);
+            } else if (playerRole === 1) {
                 if (event.code === "ArrowUp"){
                     rightPaddle.y -= rightPaddle.dy * 10;
                     if (rightPaddle.y < 0) {
@@ -107,7 +110,7 @@ export default function Pong() {
                     }
                 }
                 console.log(playerRole + " " + event.code);
-                socket.emit('paddleMovement2', event.code);
+                socket.emit('paddleMovement1', event.code);
             }
         }
         
