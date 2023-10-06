@@ -64,8 +64,8 @@ implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
       const usersArray = Array.from(users);
       const opponent = usersArray[0] === client.id ? usersArray[1] : usersArray[0]
       const rightPlayer = this.players[0].id === opponent ? opponent : client.id;
-      const leftPlayer = opponent !== rightPlayer ? client.id : opponent;
-        this.pongService.startBroadcastingBallState(this.io, rightPlayer, leftPlayer);
+      const leftPlayer = opponent === rightPlayer ? client.id : opponent;
+        this.pongService.startBroadcastingBallState(this.io, leftPlayer, rightPlayer);
     }
   };
 

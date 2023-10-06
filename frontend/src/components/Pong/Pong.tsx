@@ -53,15 +53,27 @@ export default function Pong() {
         const onLeftPaddleState = (receivedLeftPaddleState: typeof leftPaddle) => {
             setLeftPaddle(receivedLeftPaddleState);
         }
+		const onPlayerRole = (role: number) => {
+			setPlayerRole(role);
+		}
         socket.on('ballState', onBallState);
         socket.on('paddleLeft', onLeftPaddleState);
         socket.on('paddleRight', onRightPaddleState);
         socket.on('scorePlayer1', setScorePlayer1);
         socket.on('scorePlayer2', setScorePlayer2);
-        socket.on('playerRole', (role: number) => {
-            setPlayerRole(role);
-        })
+        socket.on('playerRole', onPlayerRole);
+
+		return (() => {
+			socket.off('ballState', onBallState);
+			socket.off('paddleLeft', onRightPaddleState);
+			socket.off('paddleRight', onLeftPaddleState);
+			socket.off('scorePlayer1', setScorePlayer1);
+			socket.off('scorePlayer2', setScorePlayer2);
+			socket.off('playerRole', onPlayerRole);
+		});
+	}, [setBallState, setRightPaddle, setLeftPaddle]);
         
+    useEffect(() => {
         const canvas = canvasRef.current;
         const context = canvas?.getContext("2d");
         
@@ -189,12 +201,6 @@ export default function Pong() {
         draw();
 
     return () => {
-        socket.off('ballState', onBallState);
-        socket.off('paddleLeft', onRightPaddleState);
-        socket.off('paddleRight', onLeftPaddleState);
-        socket.off('scorePlayer1', setScorePlayer1);
-        socket.off('scorePlayer2', setScorePlayer2);
-        socket.off('playerRole', setPlayerRole);
         cancelAnimationFrame(animationFrameId);
         window.removeEventListener("keydown", handleKey);
     };
