@@ -1,19 +1,43 @@
+import { useEffect } from 'react';
 import ChatMessage from '../ChatMessage/ChatMessage';
-import { Contact } from '../../../utils/hooks/useStatus';
 import { useMessages } from '../../../utils/hooks/useMessages';
 import { useScroll } from '../../../utils/hooks/useScroll';
+import { Scrollable } from '../Scrollable/Scrollable';
+import { useSocketContext } from '../../../contexts/socket';
 
 interface ChatFeedProps {
-  contact: Contact | undefined;
-  isConnected: boolean;
+  event: 'channelMessages' | 'messages';
+  userID: string;
 }
 
-function ChatFeed({ contact, isConnected }: ChatFeedProps) {
-  const messages = useMessages(contact, isConnected);
+function ChatFeed({ userID, event }: ChatFeedProps) {
+  const { socket } = useSocketContext();
+  const messages = useMessages(userID);
   const messageEndRef = useScroll(messages);
 
+  useEffect(() => {
+    if (userID.length !== 0) {
+      if (event === 'messages') {
+        socket.emit(event, {
+          userID
+        });
+      } else {
+        socket.emit(event, {
+          chanID: userID
+        });
+      }
+    }
+  }, [userID, socket, event]);
+
   return (
-    <div>
+    <Scrollable width={336}>
+      {messages.length ? null : (
+        <div className="mt-80 flex h-auto items-center justify-center ">
+          <p className="text-2xl font-extrabold text-pong-blue-100">
+            Start writing :)
+          </p>
+        </div>
+      )}
       {messages.map((chat, index: number) => {
         if (index % 2) {
           return (
@@ -22,7 +46,6 @@ function ChatFeed({ contact, isConnected }: ChatFeedProps) {
               message={chat.message}
               time={chat.time}
               username={chat.username}
-              level={chat.level}
               profilePictureUrl={chat.profilePictureUrl}
               noBgColor
             />
@@ -34,13 +57,12 @@ function ChatFeed({ contact, isConnected }: ChatFeedProps) {
             message={chat.message}
             time={chat.time}
             username={chat.username}
-            level={chat.level}
             profilePictureUrl={chat.profilePictureUrl}
           />
         );
       })}
       <div ref={messageEndRef} />
-    </div>
+    </Scrollable>
   );
 }
 

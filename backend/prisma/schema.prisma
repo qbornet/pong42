@@ -11,19 +11,19 @@ datasource db {
 }
 
 model Users {
-  id              String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email           String         @unique
-  username        String         @unique
-  password        String
-  twoAuthOn       Boolean        @default(false)
-  twoAuthSecret   String?
-  apiToken        String?
-  connectedChat   Boolean        @default(false)
-  restrictList    ChanRestrict[]
-  inviteList      ChanInvite[]
-  channels        Channel[]
-  messageSent     Message[]      @relation(name: "sender")
-  messageReceived Message[]      @relation(name: "receiver")
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email         String         @unique
+  username      String         @unique
+  password      String
+  twoAuthOn     Boolean        @default(false)
+  twoAuthSecret String?
+  apiToken      String?
+  connectedChat Boolean        @default(false)
+  restrictList  ChanRestrict[]
+  inviteList    ChanInvite[]
+  channels      Channel[]
+  messageSent   Message[] @relation(name: "sender")
+  messageReceived Message[] @relation(name: "receiver")
 }
 
 model Message {
@@ -31,11 +31,11 @@ model Message {
   content    String
   sender     Users    @relation(name: "sender", fields: [senderID], references: [id])
   senderID   String   @db.Uuid
-  receiver   Users    @relation(name: "receiver", fields: [receiverID], references: [id])
-  receiverID String   @db.Uuid
-  createdAt  DateTime @default(now())
+  receiver   Users?   @relation(name: "receiver", fields: [receiverID], references: [id])
+  receiverID String?  @db.Uuid
   channel    Channel? @relation(fields: [channelID], references: [id])
   channelID  String?  @db.Uuid
+  createdAt  DateTime @default(now())
 }
 
 model ChanInvite {

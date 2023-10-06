@@ -11,7 +11,7 @@ import {
 import { ChannelService } from '../../database/service/channel.service';
 import { ChatSocket } from '../chat.interface';
 import { Roles, RolesType } from '../decorators/roles.decorator';
-import { ChannelNameDto } from '../dto/channel-name.dto';
+import { ChannelIdDto } from '../dto/channel-id.dto';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -29,15 +29,15 @@ export class RolesGuard implements CanActivate {
     const socket = context.switchToWs().getClient() as ChatSocket;
     const data = context.switchToWs().getData();
 
-    const channelDto = plainToClass(ChannelNameDto, data);
-    const validationErrors = await validate(channelDto);
+    const channelIdDto = plainToClass(ChannelIdDto, data);
+    const validationErrors = await validate(channelIdDto);
     const message = validationErrors.map((e) => e.constraints);
     if (validationErrors.length > 0) {
       throw new BadRequestException({ message });
     }
 
-    const { chanName } = channelDto;
-    const channel = await this.channelService.getChanWithMembers(chanName);
+    const { chanID } = channelIdDto;
+    const channel = await this.channelService.getChanByIdWithMembers(chanID);
     if (channel) {
       let socketRole: RolesType;
       if (channel.creatorID === socket.user.id) {

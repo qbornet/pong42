@@ -11,7 +11,6 @@ export interface PublicChatUser {
   userID: string;
   connected: boolean;
   username: string;
-  messages: PublicMessage[];
 }
 
 export interface PublicMessage {
@@ -19,23 +18,26 @@ export interface PublicMessage {
   content: string;
   sender: string;
   senderID: string;
-  receiver: string;
-  receiverID: string;
+  receiver: string | null;
+  receiverID: string | null;
   createdAt: Date;
 }
 
 export interface PublicChannelMessage {
   messageID: string;
-  chanID: string;
   content: string;
   sender: string;
-  receiver: string;
+  senderID: string;
+  chanName: string | null;
+  chanID: string | null;
   createdAt: Date;
 }
 
 export interface PublicChannel {
   chanID: string;
+  creatorID: string;
   chanName: string;
   chanType: string;
+  chanAdmins: string[];
   chanCreatedAt: Date;
 }

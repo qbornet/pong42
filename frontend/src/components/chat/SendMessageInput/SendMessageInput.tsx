@@ -1,27 +1,33 @@
 import { FaTelegramPlane } from 'react-icons/fa';
 import { useState } from 'react';
-import socket from '../../../services/socket';
+import { useSocketContext } from '../../../contexts/socket';
 
 interface SendMessageInputProps {
+  event: 'privateMessage' | 'channelMessage';
   receiverID: string;
-  isConnected: boolean;
 }
 
-function SendMessageInput({ receiverID, isConnected }: SendMessageInputProps) {
+export function SendMessageInput({ receiverID, event }: SendMessageInputProps) {
   const [message, setMessage] = useState('');
-  // const [isLoading, setIsLoading] = useState(false);
+  const { socket } = useSocketContext();
 
-  const handleSubmit = (event: any) => {
-    event.preventDefault();
-    if (message.length !== 0 && isConnected) {
-      // setIsLoading(true);
-      const data = {
-        content: message,
-        receiverID
+  const handleSubmit = (e: any) => {
+    e.preventDefault();
+    if (message.length !== 0) {
+      const data: {
+        content: string;
+        userID?: string;
+        chanID?: string;
+      } = {
+        content: message
       };
-      socket.timeout(5000).emit('privateMessage', data, () => {
-        // setIsLoading(false);
-      });
+      if (event === 'privateMessage') {
+        data.userID = receiverID;
+      } else {
+        data.chanID = receiverID;
+      }
+
+      socket.emit(event, data);
     }
     setMessage('');
   };
@@ -38,7 +44,7 @@ function SendMessageInput({ receiverID, isConnected }: SendMessageInputProps) {
         autoComplete="false"
         placeholder="Send Message..."
         value={message}
-        onChange={(event) => setMessage(event.target.value)}
+        onChange={(e) => setMessage(e.target.value)}
         className="peer h-8 w-full border-none bg-transparent pr-3 text-pong-white placeholder-pong-blue-100 outline-none"
       />
       <button type="submit">
@@ -47,5 +53,3 @@ function SendMessageInput({ receiverID, isConnected }: SendMessageInputProps) {
     </form>
   );
 }
-
-export default SendMessageInput;

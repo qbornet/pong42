@@ -50,6 +50,19 @@ export class ChannelService {
     }
   }
 
+  async getAllChanWithMembers() {
+    try {
+      return await this.prisma.channel.findMany({
+        include: {
+          members: true
+        }
+      });
+    } catch (e: any) {
+      this.logger.warn(e);
+      return null;
+    }
+  }
+
   async getChanById(id: string) {
     try {
       return await this.prisma.channel.findUnique({
@@ -96,11 +109,43 @@ export class ChannelService {
     }
   }
 
+  async getChanByIdWithRestrictList(id: string) {
+    try {
+      return await this.prisma.channel.findUnique({
+        where: {
+          id
+        },
+        include: {
+          restrictList: true
+        }
+      });
+    } catch (e) {
+      this.logger.warn(e);
+      throw new ForbiddenException();
+    }
+  }
+
   async getChanWithMessages(chanName: string) {
     try {
       return await this.prisma.channel.findUnique({
         where: {
           chanName
+        },
+        include: {
+          messages: true
+        }
+      });
+    } catch (e) {
+      this.logger.warn(e);
+      throw new ForbiddenException();
+    }
+  }
+
+  async getChanByIdWithMessages(id: string) {
+    try {
+      return await this.prisma.channel.findUnique({
+        where: {
+          id
         },
         include: {
           messages: true
@@ -153,16 +198,32 @@ export class ChannelService {
         }
       });
     } catch (e) {
-      this.logger.warn(e);
+      this.logger.warn('getChanWithMembers', e);
       throw new ForbiddenException();
     }
   }
 
-  async addChannelMember(chanName: string, memberId: string) {
+  async getChanByIdWithMembers(id: string) {
+    try {
+      return await this.prisma.channel.findUnique({
+        where: {
+          id
+        },
+        include: {
+          members: true
+        }
+      });
+    } catch (e) {
+      this.logger.warn('getChanWithMembers', e);
+      throw new ForbiddenException();
+    }
+  }
+
+  async addChannelMember(id: string, memberId: string) {
     try {
       return await this.prisma.channel.update({
         where: {
-          chanName
+          id
         },
         data: {
           members: {

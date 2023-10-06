@@ -6,16 +6,8 @@ export const chatMachine = createMachine(
       '': ''
     },
     id: 'chatMachine',
-    initial: 'closed',
+    initial: 'opened',
     states: {
-      closed: {
-        description: 'The channel component is closed',
-        on: {
-          OPEN: {
-            target: '#chatMachine.opened.History State'
-          }
-        }
-      },
       opened: {
         description: 'The channel component is open',
         initial: 'messageView',
@@ -33,7 +25,7 @@ export const chatMachine = createMachine(
                 target: 'conversationView'
               },
               clickOnChannel: {
-                target: 'channelView'
+                target: 'channelSettings'
               }
             }
           },
@@ -85,14 +77,78 @@ export const chatMachine = createMachine(
                 target: 'messageView'
               },
               selectChannel: {
-                target: 'channeConversationView'
+                target: 'channelSettings'
+              },
+              addChannel: {
+                target: 'createORJoinChannelView'
+              },
+              selectHeader: {
+                target: 'channelSettings'
               }
             }
           },
-          channeConversationView: {
+          channelSettings: {
+            on: {
+              clickOnChannel: {
+                target: 'channelView'
+              },
+              clickOnSearch: {
+                target: 'searchView'
+              },
+              clickOnNotification: {
+                target: 'notificationView'
+              },
+              clickOnMessage: {
+                target: 'messageView'
+              },
+              addChannel: {
+                target: 'createORJoinChannelView'
+              }
+            }
+          },
+          createORJoinChannelView: {
             on: {
               selectHeader: {
                 target: 'channelView'
+              },
+              createChannel: {
+                target: 'channelNameView'
+              },
+              joinChannel: {
+                target: 'joinChannelView'
+              }
+            }
+          },
+          channelNameView: {
+            on: {
+              inviteChannel: {
+                target: 'inviteChannelView'
+              },
+              selectHeader: {
+                target: 'channelView'
+              },
+              previousAddChannel: {
+                target: 'createORJoinChannelView'
+              }
+            }
+          },
+          joinChannelView: {
+            on: {
+              previousAddChannel: {
+                target: 'createORJoinChannelView'
+              },
+              closeAddChannel: {
+                target: 'channelView'
+              }
+            }
+          },
+          inviteChannelView: {
+            on: {
+              selectHeader: {
+                target: 'channelView'
+              },
+              previousAddChannel: {
+                target: 'channelNameView'
               }
             }
           },
@@ -106,19 +162,33 @@ export const chatMachine = createMachine(
             target: 'closed'
           }
         }
+      },
+      closed: {
+        description: 'The channel component is closed',
+        on: {
+          OPEN: {
+            target: '#chatMachine.opened.History State'
+          }
+        }
       }
     },
     schema: {
       events: {} as
-        | { type: 'OPEN' }
-        | { type: 'CLOSE' }
-        | { type: 'selectHeader' }
+        | { type: 'clickOnNotification' }
         | { type: 'clickOnSearch' }
-        | { type: 'selectChannel' }
         | { type: 'selectContact' }
         | { type: 'clickOnChannel' }
         | { type: 'clickOnMessage' }
-        | { type: 'clickOnNotification' },
+        | { type: 'selectHeader' }
+        | { type: 'selectChannel' }
+        | { type: 'addChannel' }
+        | { type: 'createChannel' }
+        | { type: 'joinChannel' }
+        | { type: 'inviteChannel' }
+        | { type: 'previousAddChannel' }
+        | { type: 'closeAddChannel' }
+        | { type: 'CLOSE' }
+        | { type: 'OPEN' },
       context: {} as { '': string }
     },
     predictableActionArguments: true,
