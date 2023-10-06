@@ -93,7 +93,7 @@ export class PongService {
         this.ballState.dy = 2 * Math.sin(bounceAngle);
     }
     
-    startBroadcastingBallState(io: Server) {
+    startBroadcastingBallState(io: Server, rightPlayer: string, leftPlayer: string) {
         this.gameInterval = setInterval(() => {
             // Mettre à jour l'état de la balle ici 
             this.ballState.x += this.ballState.dx;
@@ -128,7 +128,6 @@ export class PongService {
             //reinitalisation pos this.ballState quand point marque
             if (this.ballState.x + this.ballState.radius > 1200)
             {
-                
                 // this.logger.log('Joueur gauche a marque 1 Point !!!!!!!!!!!!');
                 this.scorePlayer1++;
                 io.to('room-0').emit('scorePlayer1', this.scorePlayer1)
@@ -142,8 +141,8 @@ export class PongService {
                 this.resetBall();
             }
             io.to('room-0').emit('ballState',this.ballState);
-            io.to('room-0').emit('paddleRight', this.paddlePlayer1);
-            io.to('room-0').emit('paddleLeft', this.paddlePlayer2);
+            io.to(rightPlayer).emit('paddleRight', this.paddlePlayer1);
+            io.to(leftPlayer).emit('paddleLeft', this.paddlePlayer2);
         }, 3);
     }
 }
