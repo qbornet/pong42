@@ -16,7 +16,7 @@ implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
   }
 
   //tableau de joueurs 
-  private players: Array<Socket> = [];
+  // private players: Array<Socket> = [];
 
   isReady: boolean;
   constructor(private userService: UsersService, private pongService: PongService) {
@@ -33,18 +33,15 @@ implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
   
   //checker pourquoi les socket des 2 clients sont mis a jour
   handleConnection(client: Socket, ...args: any[]): any {
-    if (this.players.length === 0) {
-      this.players.push(client);
+    client.join('room-0');
+    const users = this.io.sockets.adapter.rooms.get('room-0');
+    this.logger.debug(client.id);
+    if (users?.size === 1){
       client.emit('playerRole', 1);
-    } else if (this.players.length === 1) {
-      this.players.push(client);
+    }
+    else if (users?.size === 2){
       client.emit('playerRole', 2);
     }
-    else if (this.players.length === 2) {
-      client.emit('errorMessage', 'Room is full');
-      client.disconnect();
-    }
-
     this.logger.debug('New connection : '+ client.id);
   }
 

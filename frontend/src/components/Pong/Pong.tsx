@@ -4,8 +4,6 @@ import { useState } from "react";
 import { useEffect } from "react";
 import { io } from "socket.io-client";
 
-const PADDLE_WIDTH = 10;
-const PADDLE_HEIGHT = 100;
 
 const socket = io('http://localhost:4000', { autoConnect: true, reconnection: false });
 
@@ -20,26 +18,26 @@ export default function Pong() {
     const [leftPaddle, setLeftPaddle] = useState({
         x: 10,
         y: 300,
-        width: PADDLE_WIDTH,
-        height: PADDLE_HEIGHT,
+        width: 10,
+        height: 100,
         dy: 2,
     });
     const [rightPaddle, setRightPaddle] = useState({
         x: 1180,
         y: 300,
-        width: PADDLE_WIDTH,
-        height: PADDLE_HEIGHT,
+        width: 10,
+        height: 100,
         dy: 2,
     })
     const [scorePlayer1, setScorePlayer1] = useState(0);
     const [scorePlayer2, setScorePlayer2] = useState(0);
     const [playerRole, setPlayerRole] = useState<number | null>(null);
-
+    
     function handleReadyClick() {
         socket.emit('playerReady');
     }
-
-    // console.log(playerRole);
+    
+    console.log(playerRole);
     
     
     useEffect(() => {
@@ -60,12 +58,12 @@ export default function Pong() {
         socket.on('playerRole', (role: number) => {
             setPlayerRole(role);
         })
-
+        
         const canvas = canvasRef.current;
         const context = canvas?.getContext("2d");
-
+        
         let animationFrameId: number;
-
+        
         // dessine ligne poitillee au centre
         function drawNet() {
             if (context) {
@@ -173,9 +171,6 @@ export default function Pong() {
                 context.fillText(String(scorePlayer2), 670, 70);
             }
         }
-        
-        //fonction pour ajuster l'angle de la balle selon ou touche la raquette
-        
 
         function draw() {
             resetCanvas();
@@ -194,6 +189,9 @@ export default function Pong() {
         socket.off('ballState', onBallState);
         socket.off('paddleLeft', onRightPaddleState);
         socket.off('paddleRight', onLeftPaddleState);
+        socket.off('scorePlayer1', setScorePlayer1);
+        socket.off('scorePlayer2', setScorePlayer2);
+        socket.off('playerRole', setPlayerRole);
         cancelAnimationFrame(animationFrameId);
         window.removeEventListener("keydown", handleKey);
     };

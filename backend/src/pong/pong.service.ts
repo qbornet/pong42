@@ -131,19 +131,19 @@ export class PongService {
                 
                 // this.logger.log('Joueur gauche a marque 1 Point !!!!!!!!!!!!');
                 this.scorePlayer1++;
-                io.emit('scorePlayer1', this.scorePlayer1)
+                io.to('room-0').emit('scorePlayer1', this.scorePlayer1)
                 this.resetBall();
             }
             if (this.ballState.x + this.ballState.radius < 0)
             {
                 // this.logger.log('joueur droit a marque 1 Point !!!!!!!!!!!!');
                 this.scorePlayer2++;
-                io.emit('scorePlayer2', this.scorePlayer2);
+                io.to('room-0').emit('scorePlayer2', this.scorePlayer2);
                 this.resetBall();
             }
-            io.emit('ballState',this.ballState);
-            io.emit('paddleRight', this.paddlePlayer1);
-            io.emit('paddleLeft', this.paddlePlayer2);
+            io.to('room-0').emit('ballState',this.ballState);
+            io.to('room-0').emit('paddleRight', this.paddlePlayer1);
+            io.to('room-0').emit('paddleLeft', this.paddlePlayer2);
         }, 3);
     }
 }
