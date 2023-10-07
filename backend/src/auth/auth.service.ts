@@ -7,17 +7,20 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import axios, { AxiosResponse } from 'axios';
+import { HttpService } from '@nestjs/axios';
+import { AxiosResponse } from 'axios';
 import * as bcrypt from 'bcrypt';
+import { lastValueFrom, map } from 'rxjs';
 import { authenticator } from 'otplib';
-import { toFileStream } from 'qrcode';
-import { Request, Response } from 'express';
+import { toDataURL } from 'qrcode';
+import { Request } from 'express';
 import { IUsers } from 'src/database/service/interface/users';
 import { CONST_URL } from './constants';
 import { UsersService } from '../database/service/users.service';
 
 type CreateUserDto = { email: string; username: string; password: string };
 type UpdateUserDto = {
+  img?: string;
   email?: string;
   username?: string;
   apiToken?: string;
@@ -38,14 +41,15 @@ export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly httpService: HttpService
   ) {
     this.logger.log('AuthService Init...');
   }
 
   // generate QrCode
-  async pipeQrCodeStream(stream: Response, optAuthUrl: string) {
-    return toFileStream(stream, optAuthUrl);
+  async generateQrCodeDataUrl(optAuthUrl: string) {
+    return toDataURL(optAuthUrl);
   }
 
   // generate 2FA Secret for the user
@@ -151,29 +155,13 @@ export class AuthService {
       headers: { Authorization: `Bearer ${token}` }
     };
 
-    try {
-      const res: AxiosResponse = await axios.get(
-        'https://api.intra.42.fr/v2/me',
-        config
-      );
-      const { email } = res.data;
-      return await this.usersService.getUser({ email });
-    } catch (error) {
-      this.logger.warn(error);
-      return null;
-    }
-  }
-
-  async findUserByJWT(token: string) {
-    try {
-      this.jwtService.verify(token);
-      const payload: any = this.jwtService.decode(token);
-      const { email } = payload;
-      return await this.usersService.getFullUserWithEmail(email);
-    } catch (error) {
-      this.logger.warn(error);
-      return null;
-    }
+    this.logger.debug('in findUserWithToken()');
+    const info$ = this.httpService
+      .get('https://api.intra.42.fr/v2/me', config)
+      .pipe(map((response: AxiosResponse) => response.data));
+    const info = await lastValueFrom(info$);
+    const { email } = info;
+    return this.usersService.getUser({ email });
   }
 
   // get Token from api 42
@@ -183,7 +171,8 @@ export class AuthService {
 
     if (clientId !== undefined && clientSecret !== undefined) {
       try {
-        const promise = await axios
+        this.logger.debug('in callbackToken()');
+        const promise = await this.httpService.axiosRef
           .postForm(CONST_URL, {
             grant_type: 'authorization_code',
             client_id: clientId,
@@ -192,7 +181,7 @@ export class AuthService {
             redirect_uri: 'http://localhost:3000/auth/callback',
             state
           })
-          .then((res) => res.data);
+          .then((res: AxiosResponse) => res.data);
         return promise;
       } catch (e: any) {
         throw new HttpException(

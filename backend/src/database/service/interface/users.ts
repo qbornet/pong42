@@ -54,4 +54,5 @@ export interface IUsers {
   inviteList: Partial<IChanInvite>[];
   restrictList: Partial<IChanRestrict>[];
   channels: Partial<IChannel>[];
+  img?: string;
 }

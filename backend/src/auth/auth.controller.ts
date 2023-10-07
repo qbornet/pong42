@@ -14,15 +14,22 @@ import {
   Logger,
   UnauthorizedException
 } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
 import { Request, Response } from 'express';
-import axios, { AxiosResponse } from 'axios';
+import { AxiosResponse } from 'axios';
+import { lastValueFrom, map } from 'rxjs';
 import * as bcrypt from 'bcrypt';
 import { ApiGuard } from '@api';
 import { JwtAuthGuard } from '@jwt';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { ContentValidationPipe, createSchema } from './pipes/validation.pipe';
 import { CreateDto } from './dto/create-dto';
-import { CONST_INFO_URL, CONST_LOCAL_LOGIN, CONST_SALT } from './constants';
+import {
+  CONST_FRONTEND_URL,
+  CONST_INFO_URL,
+  CONST_LOCAL_LOGIN,
+  CONST_SALT
+} from './constants';
 import { AuthService } from './auth.service';
 import { IUsers } from '../database/service/interface/users';
 
@@ -30,7 +37,10 @@ import { IUsers } from '../database/service/interface/users';
 export class AuthController {
   private logger = new Logger('AuthController');
 
-  constructor(private readonly authService: AuthService) {
+  constructor(
+    private readonly authService: AuthService,
+    private readonly httpService: HttpService
+  ) {
     this.logger.log('AuthController Init...');
   }
 
@@ -44,30 +54,9 @@ export class AuthController {
   @Post('2fa-generate')
   @UseGuards(ApiGuard, JwtAuthGuard)
   @HttpCode(200)
-  async generate2Fa(@Req() req: any, @Res() res: any) {
+  async generate2Fa(@Req() req: any) {
     const { optAuthUrl } = await this.authService.generate2FASecret(req.user);
-    return this.authService.pipeQrCodeStream(res, optAuthUrl);
-  }
-
-  @Post('2fa-turn-on')
-  @UseGuards(ApiGuard, JwtAuthGuard)
-  @HttpCode(200)
-  async turnOnTwoAuthFactor(
-    @Req() req: any,
-    @Res() res: any,
-    @Body('twoFactorAuthCode') twoFactorAuthCode: string
-  ) {
-    const isCodeValid = this.authService.twoAuthCodeValid(
-      twoFactorAuthCode,
-      req.user
-    );
-    if (!isCodeValid) {
-      throw new UnauthorizedException('Wrong authentication code');
-    }
-    await this.authService.updateUser(req.user, {
-      twoAuthOn: true
-    });
-    res.json({ message: 'ok' });
+    return this.authService.generateQrCodeDataUrl(optAuthUrl);
   }
 
   @Get('2fa-login')
@@ -107,11 +96,8 @@ export class AuthController {
   @Post('login')
   @UseGuards(ApiGuard, LocalAuthGuard)
   @HttpCode(200)
-  async login(@Req() req: any, @Res({ passthrough: true }) res: any) {
-    const jsonWebToken = await this.authService.login(req.user);
-
-    res.setHeader('Authorization', `Bearer ${jsonWebToken.access_token}`);
-    return jsonWebToken;
+  async login(@Req() req: any) {
+    return this.authService.login(req.user);
   }
 
   @Get('callback')
@@ -139,20 +125,26 @@ export class AuthController {
         sameSite: 'lax',
         httpOnly: true
       });
-      res.status(301).redirect('/auth/create_profile');
-    } else {
-      const usernameAndHash = `${user.username}|${hash}`;
-      res.cookie('api_token', usernameAndHash, {
-        maxAge: token.expires_in * 1000,
-        sameSite: 'lax',
-        httpOnly: true
-      });
-      await this.authService.updateUser(user as Partial<IUsers>, {
-        apiToken: token.access_token
-      });
-      if (user && user.twoAuthOn) res.status(301).redirect('/auth/2fa-login');
-      res.status(301).redirect('/auth/login');
+      res.status(301).redirect(`${CONST_FRONTEND_URL}/signup`);
+      return;
     }
+
+    const usernameAndHash = `${user.username}|${hash}`;
+    res.cookie('api_token', usernameAndHash, {
+      maxAge: token.expires_in * 1000,
+      sameSite: 'lax',
+      httpOnly: true
+    });
+    await this.authService.updateUser(user, {
+      apiToken: token.access_token
+    });
+
+    // res should not be return to avoid cerciluar dependicy
+    if (user.twoAuthOn) {
+      res.status(301).redirect(`${CONST_FRONTEND_URL}/2fa-login`);
+      return;
+    }
+    res.status(301).redirect(`${CONST_FRONTEND_URL}/login`);
   }
 
   // this might change in the future.
@@ -177,9 +169,11 @@ export class AuthController {
         headers: { Authorization: `Bearer ${token}` }
       };
 
-      const info = await axios
+      this.logger.debug('in createUser() or post create_profile route 1st');
+      const info$ = this.httpService
         .get('https://api.intra.42.fr/v2/me', config)
-        .then((resp: AxiosResponse) => resp.data);
+        .pipe(map((response: AxiosResponse) => response.data));
+      const info = await lastValueFrom(info$);
 
       const { email } = info;
       const salt = await bcrypt.genSalt(CONST_SALT);
@@ -188,20 +182,24 @@ export class AuthController {
         email,
         username: user.username,
         password: passwordHash,
+        twoAuthOn: user.twoAuth === 'on',
         apiToken: token
       };
 
       const promise = await this.authService.createUser(updatedUser);
       if (!promise) {
-        return res.status(HttpStatus.FORBIDDEN).json({
+        res.status(HttpStatus.FORBIDDEN).json({
           message: 'Failed to create user, user might already exist.'
         });
+        return;
       }
 
-      const tokenInfo = await axios
+      this.logger.debug('in createUser() or post create_profile route 2nd');
+      const tokenInfo$ = this.httpService
         .get(CONST_INFO_URL, config)
-        .then((resp: AxiosResponse) => resp.data);
+        .pipe(map((response: AxiosResponse) => response.data));
 
+      const tokenInfo = await lastValueFrom(tokenInfo$);
       const hash = await bcrypt.hash(token, salt);
       const usernameAndHash = `${user.username}|${hash}`;
       res.cookie('api_token', usernameAndHash, {
@@ -215,16 +213,21 @@ export class AuthController {
         password: user.password
       };
 
-      const jsonWebToken = await axios
-        .post(CONST_LOCAL_LOGIN, JSON.stringify(loginInfo), {
+      this.logger.debug('in createUser() or post create_profile route 3rd');
+      const jwt$ = this.httpService
+        .post(CONST_LOCAL_LOGIN, loginInfo, {
           headers: {
             Cookie: `api_token=${usernameAndHash}`,
             'Content-Type': 'application/json'
           }
         })
-        .then((response: AxiosResponse) => response.data);
+        .pipe(map((response: AxiosResponse) => response.data));
+
+      const jsonWebToken = await lastValueFrom(jwt$);
       res.setHeader('Authorization', `Bearer ${jsonWebToken.access_token}`);
-      return res.status(HttpStatus.CREATED).json({ message: 'ok' });
+      res
+        .status(HttpStatus.CREATED)
+        .json({ message: 'ok', access_token: jsonWebToken.access_token });
     } catch (e) {
       throw new HttpException(`${e.message}`, e.code);
     }

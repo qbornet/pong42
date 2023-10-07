@@ -44,6 +44,8 @@ module.exports = {
         }
       }
     ],
+    'eol-last': 'off',
+    'import/prefer-default-export': 'off',
     '@typescript-eslint/comma-dangle': 'off',
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
     'import/prefer-default-export': 'off',

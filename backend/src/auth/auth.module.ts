@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
+import { HttpModule } from '@nestjs/axios';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService, ConfigModule } from '@nestjs/config';
 import { AuthService } from './auth.service';
@@ -22,7 +23,8 @@ import { JwtStrategy } from './strategy/jwt.strategy';
         };
       },
       inject: [ConfigService]
-    })
+    }),
+    HttpModule
   ],
   providers: [AuthService, LocalStrategy, JwtStrategy, ConfigService],
   controllers: [AuthController],

@@ -3,8 +3,8 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
-      boxShadow: {
-        pong: '0px -2px 0px 0px #3C3B6C'
+      fontFamily: {
+        roboto: ['Roboto', 'sans-serif']
       },
       colors: {
         pong: {
@@ -31,7 +31,17 @@ export default {
             800: '#161748',
             900: '#161748'
           }
-        }
+        },
+        'blue-pong-1': '#6E6FA5',
+        'blue-pong-2': '#2A2957',
+        'blue-pong-3': '#1C1C45',
+        'blue-pong-4': '#38396F',
+        'green-login': '#00BABC',
+        'profile-purple': '#6659FD'
+      },
+      backgroundImage: {
+        default: "url('./images/background.png')",
+        'profile-default': "url('./images/background_profile.png')"
       }
     }
   },
