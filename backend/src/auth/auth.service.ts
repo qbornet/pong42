@@ -68,6 +68,18 @@ export class AuthService {
     };
   }
 
+  async findUserByJWT(token: string) {
+    try {
+      this.jwtService.verify(token);
+      const payload: any = this.jwtService.decode(token);
+      const { email } = payload;
+      return await this.usersService.getFullUserWithEmail(email);
+    } catch (error) {
+      this.logger.warn(error);
+      return null;
+    }
+  }
+
   // login 2Fa
   async loginWith2Fa(userWithoutPsw: Partial<IUsers>) {
     const payload = {

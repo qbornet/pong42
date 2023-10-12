@@ -15,9 +15,9 @@ import { ApiGuard } from 'src/auth/guards/api.guard';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { AuthService } from 'src/auth/auth.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import IUsers from 'src/database/service/interface/users';
 import { ImgService } from './img.service';
 import { FileValidationPipe } from './pipe/file-validation.pipe';
+import { IUsers } from '../database/service/interface/users';
 
 @Controller('img')
 export class ImgController {
@@ -46,7 +46,7 @@ export class ImgController {
 
     this.imgService.deleteFile(user.img);
     const { twoAuthOn, twoAuthSecret, ...remaningUser } = user;
-    const properlyFormatedUser: IUsers = {
+    const properlyFormatedUser: Partial<IUsers> = {
       ...remaningUser,
       twoAuth: {
         twoAuthOn,
