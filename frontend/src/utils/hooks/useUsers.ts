@@ -2,17 +2,28 @@ import { useEffect, useState } from 'react';
 import { useSocketContext } from '../../contexts/socket';
 import { ContactList, User } from './useStatus.interfaces';
 
-export function useUsers(): ContactList {
+export function useUsers(): {
+  contactList: ContactList;
+  blockedList: ContactList;
+} {
   const { socket } = useSocketContext();
   const [contactList, setContactList] = useState<ContactList>([]);
+  const [blockedList, setBlockedList] = useState<ContactList>([]);
 
   useEffect(() => {
-    const onChannelMembers = (data: ContactList) => {
-      setContactList(data);
-    };
     const onUsers = (data: ContactList) => {
       setContactList(data.filter((d) => d.userID !== socket.userID));
     };
+
+    const onUsersBlocked = (data: ContactList) => {
+      setBlockedList(data.filter((d) => d.userID !== socket.userID));
+    };
+
+    const onBlockUser = () => {
+      socket.emit('users');
+      socket.emit('usersBlocked');
+    };
+
     const onUserDisconnected = (data: User) => {
       setContactList((list) => {
         const newList = list.map((c) => {
@@ -38,16 +49,18 @@ export function useUsers(): ContactList {
     };
 
     socket.on('users', onUsers);
-    socket.on('channelMembers', onChannelMembers);
+    socket.on('usersBlocked', onUsersBlocked);
     socket.on('userConnected', onUserConnected);
     socket.on('userDisconnected', onUserDisconnected);
+    socket.on('blockUser', onBlockUser);
     return () => {
       socket.off('users', onUsers);
-      socket.off('channelMembers', onChannelMembers);
+      socket.off('usersBlocked', onUsersBlocked);
       socket.off('userConnected', onUserConnected);
       socket.off('userDisconnected', onUserDisconnected);
+      socket.off('blockUser', onBlockUser);
     };
   }, [socket]);
 
-  return contactList;
+  return { contactList, blockedList };
 }

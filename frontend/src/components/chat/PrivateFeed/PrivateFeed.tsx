@@ -5,33 +5,15 @@ import { useScroll } from '../../../utils/hooks/useScroll';
 import { Scrollable } from '../Scrollable/Scrollable';
 import { useSocketContext } from '../../../contexts/socket';
 
-interface ChanFeedProps {
+interface PrivateFeedProps {
   event: 'channelMessages' | 'messages';
   userID: string;
-  toggleChannelSettings: () => any;
 }
 
-function ChanFeed({ userID, event, toggleChannelSettings }: ChanFeedProps) {
+export function PrivateFeed({ userID, event }: PrivateFeedProps) {
   const { socket } = useSocketContext();
   const messages = useMessages(userID);
   const messageEndRef = useScroll(messages);
-
-  useEffect(() => {
-    const onChannelRestrict = (data: {
-      userID: string;
-      chanID: string;
-      reason: string;
-      type: string;
-    }) => {
-      if (socket.userID === data.userID) {
-        toggleChannelSettings();
-      }
-    };
-    socket.on('channelRestrict', onChannelRestrict);
-    return () => {
-      socket.off('channelRestrict', onChannelRestrict);
-    };
-  });
 
   useEffect(() => {
     if (userID.length !== 0) {
@@ -83,5 +65,3 @@ function ChanFeed({ userID, event, toggleChannelSettings }: ChanFeedProps) {
     </Scrollable>
   );
 }
-
-export default ChanFeed;

@@ -1,82 +1,122 @@
 import { useEffect } from 'react';
-import {
-  Contact,
-  ContactList
-} from '../../../utils/hooks/useStatus.interfaces';
-import { useUsers } from '../../../utils/hooks/useUsers';
-import { ContactCard } from '../ContactCard/ContactCard';
 import { Scrollable } from '../Scrollable/Scrollable';
 import { useSocketContext } from '../../../contexts/socket';
 import { useChanInfo } from '../../../utils/hooks/useChannelInfo';
+import { ChannelList } from '../ChannelList/ChannelList';
+import { LeaveChannel } from '../LeaveChannel/LeaveChannel';
+import { useChanUsers } from '../../../utils/hooks/useChanUsers';
+import { UpdateChannel } from '../AddPassword/AddPassword';
 
 interface ContactListProps {
   chanID: string;
+  setChanID: (arg: string) => any;
+  updateChannel: () => any;
 }
 
-export function ChannelListFeed({ chanID }: ContactListProps) {
+export function ChannelListFeed({
+  chanID,
+  setChanID,
+  updateChannel
+}: ContactListProps) {
   const { socket } = useSocketContext();
-  const contactList = useUsers();
+  const { contactList, bannedList } = useChanUsers(() => setChanID(''));
+
   const channel = useChanInfo();
-
+  const isCreator = (userID: string) => channel?.creatorID === userID;
+  const isAdmin = (userID: string) => {
+    if (channel && !isCreator(userID)) {
+      return channel.chanAdmins.includes(userID);
+    }
+    return false;
+  };
+  const isMember = (userID: string) => {
+    if (!isCreator(userID) && !isAdmin(userID)) {
+      return true;
+    }
+    return false;
+  };
   useEffect(() => {
-    if (chanID.length !== 0) {
-      socket.emit('channelMembers', { chanID });
-      socket.emit('channelInfo', { chanID });
-    }
-  }, [socket, chanID]);
-
-  const admins: ContactList = [];
-  const online: ContactList = [];
-  const offline: ContactList = [];
-
-  contactList.forEach((user) => {
-    if (channel && user.connected === true) {
-      if (channel.chanAdmins.find((a) => a === user.userID)) {
-        admins.push(user);
-      } else {
-        online.push(user);
+    const emitInfo = () => {
+      if (chanID.length !== 0) {
+        socket.emit('usersBanned', { chanID });
+        socket.emit('channelMembers', { chanID });
+        socket.emit('channelInfo', { chanID });
       }
-    } else {
-      offline.push(user);
+    };
+    emitInfo();
+    socket.on('channelAddAdmin', emitInfo);
+    socket.on('channelRestrict', emitInfo);
+    socket.on('channelRemoveAdmin', emitInfo);
+    return () => {
+      socket.off('channelAddAdmin', emitInfo);
+      socket.off('channelRestrict', emitInfo);
+      socket.off('channelRemoveAdmin', emitInfo);
+    };
+  }, [socket, chanID]);
+  useEffect(() => {}, [socket]);
+
+  const handleLeave = () => {
+    if (chanID.length !== 0) {
+      socket.emit('channelLeave', { chanID });
     }
-  });
-  const displayCard = (user: Contact) => (
-    <ContactCard
-      key={user.userID}
-      username={user.username}
-      userID={user.userID}
-      onClick={() => {}}
-      url="starwatcher.jpg"
-    />
-  );
+  };
+
+  const handleDelete = () => {
+    if (chanID.length !== 0) {
+      socket.emit('channelDelete', { chanID });
+    }
+  };
   return (
     <div className="w-full">
       <Scrollable>
         <div className="flex flex-col gap-3">
-          {admins.length ? (
-            <div>
-              <p className="pl-2 font-semibold text-pong-blue-100">
-                {`ADMINS — ${admins.length}`}
-              </p>
-              {admins.map(displayCard)}
-            </div>
+          <ChannelList
+            list={contactList.filter((c) => isCreator(c.userID))}
+            title="CREATOR"
+            chanID={channel ? channel.chanID : ''}
+            isAdmin={false}
+            isCreator={false}
+          />
+          <ChannelList
+            list={contactList.filter((c) => isAdmin(c.userID))}
+            title="ADMINS"
+            chanID={channel ? channel.chanID : ''}
+            isAdmin={isAdmin(socket.userID)}
+            isCreator={isCreator(socket.userID)}
+            adminSection
+          />
+          <ChannelList
+            list={contactList.filter((c) => isMember(c.userID))}
+            title="MEMBER"
+            chanID={channel ? channel.chanID : ''}
+            isAdmin={isAdmin(socket.userID)}
+            isCreator={isCreator(socket.userID)}
+          />
+
+          {isCreator(socket.userID) || isAdmin(socket.userID) ? (
+            <ChannelList
+              list={bannedList}
+              title="BANLIST"
+              chanID={channel ? channel.chanID : ''}
+              isAdmin={false}
+              isCreator={false}
+              isBanned
+            />
           ) : null}
-          {online.length ? (
-            <div>
-              <p className="pl-2 font-semibold text-pong-blue-100">
-                {`ONLINE — ${online.length}`}
-              </p>
-              {online.map(displayCard)}
-            </div>
+
+          {isCreator(socket.userID) ? (
+            <UpdateChannel
+              display={contactList.length !== 0}
+              handler={updateChannel}
+              label="Channel configuration"
+            />
           ) : null}
-          {offline.length ? (
-            <div>
-              <p className="pl-2 font-bold text-pong-blue-100">
-                {`OFFLINE — ${offline.length}`}
-              </p>
-              {offline.map(displayCard)}
-            </div>
-          ) : null}
+          <LeaveChannel
+            display={contactList.length !== 0}
+            handler={isCreator(socket.userID) ? handleDelete : handleLeave}
+            label={isCreator(socket.userID) ? 'Delete channel' : 'Leave'}
+            disabled={contactList.length > 1 && isCreator(socket.userID)}
+          />
         </div>
       </Scrollable>
     </div>

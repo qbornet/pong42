@@ -42,7 +42,6 @@ import { ChannelNameDto } from './dto/channel-name.dto';
 import { ChannelMessageDto } from './dto/channel-message.dto';
 import { ChannelUsersDto } from './dto/channel-users.dto';
 import { EmptyChannel } from './decorators/empty-channel';
-import { ChanRestrictService } from '../database/service/chan-restrict.service';
 import { ChannelRestrictDto } from './dto/channel-restrict.dto';
 import { UserDto } from './dto/user.dto';
 import { ChannelIdDto } from './dto/channel-id.dto';
@@ -60,11 +59,12 @@ export default class ChatGateway
 {
   private readonly logger = new Logger(ChatGateway.name);
 
+  private socketMap = new Map();
+
   constructor(
     private usersService: UsersService,
     private messageService: MessageService,
-    private channelService: ChannelService,
-    private chanRestrictService: ChanRestrictService
+    private channelService: ChannelService
   ) {}
 
   getLogger(): Logger {
@@ -114,6 +114,7 @@ export default class ChatGateway
 
   async handleConnection(socket: ChatSocket) {
     const senderID = socket.user.id!;
+    this.socketMap.set(senderID, socket);
 
     this.logger.log(`ClientId: ${socket.user.id} connected`);
     this.logger.log(`Nb clients: ${this.io.sockets.sockets.size}`);
@@ -132,7 +133,8 @@ export default class ChatGateway
   }
 
   async handleDisconnect(socket: ChatSocket) {
-    this.logger.log(`ClientId: ${socket.user.id} disconnected`);
+    const senderID = socket.user.id!;
+    this.logger.log(`ClientId: ${senderID} disconnected`);
     this.logger.log(`Nb clients: ${this.io.sockets.sockets.size}`);
 
     this.usersService.setChatDisonnected(socket.user.id!);
@@ -144,6 +146,7 @@ export default class ChatGateway
         userID: socket.user.id,
         username: socket.user.username
       });
+      this.socketMap.delete(senderID);
     }
   }
 
@@ -186,18 +189,101 @@ export default class ChatGateway
 
   @SubscribeMessage('users')
   async handleUsers(@ConnectedSocket() socket: ChatSocket) {
+    const senderID = socket.user.id!;
+    const user = await this.usersService.getUserById(senderID);
     const privateUsers = await this.usersService.getAllUsers();
     const publicUsers: PublicChatUser[] = [];
-    if (privateUsers) {
-      privateUsers!.forEach((user) => {
-        publicUsers.push({
-          userID: user.id,
-          connected: user.connectedChat,
-          username: user.username!
+    if (privateUsers && user) {
+      privateUsers
+        .filter((u) => !user.blockList.includes(u.id))
+        .forEach((u) => {
+          publicUsers.push({
+            userID: u.id,
+            connected: u.connectedChat,
+            username: u.username!
+          });
         });
-      });
     }
     socket.emit('users', publicUsers);
+  }
+
+  @SubscribeMessage('usersBlocked')
+  async handleUsersBlocked(@ConnectedSocket() socket: ChatSocket) {
+    const senderID = socket.user.id!;
+    const user = await this.usersService.getUserById(senderID);
+    const privateUsers = await this.usersService.getAllUsers();
+    const publicUsers: PublicChatUser[] = [];
+    if (privateUsers && user) {
+      privateUsers
+        .filter((u) => user.blockList.includes(u.id))
+        .forEach((u) => {
+          publicUsers.push({
+            userID: u.id,
+            connected: u.connectedChat,
+            username: u.username!
+          });
+        });
+    }
+    socket.emit('usersBlocked', publicUsers);
+  }
+
+  @SubscribeMessage('usersBanned')
+  async handleUsersBanned(
+    @MessageBody(new ValidationPipe()) channelIdDto: ChannelIdDto,
+    @ConnectedSocket() socket: ChatSocket
+  ) {
+    const { chanID } = channelIdDto;
+    const senderID = socket.user.id!;
+    const channel = await this.channelService.getChanById(chanID);
+    const privateUsers = await this.usersService.getAllUsers();
+    if (channel && privateUsers) {
+      const banMembers: PublicChatUser[] = privateUsers
+        .filter((m) => channel.bans.includes(m.id))
+        .map((m) => ({
+          userID: m.id,
+          connected: m.connectedChat,
+          username: m.username!
+        }));
+      this.io.to(senderID).emit('usersBanned', banMembers);
+    }
+  }
+
+  @SubscribeMessage('unblockUser')
+  async handleUnblockUser(
+    @MessageBody(new ValidationPipe()) userDto: UserDto,
+    @ConnectedSocket() socket: ChatSocket
+  ) {
+    const { userID } = userDto;
+    const senderID = socket.user.id!;
+    const user = await this.usersService.getUserById(senderID);
+    if (user && userID !== senderID) {
+      const newBlocks = user.blockList.filter((id) => id !== userID);
+      const blockSet = new Set(newBlocks);
+      user.blockList = Array.from(blockSet);
+      await this.usersService.updateUser({ username: user.username }, user);
+      socket.emit('blockUser', {
+        userID
+      });
+    }
+  }
+
+  @SubscribeMessage('blockUser')
+  async handleBlockUser(
+    @MessageBody(new ValidationPipe()) userDto: UserDto,
+    @ConnectedSocket() socket: ChatSocket
+  ) {
+    const { userID } = userDto;
+    const senderID = socket.user.id!;
+    const user = await this.usersService.getUserById(senderID);
+    if (user && userID !== senderID) {
+      const newBlocks = user.blockList.concat(userID);
+      const blockSet = new Set(newBlocks);
+      user.blockList = Array.from(blockSet);
+      await this.usersService.updateUser({ username: user.username }, user);
+      socket.emit('blockUser', {
+        userID
+      });
+    }
   }
 
   @SubscribeMessage('channels')
@@ -238,7 +324,13 @@ export default class ChatGateway
     });
     const sender = await this.usersService.getUserById(senderID);
     const receiver = await this.usersService.getUserById(userID);
-    if (message && message.receiverID) {
+    if (
+      sender &&
+      receiver &&
+      !receiver.blockList.includes(sender.id) &&
+      message &&
+      message.receiverID
+    ) {
       const publicMessage: PublicMessage = {
         content: message.content,
         sender: sender!.username,
@@ -296,25 +388,21 @@ export default class ChatGateway
   @Roles(['creator'])
   @SubscribeMessage('channelDelete')
   async handleDeleteChannel(
-    @MessageBody(new ValidationPipe()) channelDto: ChannelNameDto,
+    @MessageBody(new ValidationPipe()) channelIdDto: ChannelIdDto,
     @ConnectedSocket() socket: ChatSocket
   ) {
-    const { chanName } = channelDto;
-    const clientId = socket.user.id!;
-    this.logger.log(`Client ${clientId} request to delete chan ${chanName}`);
+    const { chanID } = channelIdDto;
+    const senderID = socket.user.id!;
+    this.logger.log(`Client ${senderID} request to delete chan ${chanID}`);
 
-    const deletedChan = await this.channelService.deleteChannelByName(chanName);
+    await this.messageService.deleteMessageByChanId(chanID);
+    const deletedChan = await this.channelService.deleteChannelById(chanID);
     if (deletedChan) {
       socket.leave(deletedChan.id);
-      const pubChan: PublicChannel = {
+      this.io.to(senderID).emit('channelDelete', {
         chanID: deletedChan.id,
-        chanAdmins: deletedChan.admins,
-        creatorID: deletedChan.creatorID,
-        chanName: deletedChan.chanName,
-        chanType: deletedChan.type,
-        chanCreatedAt: deletedChan.createdAt
-      };
-      this.io.to(clientId).emit('channelDelete', pubChan);
+        userID: senderID
+      });
     }
   }
 
@@ -323,12 +411,12 @@ export default class ChatGateway
   @UseGuards(JoinChannelGuard)
   @SubscribeMessage('channelJoin')
   async handleJoinChannel(
-    @MessageBody(new ValidationPipe()) channelIdDto: ChannelIdDto,
+    @MessageBody(new ValidationPipe()) channelNameDto: ChannelNameDto,
     @ConnectedSocket() socket: ChatSocket
   ) {
-    const { chanID } = channelIdDto;
+    const { chanName } = channelNameDto;
     const clientId = socket.user.id!;
-    this.logger.log(`ClientId ${clientId} request to join chan ${chanID}`);
+    this.logger.log(`ClientId ${clientId} request to join chan ${chanName}`);
 
     const user = await this.usersService.getUserById(clientId);
     if (!user) {
@@ -338,7 +426,7 @@ export default class ChatGateway
       });
     }
     const channel = await this.channelService.addChannelMember(
-      chanID,
+      chanName,
       clientId
     );
     if (channel) {
@@ -350,9 +438,9 @@ export default class ChatGateway
         chanType: channel.type,
         chanCreatedAt: channel.createdAt
       };
-      socket.join(chanID);
+      socket.join(channel.id);
       this.io.to(clientId).emit('channelJoin', pubChannel);
-      const pubChatUser: Partial<PublicChatUser> = {
+      const pubChatUser: PublicChatUser = {
         username: user.username,
         userID: user.id,
         connected: user.connectedChat
@@ -397,20 +485,22 @@ export default class ChatGateway
   @Roles(['member', 'admin'])
   @SubscribeMessage('channelLeave')
   async handleLeaveChannel(
-    @MessageBody(new ValidationPipe()) leaveChannelDto: ChannelNameDto,
+    @MessageBody(new ValidationPipe()) channelIdDto: ChannelIdDto,
     @ConnectedSocket() socket: ChatSocket
   ) {
-    const { chanName } = leaveChannelDto;
+    const { chanID } = channelIdDto;
     const senderID = socket.user.id!;
-    this.logger.log(`User ${senderID} leave channel [${chanName}]`);
+    this.logger.log(`User ${senderID} leave channel [${chanID}]`);
     const channel = await this.channelService.removeChannelMember(
-      chanName,
+      chanID,
       senderID
     );
     if (channel) {
+      const admins = channel.admins.filter((id) => id !== senderID);
+      const adminsSet = new Set(admins);
+      await this.channelService.updateAdmins(chanID, Array.from(adminsSet));
       socket.leave(channel.id);
       this.io.to(channel.id).to(senderID).emit('channelLeave', {
-        chanName,
         chanID: channel.id,
         userID: senderID
       });
@@ -423,44 +513,61 @@ export default class ChatGateway
     @MessageBody(new ValidationPipe()) channelUsersDto: ChannelUsersDto,
     @ConnectedSocket() socket: ChatSocket
   ) {
-    const { usersID, chanName } = channelUsersDto;
+    const { usersID, chanID } = channelUsersDto;
     const senderID = socket.user.id!;
     this.logger.log(
-      `Add admin request for ${usersID} by ${senderID} for channel ${chanName}`
+      `Add admin request for ${usersID} by ${senderID} for channel ${chanID}`
     );
-    const channel = await this.channelService.getChanByName(chanName);
+    const channel = await this.channelService.getChanById(chanID);
     if (channel) {
-      const { admins } = channel;
-      admins.concat(usersID);
-      const adminsSet = new Set(admins);
-      await this.channelService.updateAdmins(chanName, Array.from(adminsSet));
-      this.io.to(senderID).to(usersID).emit('channelAddAdmin', {
+      const newAdmins = channel.admins.concat(usersID);
+      const adminsSet = new Set(newAdmins);
+      await this.channelService.updateAdmins(chanID, Array.from(adminsSet));
+      this.io.to(channel.id).emit('channelAddAdmin', {
         chanID: channel.id,
         userID: usersID
       });
     }
   }
 
-  @Roles(['creator'])
+  @Roles(['creator', 'admin'])
   @SubscribeMessage('channelRemoveAdmin')
   async handleRemoveAdminChannel(
     @MessageBody(new ValidationPipe()) channelUsersDto: ChannelUsersDto,
     @ConnectedSocket() socket: ChatSocket
   ) {
-    const { usersID, chanName } = channelUsersDto;
+    const { usersID, chanID } = channelUsersDto;
     const senderID = socket.user.id!;
     this.logger.log(
-      `Remove admin request for ${usersID} by ${senderID} for channel ${chanName}`
+      `Remove admin request for ${usersID} by ${senderID} for channel ${chanID}`
     );
-    const channel = await this.channelService.getChanByName(chanName);
+    const channel = await this.channelService.getChanById(chanID);
     if (channel) {
       const admins = channel.admins.filter((admin) => !usersID.includes(admin));
       const adminsSet = new Set(admins);
-      await this.channelService.updateAdmins(chanName, Array.from(adminsSet));
-      this.io.to(senderID).to(usersID).emit('channelRemoveAdmin', {
+      await this.channelService.updateAdmins(chanID, Array.from(adminsSet));
+      this.io.to(channel.id).emit('channelRemoveAdmin', {
         chanID: channel.id,
         userID: usersID
       });
+    }
+  }
+
+  @UseGuards(JoinChannelGuard)
+  @SubscribeMessage('channelId')
+  async handleChannelId(
+    @MessageBody(new ValidationPipe()) channelNameDto: ChannelNameDto,
+    @ConnectedSocket() socket: ChatSocket
+  ) {
+    const { chanName } = channelNameDto;
+    const senderID = socket.user.id!;
+    this.logger.log(
+      `Channel id request for channel ${chanName} by user ${senderID}`
+    );
+
+    const channel = await this.channelService.getChanByName(chanName);
+    if (channel) {
+      this.io.to(senderID).emit('channelId', channel.id);
     }
   }
 
@@ -480,7 +587,7 @@ export default class ChatGateway
     if (channel) {
       const pubChan: PublicChannel = {
         chanID: channel.id,
-        creatorID: channel.id,
+        creatorID: channel.creatorID,
         chanName: channel.chanName,
         chanType: channel.type,
         chanAdmins: channel.admins,
@@ -524,7 +631,7 @@ export default class ChatGateway
           chanType: privChan.type,
           chanCreatedAt: privChan.createdAt
         };
-        this.io.to(senderID).emit('channelInfo', pubChan);
+        this.io.to(senderID).emit('channelMode', pubChan);
       }
     }
   }
@@ -595,48 +702,58 @@ export default class ChatGateway
     @MessageBody(new ValidationPipe()) channelRestrictDto: ChannelRestrictDto,
     @ConnectedSocket() socket: ChatSocket
   ) {
-    const { userID, chanName, restrictType, endOfRestrict, reason } =
-      channelRestrictDto;
+    const { userID, chanID, restrictType, reason } = channelRestrictDto;
     const senderID = socket.user.id!;
     this.logger.log(
-      `Channel restrict request for ${userID} by ${senderID} for channel ${chanName}. Restrict type: ${restrictType}`
+      `Channel restrict request for ${userID} by ${senderID} for channel ${chanID}. Restrict type: ${restrictType}`
     );
-    const channel = await this.channelService.getChanByName(chanName);
-    if (channel) {
+    const channel = await this.channelService.getChanById(chanID);
+    const socketToRestrict = this.socketMap.get(userID);
+    if (channel && socketToRestrict) {
       if (userID === channel.creatorID) {
         throw new ForbiddenException("Channel creator can't be restricted");
       }
-      if (restrictType === 'BAN' || restrictType === 'MUTE') {
-        const restrict = await this.chanRestrictService.createChanRestrict({
-          type: restrictType,
-          endOfRestrict,
-          reason,
-          user: { connect: { id: userID } },
-          channel: { connect: { id: channel.id } }
-        });
-        if (restrict) {
-          const payload = {
-            chanID: restrict.channelID,
-            reason: restrict.reason
-          };
-          if (restrictType === 'BAN') {
-            this.io.to(userID).emit('channelBan', payload);
+      if (restrictType === 'BAN') {
+        const newBans = channel.bans.concat(userID);
+        const bansSet = new Set(newBans);
+        await this.channelService.updateBans(chanID, Array.from(bansSet));
 
-            this.channelService.removeChannelMember(channel.id, senderID);
-            socket.leave(restrict.channelID);
-          } else if (restrictType === 'MUTE') {
-            this.io.to(userID).emit('channelMute', payload);
-          }
-          this.io.to(senderID).emit('channelRestrict', payload);
-        }
-      } else if (restrictType === 'KICK') {
-        this.channelService.removeChannelMember(channel.id, senderID);
-        socket.leave(channel.id);
-        this.io.to(senderID).emit('channelRestrict', {
-          chanID: restrictType,
-          reason
+        const admins = channel.admins.filter((id) => id !== userID);
+        const adminsSet = new Set(admins);
+        await this.channelService.updateAdmins(chanID, Array.from(adminsSet));
+
+        this.channelService.removeChannelMember(channel.id, userID);
+        socketToRestrict.leave(channel.id);
+        this.io.to(channel.id).to(userID).emit('channelLeave', {
+          chanID: channel.id,
+          userID
         });
+      } else if (restrictType === 'MUTE') {
+        const newMute = channel.mute.concat(userID);
+        const muteSet = new Set(newMute);
+        await this.channelService.updateMute(chanID, Array.from(muteSet));
+      } else if (restrictType === 'KICK') {
+        const admins = channel.admins.filter((id) => id !== userID);
+        const adminsSet = new Set(admins);
+        await this.channelService.updateAdmins(chanID, Array.from(adminsSet));
+
+        this.channelService.removeChannelMember(channel.id, userID);
+        socketToRestrict.leave(channel.id);
+        this.io.to(channel.id).to(userID).emit('channelLeave', {
+          chanID: channel.id,
+          userID
+        });
+      } else if (restrictType === 'UNBAN') {
+        const newBans = channel.bans.filter((id) => id !== userID);
+        const bansSet = new Set(newBans);
+        await this.channelService.updateBans(chanID, Array.from(bansSet));
       }
+      this.io.to(chanID).to(userID).emit('channelRestrict', {
+        userID,
+        chanID: channel.id,
+        reason,
+        type: restrictType
+      });
     }
   }
 }

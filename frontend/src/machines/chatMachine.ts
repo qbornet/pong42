@@ -6,12 +6,23 @@ export const chatMachine = createMachine(
       '': ''
     },
     id: 'chatMachine',
-    initial: 'opened',
+    initial: 'closed',
     states: {
       opened: {
         description: 'The channel component is open',
         initial: 'messageView',
         states: {
+          channelConfigView: {
+            description: 'Update channel type, name and picture',
+            on: {
+              selectHeader: {
+                target: 'channelSettings'
+              },
+              selectChannel: {
+                target: 'channelSettings'
+              }
+            }
+          },
           messageView: {
             description: 'The chat component displays the contact view.',
             on: {
@@ -103,13 +114,16 @@ export const chatMachine = createMachine(
               },
               addChannel: {
                 target: 'createORJoinChannelView'
+              },
+              updateChannel: {
+                target: 'channelConfigView'
               }
             }
           },
           createORJoinChannelView: {
             on: {
               selectHeader: {
-                target: 'channelView'
+                target: 'channelSettings'
               },
               createChannel: {
                 target: 'channelNameView'
@@ -125,7 +139,7 @@ export const chatMachine = createMachine(
                 target: 'inviteChannelView'
               },
               selectHeader: {
-                target: 'channelView'
+                target: 'channelSettings'
               },
               previousAddChannel: {
                 target: 'createORJoinChannelView'
@@ -134,10 +148,10 @@ export const chatMachine = createMachine(
           },
           joinChannelView: {
             on: {
-              previousAddChannel: {
-                target: 'createORJoinChannelView'
+              selectHeader: {
+                target: 'channelSettings'
               },
-              closeAddChannel: {
+              clickOnChannel: {
                 target: 'channelView'
               }
             }
@@ -177,6 +191,7 @@ export const chatMachine = createMachine(
         | { type: 'clickOnNotification' }
         | { type: 'clickOnSearch' }
         | { type: 'selectContact' }
+        | { type: 'updateChannel' }
         | { type: 'clickOnChannel' }
         | { type: 'clickOnMessage' }
         | { type: 'selectHeader' }

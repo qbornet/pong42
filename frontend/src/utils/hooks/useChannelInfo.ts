@@ -10,7 +10,6 @@ export function useChanInfo(): Channel | undefined {
     const onChannelInfo = (data: Channel) => {
       setChanInfo(data);
     };
-
     socket.on('channelInfo', onChannelInfo);
     return () => {
       socket.off('channelInfo', onChannelInfo);
