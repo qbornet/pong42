@@ -49,7 +49,6 @@ export function ContactListFeed({
             <ContactCard
               key={user.userID}
               username={user.username}
-              userID={user.userID}
               sendMessage={() => {
                 setUserID(user.userID);
                 toggleConversationView();
@@ -79,7 +78,6 @@ export function ContactListFeed({
             <ContactCard
               key={user.userID}
               username={user.username}
-              userID={user.userID}
               sendMessage={() => {
                 setUserID(user.userID);
                 toggleConversationView();
@@ -109,7 +107,6 @@ export function ContactListFeed({
             <ContactCard
               key={user.userID}
               username={user.username}
-              userID={user.userID}
               sendMessage={() => {
                 setUserID(user.userID);
                 toggleConversationView();

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import RenderIf from '../RenderIf/RenderIf';
-import { ContactListFeed } from '../ContactListFeed.tsx/ContactListFeed';
+import { ContactListFeed } from '../ContactListFeed/ContactListFeed';
 import { SendMessageInput } from '../SendMessageInput/SendMessageInput';
 import { PrivateFeed } from '../PrivateFeed/PrivateFeed';
 
