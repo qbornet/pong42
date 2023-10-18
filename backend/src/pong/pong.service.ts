@@ -1,148 +1,193 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { initialize } from 'passport';
 import { Server } from 'socket.io';
 import { Socket } from 'socket.io';
 
 @Injectable()
 export class PongService {
-    private ballState = {
-        x: 600,
-        y: 350,
-        radius: 5,
-        dx: 1,
-        dy: 1,
-    };
-    private paddlePlayer1 = {
-        x: 10,
-        y: 300,
-        width: 10,
-        height: 100,
-        dy: 2,
-    };
-    private paddlePlayer2 = {
-        x: 1180,
-        y: 300,
-        width: 10,
-        height: 100,
-        dy: 2,
-    };
-
-    private scorePlayer1: number;
-    private scorePlayer2: number;
-
-    constructor() {
-        this.scorePlayer1 = 0;
-        this.scorePlayer2 = 0;
-    }
-
     private readonly logger = new Logger(PongService.name);
-    private gameInterval: NodeJS.Timeout;
+    
+    private rooms = new Map<string, {
+        ballState: any,
+        paddlePlayer1: any,
+        paddlePlayer2: any,
+        scorePlayer1: number,
+        scorePlayer2: number,
+        gameInterval?: NodeJS.Timeout;
+    }>();
 
-    getBallState() {
-        this.logger.debug(this.ballState);
-        return (this.ballState);
+    constructor() {};
+
+    initializeRoom(roomName: string) {
+        this.rooms.set(roomName, {
+            ballState: {
+                x: 600,
+                y: 350,
+                radius: 5,
+                dx: 1,
+                dy: 1,
+            },
+            paddlePlayer1: {
+                x: 10,
+                y: 300,
+                width: 10,
+                height: 100,
+                dy: 2,
+            },
+            paddlePlayer2: {
+                x: 1180,
+                y: 300,
+                width: 10,
+                height: 100,
+                dy: 2,
+            },
+            scorePlayer1: 0,
+            scorePlayer2: 0
+        });
     }
 
-    handleKeyCode1(keycode: string) {
+    checkVictory(roomName: string): string | null {
+        const room = this.rooms.get(roomName);
+        if (!room) return null;
+
+        if (room.scorePlayer1 === 10) {
+            return 'player1';
+        } else if (room.scorePlayer2 === 10) {
+            return 'player2';
+        }
+        return null;
+    }
+
+    getBallState(roomName: string) {
+        const room = this.rooms.get(roomName);
+        if (!room) return null;
+
+        this.logger.debug(room.ballState);
+        return (room.ballState);
+    }
+
+    handleKeyCode1(keycode: string, roomName: string) {
+        const room = this.rooms.get(roomName);
+        if (!room) return null;
+
         if (keycode === "ArrowUp")
         {
-            this.paddlePlayer1.y -= this.paddlePlayer1.dy * 10;
-            if (this.paddlePlayer1.y < 0) {
-                this.paddlePlayer1.y = 0;
+            room.paddlePlayer1.y -= room.paddlePlayer1.dy * 10;
+            if (room.paddlePlayer1.y < 0) {
+                room.paddlePlayer1.y = 0;
             }
             // this.logger.debug(this.paddlePlayer1.y);
         }
         else if (keycode === "ArrowDown") {
-            this.paddlePlayer1.y += this.paddlePlayer1.dy * 10;
-            if (this.paddlePlayer1.y + this.paddlePlayer1.height > 700) {
-                this.paddlePlayer1.y = 700 - this.paddlePlayer1.height;
+            room.paddlePlayer1.y += room.paddlePlayer1.dy * 10;
+            if (room.paddlePlayer1.y + room.paddlePlayer1.height > 700) {
+                room.paddlePlayer1.y = 700 - room.paddlePlayer1.height;
             }
             // this.logger.debug(this.paddlePlayer1.y)
         }
     }
     
-    handleKeyCode2(keycode: string) {
+    handleKeyCode2(keycode: string, roomName: string) {
+        const room = this.rooms.get(roomName);
+        if (!room) return null;
+
         if (keycode === "ArrowUp")
         {
-            this.paddlePlayer2.y -= this.paddlePlayer2.dy * 10;
-            if (this.paddlePlayer2.y < 0) {
-                this.paddlePlayer2.y = 0;
+            room.paddlePlayer2.y -= room.paddlePlayer2.dy * 10;
+            if (room.paddlePlayer2.y < 0) {
+                room.paddlePlayer2.y = 0;
             }
             // this.logger.debug(this.paddlePlayer2.y);
         }
         else if (keycode === "ArrowDown") {
-            this.paddlePlayer2.y += this.paddlePlayer2.dy * 10;
-            if (this.paddlePlayer2.y + this.paddlePlayer2.height > 700) {
-                this.paddlePlayer2.y = 700 - this.paddlePlayer2.height;
+            room.paddlePlayer2.y += room.paddlePlayer2.dy * 10;
+            if (room.paddlePlayer2.y + room.paddlePlayer2.height > 700) {
+                room.paddlePlayer2.y = 700 - room.paddlePlayer2.height;
             }
             // this.logger.debug(this.paddlePlayer2.y)
         }
     }
     
-    resetBall() {
-        this.ballState.x = 600;
-        this.ballState.y = 350;
-        this.ballState.dx = (Math.random() < 0.5 ? -1 : 1);
-        this.ballState.dy = (Math.random() * 2 - 1);
+    resetBall(roomName: string) {
+        const room = this.rooms.get(roomName);
+        if (!room) return null;
+
+        room.ballState.x = 600;
+        room.ballState.y = 350;
+        room.ballState.dx = (Math.random() < 0.5 ? -1 : 1);
+        room.ballState.dy = (Math.random() * 2 - 1);
     }
     
-    adjustBallAngle(paddleY: number) {
-        let relativeIntersectY = this.ballState.y - (paddleY + 50);
+    adjustBallAngle(paddleY: number, roomName: string) {
+        const room = this.rooms.get(roomName);
+        if (!room) return null;
+
+        let relativeIntersectY = room.ballState.y - (paddleY + 50);
         let normalizedIntersectY = relativeIntersectY / (50);
         let bounceAngle = normalizedIntersectY * (45 * (Math.PI / 180));
         
-        this.ballState.dy = 2 * Math.sin(bounceAngle);
+        room.ballState.dy = 2 * Math.sin(bounceAngle);
     }
     
-    startBroadcastingBallState(io: Server, rightPlayer: string, leftPlayer: string) {
-        this.gameInterval = setInterval(() => {
+    startBroadcastingBallState(io: Server, rightPlayer: string, leftPlayer: string, roomName: string) {
+        const room = this.rooms.get(roomName);
+        if (!room) return null;
+
+        room.gameInterval = setInterval(() => {
             // Mettre à jour l'état de la balle ici 
-            this.ballState.x += this.ballState.dx;
-            this.ballState.y += this.ballState.dy;
+            room.ballState.x += room.ballState.dx;
+            room.ballState.y += room.ballState.dy;
             //collisions raquette gauche
             if (
-                this.ballState.x - this.ballState.radius < this.paddlePlayer1.x + this.paddlePlayer1.width &&
-                this.ballState.y + this.ballState.radius > this.paddlePlayer1.y &&
-                this.ballState.y - this.ballState.radius < this.paddlePlayer1.y + this.paddlePlayer1.height
+                room.ballState.x - room.ballState.radius < room.paddlePlayer1.x + room.paddlePlayer1.width &&
+                room.ballState.y + room.ballState.radius > room.paddlePlayer1.y &&
+                room.ballState.y - room.ballState.radius < room.paddlePlayer1.y + room.paddlePlayer1.height
                 ) {
-                    this.ballState.dx = -this.ballState.dx;
-                    this.adjustBallAngle(this.paddlePlayer1.y);
+                    room.ballState.dx = -room.ballState.dx;
+                    this.adjustBallAngle(room.paddlePlayer1.y, roomName);
                 }
                 //collisions raquette droite
                 if (
-                    this.ballState.x + this.ballState.radius > this.paddlePlayer2.x &&
-                    this.ballState.y + this.ballState.radius > this.paddlePlayer2.y &&
-                    this.ballState.y - this.ballState.radius < this.paddlePlayer2.y + this.paddlePlayer2.height
+                    room.ballState.x + room.ballState.radius > room.paddlePlayer2.x &&
+                    room.ballState.y + room.ballState.radius > room.paddlePlayer2.y &&
+                    room.ballState.y - room.ballState.radius < room.paddlePlayer2.y + room.paddlePlayer2.height
                     ) {
-                        this.ballState.dx = -this.ballState.dx;
-                        this.adjustBallAngle(this.paddlePlayer2.y);
+                        room.ballState.dx = -room.ballState.dx;
+                        this.adjustBallAngle(room.paddlePlayer2.y, roomName);
                     }
                     
                     //gere la collision des parois hautes et basses
             if (
-            this.ballState.y + this.ballState.radius > 700 ||
-            this.ballState.y - this.ballState.radius < 0
+            room.ballState.y + room.ballState.radius > 700 ||
+            room.ballState.y - room.ballState.radius < 0
             ) {
-                this.ballState.dy = -this.ballState.dy;
+                room.ballState.dy = -room.ballState.dy;
             }
             
             //reinitalisation pos this.ballState quand point marque
-            if (this.ballState.x + this.ballState.radius > 1200)
+            if (room.ballState.x + room.ballState.radius > 1200)
             {
                 // this.logger.log('Joueur gauche a marque 1 Point !!!!!!!!!!!!');
-                this.scorePlayer1++;
-                io.to('room-0').emit('scorePlayer1', this.scorePlayer1)
-                this.resetBall();
+                room.scorePlayer1++;
+                io.to(roomName).emit('scorePlayer1', room.scorePlayer1)
+                this.resetBall(roomName);
             }
-            if (this.ballState.x + this.ballState.radius < 0)
+            if (room.ballState.x + room.ballState.radius < 0)
             {
                 // this.logger.log('joueur droit a marque 1 Point !!!!!!!!!!!!');
-                this.scorePlayer2++;
-                io.to('room-0').emit('scorePlayer2', this.scorePlayer2);
-                this.resetBall();
+                room.scorePlayer2++;
+                io.to(roomName).emit('scorePlayer2', room.scorePlayer2);
+                this.resetBall(roomName);
             }
-            io.to('room-0').emit('ballState',this.ballState);
-            io.to(rightPlayer).emit('paddleRight', this.paddlePlayer1);
-            io.to(leftPlayer).emit('paddleLeft', this.paddlePlayer2);
+            const winner = this.checkVictory(roomName);
+            if (winner) {
+                clearInterval(room.gameInterval); //stop le jeu
+                io.to(roomName).emit('gameOver',)
+            }
+
+            io.to(roomName).emit('ballState',room.ballState);
+            io.to(rightPlayer).emit('paddleRight', room.paddlePlayer1);
+            io.to(leftPlayer).emit('paddleLeft', room.paddlePlayer2);
         }, 3);
     }
 }
