@@ -35,13 +35,24 @@ export default function Pong() {
     const [scorePlayer1, setScorePlayer1] = useState(0);
     const [scorePlayer2, setScorePlayer2] = useState(0);
     const [playerRole, setPlayerRole] = useState<number | null>(null);
-    
+    const [isGameOver,setIsGameOver] = useState(false);
+    const [gameOverMessage, setGameOverMessage] = useState('');
+
+    useEffect(() => {
+        if (scorePlayer1 >= 10) {
+            setIsGameOver(true);
+            setGameOverMessage('Player 1 Wins!');
+            // socket.emit('Player 1 Wins');
+        } else if (scorePlayer2 >= 10) {
+            setIsGameOver(true);
+            setGameOverMessage('Player 2 Wins!');
+            // socket.emit('Player 2 Wins');
+        }
+    }, [scorePlayer1, scorePlayer2]);
+
     function handleReadyClick() {
         socket.emit('playerReady');
     }
-    
-    console.log(playerRole);
-    
     
     useEffect(() => {
         const onBallState = (receivedBallState: typeof ballState) => {
@@ -134,6 +145,16 @@ export default function Pong() {
             }
         }
 
+        //dessine le message de fin de partie
+        function drawGameOverMessage(message: string) {
+            if (context) {
+                context.fillStyle = "#ffffff";
+                context.font = "50px Arial";
+                context.textAlign = "center";
+                context.fillText(message, 1200 / 2, 700 / 2);
+            }
+        }
+
         //dessine la raquette 
         function drawPaddle(x: number, y: number) {
             if (context) {
@@ -189,13 +210,17 @@ export default function Pong() {
 
         function draw() {
             resetCanvas();
-            drawScore(scorePlayer1, scorePlayer2);
-            drawUpperLine();
-            drawLowerLine();
-            drawNet();
-            drawPaddle(leftPaddle.x, leftPaddle.y);
-            drawPaddle(rightPaddle.x, rightPaddle.y);
-            drawBall(ballState.x, ballState.y);
+            if (isGameOver) {
+                drawGameOverMessage(gameOverMessage);
+            } else {
+                drawScore(scorePlayer1, scorePlayer2);
+                drawUpperLine();
+                drawLowerLine();
+                drawNet();
+                drawPaddle(leftPaddle.x, leftPaddle.y);
+                drawPaddle(rightPaddle.x, rightPaddle.y);
+                drawBall(ballState.x, ballState.y);
+            }
             animationFrameId = requestAnimationFrame(draw);
         }
         draw();
