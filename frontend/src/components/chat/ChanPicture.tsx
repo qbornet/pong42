@@ -2,9 +2,10 @@ import { CONST_BACKEND_URL } from '@constant';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
-interface ProfilePictureProps {
+interface Props {
   size?: 'xs' | 's' | 'm' | 'l' | 'xl';
   select?: boolean;
+  chanID: string;
 }
 
 const style = Object.freeze({
@@ -15,16 +16,18 @@ const style = Object.freeze({
   xl: 'h-[155px] w-[155px] border-[5px]'
 });
 
-function ProfilePicture({ size = 'xl', select = false }: ProfilePictureProps) {
+export function ChanPicture({ size = 'xl', select = false, chanID }: Props) {
   const [data, setData] = useState<{
     img: string;
     ext: string;
   }>({ img: '', ext: '' });
+
   useEffect(() => {
-    const fetchData = () => {
+    const fetchData = (id: string) => {
+      if (!chanID) return;
       const jwt = localStorage.getItem('jwt');
       axios
-        .get(`${CONST_BACKEND_URL}/img/download`, {
+        .get(`${CONST_BACKEND_URL}/img/download/${id}`, {
           withCredentials: true,
           headers: { Authorization: `Bearer ${jwt!}` }
         })
@@ -33,12 +36,12 @@ function ProfilePicture({ size = 'xl', select = false }: ProfilePictureProps) {
         })
         .catch(() => {});
     };
-    fetchData();
-  }, []);
+    fetchData(chanID);
+  }, [chanID]);
 
   return (
     <img
-      alt="pp"
+      alt="channel"
       src={`${
         data.ext === '.jpeg'
           ? 'data:image/jpeg;base64'
@@ -52,5 +55,3 @@ function ProfilePicture({ size = 'xl', select = false }: ProfilePictureProps) {
     />
   );
 }
-
-export default ProfilePicture;

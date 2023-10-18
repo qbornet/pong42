@@ -46,6 +46,8 @@ import { ChannelRestrictDto } from './dto/channel-restrict.dto';
 import { UserDto } from './dto/user.dto';
 import { ChannelIdDto } from './dto/channel-id.dto';
 import { ChannelInviteDto } from './dto/channel-invite.dto';
+import { CreateChannelDto } from './dto/create-channel.dto';
+import { ImgService } from '../img/img.service';
 
 // WebSocketGateways are instantiated from the SocketIoAdapter (inside src/adapters)
 // inside this IoAdapter there is authentification process with JWT
@@ -60,12 +62,13 @@ export default class ChatGateway
 {
   private readonly logger = new Logger(ChatGateway.name);
 
-  private socketMap = new Map();
+  private socketMap = new Map<string, ChatSocket>();
 
   constructor(
     private usersService: UsersService,
     private messageService: MessageService,
-    private channelService: ChannelService
+    private channelService: ChannelService,
+    private readonly imgService: ImgService
   ) {}
 
   getLogger(): Logger {
@@ -350,14 +353,15 @@ export default class ChatGateway
   @SubscribeMessage('channelCreate')
   async handleCreateChannel(
     @MessageBody(new ValidationPipe({ transform: true }))
-    channelDto: ChannelDto,
+    channelDto: CreateChannelDto,
     @ConnectedSocket() socket: ChatSocket
   ) {
-    const { chanName, type, password } = channelDto;
+    const { chanName, type, password, img } = channelDto;
     const creatorID = socket.user.id!;
     this.logger.log(
       `Channel creation request from ${creatorID}: [chanName: ${chanName}] [type: ${type}]`
     );
+
     const privChan = {
       chanName,
       type,
@@ -397,6 +401,7 @@ export default class ChatGateway
     await this.messageService.deleteMessageByChanId(chanID);
     const deletedChan = await this.channelService.deleteChannelById(chanID);
     if (deletedChan) {
+      this.imgService.deleteFile(deletedChan.img);
       socket.leave(deletedChan.id);
       this.io.to(senderID).emit('channelDelete', {
         chanID: deletedChan.id,
@@ -544,13 +549,10 @@ export default class ChatGateway
     const privateUsers = await this.usersService.getAllUsers();
     if (channel && privateUsers) {
       const { members } = channel;
-      this.logger.debug(members);
       const { bans } = channel;
-      this.logger.debug(channel);
       const invitableMembers = privateUsers.filter(
         (u) => !members.find((m) => m.id === u.id) && !bans.includes(u.id)
       );
-      this.logger.debug(invitableMembers);
       const pubMembers: PublicChatUser[] = invitableMembers.map((m) => ({
         userID: m.id,
         connected: m.connectedChat,
@@ -598,8 +600,10 @@ export default class ChatGateway
         chanType: channel.type,
         chanCreatedAt: channel.createdAt
       };
-      socketToJoin.join(channel.id);
-      this.io.to(userID).emit('channelJoin', pubChannel);
+      if (socketToJoin) {
+        socketToJoin.join(channel.id);
+        this.io.to(userID).emit('channelJoin', pubChannel);
+      }
       this.io.to(senderID).emit('channelInvite', {
         userID
       });
@@ -792,7 +796,7 @@ export default class ChatGateway
     );
     const channel = await this.channelService.getChanById(chanID);
     const socketToRestrict = this.socketMap.get(userID);
-    if (channel && socketToRestrict) {
+    if (channel) {
       if (userID === channel.creatorID) {
         throw new ForbiddenException("Channel creator can't be restricted");
       }
@@ -806,7 +810,9 @@ export default class ChatGateway
         await this.channelService.updateAdmins(chanID, Array.from(adminsSet));
 
         this.channelService.removeChannelMember(channel.id, userID);
-        socketToRestrict.leave(channel.id);
+        if (socketToRestrict) {
+          socketToRestrict.leave(channel.id);
+        }
         this.io.to(channel.id).to(userID).emit('channelLeave', {
           chanID: channel.id,
           userID
@@ -834,7 +840,9 @@ export default class ChatGateway
         await this.channelService.updateAdmins(chanID, Array.from(adminsSet));
 
         this.channelService.removeChannelMember(channel.id, userID);
-        socketToRestrict.leave(channel.id);
+        if (socketToRestrict) {
+          socketToRestrict.leave(channel.id);
+        }
         this.io.to(channel.id).to(userID).emit('channelLeave', {
           chanID: channel.id,
           userID
