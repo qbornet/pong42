@@ -58,8 +58,7 @@ import { ImgService } from '../img/img.service';
 @UseGuards(EmptyChannelGuard, RestrictGuard, RolesGuard)
 @WebSocketGateway()
 export default class ChatGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-{
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(ChatGateway.name);
 
   private socketMap = new Map<string, ChatSocket>();
@@ -69,7 +68,7 @@ export default class ChatGateway
     private messageService: MessageService,
     private channelService: ChannelService,
     private readonly imgService: ImgService
-  ) {}
+  ) { }
 
   getLogger(): Logger {
     return this.logger;
