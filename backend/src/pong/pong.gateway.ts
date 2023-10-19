@@ -37,18 +37,11 @@ export class PongGateway
 
   handleConnection(client: PongSocket): any {
     const party = this.rooms.get(client.user.id!);
-    const isWaiting = this.waitingRoom.isAwaitingPlayer(client);
-    if (isWaiting) {
-      client.emit('playerRole', 1);
-      return;
-    }
     if (party && client.user) {
-      this.logger.debug(party.partyName);
       client.join(party.partyName);
       client.emit('startGame', party.partyName);
     } else {
       const roomName = this.waitingRoom.getRoomName();
-      this.pongService.initializeRoom(roomName);
       const isAdded = this.waitingRoom.addPlayer(client);
       if (isAdded) {
         client.join(roomName);
@@ -56,16 +49,17 @@ export class PongGateway
       } else {
         const newParty = this.waitingRoom.getParty(client);
         if (newParty) {
+          this.pongService.initializeRoom(roomName);
           client.join(roomName);
-          client.emit('playerRole', 2);
-          this.io.to(roomName).emit('startGame', roomName);
           this.rooms.set(roomName, newParty);
           this.rooms.set(newParty.player1.socket.user.id!, newParty);
           this.rooms.set(newParty.player2.socket.user.id!, newParty);
+          client.emit('playerRole', 2);
+          this.io.to(roomName).emit('startGame', roomName);
         }
       }
-      this.logger.debug(`New connection : ${client.id}`);
     }
+    this.logger.debug(`New connection : ${client.id}`);
   }
 
   handleDisconnect(client: PongSocket): any {
@@ -87,6 +81,9 @@ export class PongGateway
         party.partyName
       );
     }
+    this.logger.debug(
+      `This party is not started yet please wait that another player join the party...`
+    );
   }
 
   @SubscribeMessage('paddleMovement1')
