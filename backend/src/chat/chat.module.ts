@@ -10,4 +10,4 @@ import { ImgModule } from '../img/img.module';
   providers: [ChatGateway],
   imports: [ConfigModule, AuthModule, DatabaseModule, ImgModule]
 })
-export class ChatModule { }
+export class ChatModule {}

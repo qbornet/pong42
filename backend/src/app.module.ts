@@ -32,4 +32,4 @@ import { PongModule } from './pong/pong.module';
   controllers: [AppController],
   providers: [AppService]
 })
-export class AppModule { }
+export class AppModule {}
