@@ -60,7 +60,11 @@ const router = createBrowserRouter([
   },
   {
     path: '/pong',
-    element: <SocketContextProvider><Pong /></SocketContextProvider>
+    element: (
+      <SocketContextProvider>
+        <Pong />
+      </SocketContextProvider>
+    )
   },
   {
     path: '/profile',
