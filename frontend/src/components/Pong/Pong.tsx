@@ -2,15 +2,16 @@ import React from "react";
 import { useRef } from "react";
 import { useState } from "react";
 import { useEffect } from "react";
-import { io } from "socket.io-client";
-
-
-const socket = io('http://localhost:4000', { autoConnect: true, reconnection: false });
-socket.onAny((e) => {
-  console.log(e)
-})
+import { useSocketContext } from "../../contexts/socket";
+import { connectSocket } from "../../utils/functions/socket";
 
 export default function Pong() {
+  const { socket } = useSocketContext();
+
+  useEffect(() => {
+    connectSocket();
+  }, [])
+
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [ballState, setBallState] = useState({
     x: 0,
@@ -60,19 +61,23 @@ export default function Pong() {
     };
     const onRightPaddleState = (receivedRightPaddleState: typeof rightPaddle) => {
       setRightPaddle(receivedRightPaddleState);
-    }
+    };
     const onLeftPaddleState = (receivedLeftPaddleState: typeof leftPaddle) => {
       setLeftPaddle(receivedLeftPaddleState);
-    }
+    };
     const onPlayerRole = (role: number) => {
       setPlayerRole(role);
-    }
+    };
+    const onStartGame = (roomName: string) => {
+      console.log("Jeu demarre dans la salle: ", roomName);
+    };
     socket.on('ballState', onBallState);
     socket.on('paddleLeft', onLeftPaddleState);
     socket.on('paddleRight', onRightPaddleState);
     socket.on('scorePlayer1', setScorePlayer1);
     socket.on('scorePlayer2', setScorePlayer2);
     socket.on('playerRole', onPlayerRole);
+    socket.on('startGame', onStartGame);
 
     return (() => {
       socket.off('ballState', onBallState);
@@ -81,6 +86,7 @@ export default function Pong() {
       socket.off('scorePlayer1', setScorePlayer1);
       socket.off('scorePlayer2', setScorePlayer2);
       socket.off('playerRole', onPlayerRole);
+      socket.off('startGame', onStartGame);
     });
   }, [setBallState, setRightPaddle, setLeftPaddle]);
 

@@ -16,6 +16,7 @@ import { loader as loaderProfile } from './components/Profile/profile.loader';
 import Pong from './components/Pong/Pong';
 import Profile from './components/Profile/Profile';
 import './index.css';
+import { SocketContextProvider } from './contexts/socket';
 
 const router = createBrowserRouter([
   {
@@ -59,7 +60,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/pong',
-    element: <Pong />
+    element: <SocketContextProvider><Pong /></SocketContextProvider>
   },
   {
     path: '/profile',

@@ -24,7 +24,7 @@ import { PongModule } from './pong/pong.module';
       rootPath: join(__dirname, '..', 'client'),
       exclude: ['/api(.*)']
     }),
-    ChatModule,
+    // ChatModule,
     AuthModule,
     ImgModule,
     PongModule
