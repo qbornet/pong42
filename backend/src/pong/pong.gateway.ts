@@ -8,10 +8,9 @@ import {
   WebSocketServer
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { PongService } from './pong.service';
 import { WaitingRoomService } from './waiting-room/waiting-room.service';
-import { Party } from './party/party';
 import { PongSocket } from './pong.interface';
+import { PartyClassic } from './party/party';
 
 type RoomName = string;
 type UserID = string;
@@ -20,10 +19,7 @@ type UserID = string;
 export class PongGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-  constructor(
-    private waitingRoom: WaitingRoomService,
-    private pongService: PongService
-  ) {}
+  constructor(private waitingRoom: WaitingRoomService) {}
 
   private readonly logger = new Logger(PongGateway.name);
 
@@ -33,7 +29,7 @@ export class PongGateway
     this.logger.log('Initialize');
   }
 
-  private rooms: Map<RoomName | UserID, Party> = new Map();
+  private rooms: Map<RoomName | UserID, PartyClassic> = new Map();
 
   handleConnection(client: PongSocket): any {
     const party = this.rooms.get(client.user.id!);
@@ -49,7 +45,6 @@ export class PongGateway
       } else {
         const newParty = this.waitingRoom.getParty(client);
         if (newParty) {
-          this.pongService.initializeRoom(roomName);
           client.join(roomName);
           this.rooms.set(roomName, newParty);
           this.rooms.set(newParty.player1.socket.user.id!, newParty);
@@ -74,12 +69,7 @@ export class PongGateway
       const p2 = party.player2.socket.id;
       const right = p1 === client.user.id ? p2 : p1;
       const left = p1 !== client.user.id ? p2 : p1;
-      this.pongService.startBroadcastingBallState(
-        this.io,
-        right,
-        left,
-        party.partyName
-      );
+      party.startBroadcastingBallState(this.io, right, left);
     }
     this.logger.debug(
       `This party is not started yet please wait that another player join the party...`
@@ -89,12 +79,12 @@ export class PongGateway
   @SubscribeMessage('paddleMovement1')
   handlePaddleMovement1(client: PongSocket, keycode: string): void {
     const party = this.rooms.get(client.user.id!);
-    if (party) this.pongService.handleKeyCode1(keycode, party.partyName);
+    if (party) party.updatePaddle1(keycode);
   }
 
   @SubscribeMessage('paddleMovement2')
   handlePaddleMovement2(client: PongSocket, keycode: string): void {
     const party = this.rooms.get(client.user.id!);
-    if (party) this.pongService.handleKeyCode2(keycode, party.partyName);
+    if (party) party.updatePaddle2(keycode);
   }
 }

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { Player } from '../player/player';
 import { PongSocket } from '../pong.interface';
-import { Party } from '../party/party';
+import { PartyClassic } from '../party/party';
+import { Player } from '../party/player';
 
 @Injectable()
 export class WaitingRoomService {
@@ -33,10 +33,10 @@ export class WaitingRoomService {
     return false;
   }
 
-  getParty(s: PongSocket): Party | undefined {
+  getParty(s: PongSocket): PartyClassic | undefined {
     if (this.player !== undefined) {
       const player2 = new Player(s, 2);
-      const party = new Party(this.player, player2, this.roomName);
+      const party = new PartyClassic(this.player, player2, this.roomName);
       this.roomCounter += 1;
       this.roomName = `room-${this.roomCounter}`;
       this.player = undefined;
