@@ -2,67 +2,75 @@ import { useRef, useState, useEffect } from 'react';
 import { useSocketContext } from '../../contexts/socket';
 import { connectSocket } from '../../utils/functions/socket';
 
+interface Position {
+  x: number;
+  y: number;
+}
+
+interface Paddle extends Position {
+  width: number;
+  height: number;
+}
+
+interface Canva {
+  width: number;
+  height: number;
+}
+
+interface GameState {
+  ball: Position;
+  leftPaddle: Paddle;
+  rightPaddle: Paddle;
+  canva: Canva;
+  scorePlayer1: number;
+  scorePlayer2: number;
+}
+
 export default function Pong() {
   const { socket } = useSocketContext();
 
-  useEffect(() => {
-    connectSocket();
-  }, []);
-
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [ballState, setBallState] = useState({
-    x: 0,
-    y: 0,
-    dx: 0,
-    dy: 0
-  });
-  const [leftPaddle, setLeftPaddle] = useState({
-    x: 1180,
-    y: 300,
-    width: 10,
-    height: 100,
-    dy: 2
-  });
-  const [rightPaddle, setRightPaddle] = useState({
-    x: 10,
-    y: 300,
-    width: 10,
-    height: 100,
-    dy: 2
-  });
-  const [scorePlayer1, setScorePlayer1] = useState(0);
-  const [scorePlayer2, setScorePlayer2] = useState(0);
   const [playerRole, setPlayerRole] = useState<number | null>(null);
   const [isGameOver, setIsGameOver] = useState(false);
   const [gameOverMessage, setGameOverMessage] = useState('');
 
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [gameState, setGameState] = useState<GameState | undefined>();
+
   useEffect(() => {
-    if (scorePlayer1 >= 10) {
+    connectSocket();
+    function handleKey(event: KeyboardEvent) {
+      if (playerRole === 2) {
+        socket.emit('paddleMovement2', event.code);
+      } else if (playerRole === 1) {
+        socket.emit('paddleMovement1', event.code);
+      }
+    }
+
+    window.addEventListener('keydown', handleKey);
+    return () => {
+      window.removeEventListener('keydown', handleKey);
+    };
+  }, [socket, playerRole]);
+
+  useEffect(() => {
+    if (gameState && gameState.scorePlayer1 >= 10) {
       setIsGameOver(true);
       setGameOverMessage('Player 1 Wins!');
       // socket.emit('Player 1 Wins');
-    } else if (scorePlayer2 >= 10) {
+    } else if (gameState && gameState.scorePlayer2 >= 10) {
       setIsGameOver(true);
       setGameOverMessage('Player 2 Wins!');
       // socket.emit('Player 2 Wins');
     }
-  }, [scorePlayer1, scorePlayer2]);
+  }, [gameState]);
 
   function handleReadyClick() {
     socket.emit('playerReady');
   }
 
   useEffect(() => {
-    const onBallState = (receivedBallState: typeof ballState) => {
-      setBallState(receivedBallState);
-    };
-    const onRightPaddleState = (
-      receivedRightPaddleState: typeof rightPaddle
-    ) => {
-      setRightPaddle(receivedRightPaddleState);
-    };
-    const onLeftPaddleState = (receivedLeftPaddleState: typeof leftPaddle) => {
-      setLeftPaddle(receivedLeftPaddleState);
+    const onGameState = (state: GameState) => {
+      setGameState(state);
     };
     const onPlayerRole = (role: number) => {
       setPlayerRole(role);
@@ -70,24 +78,16 @@ export default function Pong() {
     const onStartGame = (roomName: string) => {
       console.log(`Jeu demarre dans la salle: ${roomName}`);
     };
-    socket.on('ballState', onBallState);
-    socket.on('paddleLeft', onLeftPaddleState);
-    socket.on('paddleRight', onRightPaddleState);
-    socket.on('scorePlayer1', setScorePlayer1);
-    socket.on('scorePlayer2', setScorePlayer2);
+    socket.on('gameState', onGameState);
     socket.on('playerRole', onPlayerRole);
     socket.on('startGame', onStartGame);
 
     return () => {
-      socket.off('ballState', onBallState);
-      socket.off('paddleLeft', onRightPaddleState);
-      socket.off('paddleRight', onLeftPaddleState);
-      socket.off('scorePlayer1', setScorePlayer1);
-      socket.off('scorePlayer2', setScorePlayer2);
+      socket.off('gameState', onGameState);
       socket.off('playerRole', onPlayerRole);
       socket.off('startGame', onStartGame);
     };
-  }, [socket, setBallState, setRightPaddle, setLeftPaddle]);
+  }, [socket, gameState]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -97,16 +97,16 @@ export default function Pong() {
 
     // dessine ligne poitillee au centre
     function drawNet() {
-      if (context) {
+      if (context && gameState) {
         const netWidth = 10;
         const netHeight = 10;
         const gap = 18;
-        const numberOfDashes = 700 / (netHeight + gap);
+        const numberOfDashes = gameState.canva.height / (netHeight + gap);
 
         context.fillStyle = '#ffffff';
         for (let i = 0; i < numberOfDashes; i += 1) {
           context.fillRect(
-            1200 / 2 - netWidth / 2,
+            gameState.canva.width / 2 - netWidth / 2,
             i * (netHeight + gap),
             netWidth,
             netHeight
@@ -115,53 +115,24 @@ export default function Pong() {
       }
     }
 
-    function handleKey(event: KeyboardEvent) {
-      if (playerRole === 2) {
-        if (event.code === 'ArrowUp') {
-          leftPaddle.y -= leftPaddle.dy * 10;
-          if (leftPaddle.y < 0) {
-            leftPaddle.y = 0;
-          }
-        } else if (event.code === 'ArrowDown') {
-          leftPaddle.y += leftPaddle.dy * 10;
-          if (leftPaddle.y + leftPaddle.height > 700) {
-            leftPaddle.y = 700 - leftPaddle.height;
-          }
-        }
-        console.log(`${playerRole} ${event.code}`);
-        socket.emit('paddleMovement2', event.code);
-      } else if (playerRole === 1) {
-        if (event.code === 'ArrowUp') {
-          rightPaddle.y -= rightPaddle.dy * 10;
-          if (rightPaddle.y < 0) {
-            rightPaddle.y = 0;
-          }
-        } else if (event.code === 'ArrowDown') {
-          rightPaddle.y += rightPaddle.dy * 10;
-          if (rightPaddle.y + rightPaddle.height > 700) {
-            rightPaddle.y = 700 - rightPaddle.height;
-          }
-        }
-        console.log(`${playerRole} ${event.code}`);
-        socket.emit('paddleMovement1', event.code);
-      }
-    }
-
-    window.addEventListener('keydown', handleKey);
     function resetCanvas() {
-      if (context) {
+      if (context && gameState) {
         context.fillStyle = '#000000';
-        context.fillRect(0, 0, 1200, 700);
+        context.fillRect(0, 0, gameState.canva.width, gameState.canva.height);
       }
     }
 
     // dessine le message de fin de partie
     function drawGameOverMessage(message: string) {
-      if (context) {
+      if (context && gameState) {
         context.fillStyle = '#ffffff';
         context.font = '50px Arial';
         context.textAlign = 'center';
-        context.fillText(message, 1200 / 2, 700 / 2);
+        context.fillText(
+          message,
+          gameState.canva.width / 2,
+          gameState.canva.height / 2
+        );
       }
     }
 
@@ -186,11 +157,11 @@ export default function Pong() {
 
     // ligne de touche du haut
     function drawUpperLine() {
-      if (context) {
+      if (context && gameState) {
         context.beginPath();
         context.lineWidth = 10;
         context.moveTo(0, 0);
-        context.lineTo(1200, 0);
+        context.lineTo(gameState.canva.width, 0);
         context.strokeStyle = '#ffffff';
         context.stroke();
       }
@@ -198,11 +169,11 @@ export default function Pong() {
 
     // ligne de touche du bas
     function drawLowerLine() {
-      if (context) {
+      if (context && gameState) {
         context.beginPath();
         context.lineWidth = 10;
-        context.moveTo(0, 700);
-        context.lineTo(1200, 700);
+        context.moveTo(0, gameState.canva.height);
+        context.lineTo(gameState.canva.width, gameState.canva.height);
         context.strokeStyle = '#ffffff';
         context.stroke();
       }
@@ -210,11 +181,11 @@ export default function Pong() {
 
     // afficher le score
     function drawScore() {
-      if (context) {
+      if (context && gameState) {
         context.fillStyle = '#ffffff';
         context.font = '50px Arial';
-        context.fillText(String(scorePlayer1), 500, 70);
-        context.fillText(String(scorePlayer2), 670, 70);
+        context.fillText(String(gameState.scorePlayer1), 500, 70);
+        context.fillText(String(gameState.scorePlayer2), 670, 70);
       }
     }
 
@@ -222,14 +193,14 @@ export default function Pong() {
       resetCanvas();
       if (isGameOver) {
         drawGameOverMessage(gameOverMessage);
-      } else {
+      } else if (gameState) {
         drawScore();
+        drawNet();
         drawUpperLine();
         drawLowerLine();
-        drawNet();
-        drawPaddle(leftPaddle.x, leftPaddle.y);
-        drawPaddle(rightPaddle.x, rightPaddle.y);
-        drawBall(ballState.x, ballState.y);
+        drawPaddle(gameState.leftPaddle.x, gameState.leftPaddle.y);
+        drawPaddle(gameState.rightPaddle.x, gameState.rightPaddle.y);
+        drawBall(gameState.ball.x, gameState.ball.y);
       }
       animationFrameId = requestAnimationFrame(draw);
     }
@@ -237,19 +208,8 @@ export default function Pong() {
 
     return () => {
       cancelAnimationFrame(animationFrameId);
-      window.removeEventListener('keydown', handleKey);
     };
-  }, [
-    ballState,
-    playerRole,
-    rightPaddle,
-    leftPaddle,
-    scorePlayer1,
-    scorePlayer2,
-    socket,
-    gameOverMessage,
-    isGameOver
-  ]);
+  }, [gameState, playerRole, socket, gameOverMessage, isGameOver]);
 
   return (
     <div className="flex h-screen items-center justify-center bg-[url('./images/background.png')] bg-cover">

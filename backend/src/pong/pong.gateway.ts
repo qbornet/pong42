@@ -35,6 +35,11 @@ export class PongGateway
     const party = this.rooms.get(client.user.id!);
     if (party && client.user) {
       client.join(party.partyName);
+      if (party.player1.socket.user.id === client.user.id) {
+        client.emit('playerRole', 1);
+      } else {
+        client.emit('playerRole', 2);
+      }
       client.emit('startGame', party.partyName);
     } else {
       const roomName = this.waitingRoom.getRoomName();
@@ -54,6 +59,7 @@ export class PongGateway
         }
       }
     }
+    client.emit('gameState', PartyClassic.getInitGameState());
     this.logger.debug(`New connection : ${client.id}`);
   }
 
@@ -65,15 +71,9 @@ export class PongGateway
   handlePlayerReady(client: PongSocket) {
     const party = this.rooms.get(client.user.id!);
     if (party) {
-      const p1 = party.player1.socket.id;
-      const p2 = party.player2.socket.id;
-      const right = p1 === client.user.id ? p2 : p1;
-      const left = p1 !== client.user.id ? p2 : p1;
-      party.startBroadcastingBallState(this.io, right, left);
+      party.startBroadcastingBallState(this.io);
     }
-    this.logger.debug(
-      `This party is not started yet please wait that another player join the party...`
-    );
+    client.emit('waintingRoom');
   }
 
   @SubscribeMessage('paddleMovement1')
