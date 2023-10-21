@@ -1,31 +1,25 @@
-import { Logger } from '@nestjs/common';
 import { Server } from 'socket.io';
 import { Canva } from './canva';
 import { Player } from './player';
-import { Ball } from './ball';
 import { Game } from './game';
 import { Paddle } from './paddle';
-
-const BALLSIZE = 10;
-const PADDLE_WIDTH = 10;
-const PADDLE_HEIGHT = 100;
-const WALL_OFFSET = 20;
-const CANVA_WIDTH = 1200;
-const CANVA_HEIGHT = 700;
+import { Ball } from './ball';
+import {
+  BALLSIZE,
+  CANVA_HEIGHT,
+  CANVA_WIDTH,
+  PADDLE_HEIGHT,
+  PADDLE_WIDTH,
+  WALL_OFFSET
+} from './classic-game-param';
 
 export class PartyClassic extends Game {
-  private readonly logger: Logger = new Logger(PartyClassic.name);
-
-  // Ball
   private ball: Ball;
-
-  // Paddle
 
   private paddle2: Paddle;
 
   private paddle1: Paddle;
 
-  // Canva
   private canva: Canva;
 
   constructor(p1: Player, p2: Player, name: string) {
@@ -52,12 +46,12 @@ export class PartyClassic extends Game {
     );
   }
 
-  updatePaddle1(keycode: string) {
-    this.paddle1.handleKeyPress(keycode, this.canva);
-  }
-
-  updatePaddle2(keycode: string) {
-    this.paddle2.handleKeyPress(keycode, this.canva);
+  movePaddle(playerId: string, keycode: string, isPressed: boolean) {
+    if (playerId === this.player1.socket.user.id) {
+      this.paddle1.setActive(keycode, isPressed);
+    } else {
+      this.paddle2.setActive(keycode, isPressed);
+    }
   }
 
   public static getInitGameState() {
@@ -90,6 +84,8 @@ export class PartyClassic extends Game {
   startBroadcastingBallState(io: Server, callback: () => void): void {
     const gameInterval = setInterval(() => {
       this.ball.updatePosition(this.paddle1, this.paddle2, this.canva, this);
+      this.paddle1.updatePosition(this.canva);
+      this.paddle2.updatePosition(this.canva);
       if (this.scorePlayer1 >= 10 || this.scorePlayer2 >= 10) {
         io.to(this.partyName).emit('gameOver');
         callback();

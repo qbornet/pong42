@@ -1,10 +1,11 @@
 import { Canva } from './canva';
+import { BALL_SPEED } from './classic-game-param';
 import { Game } from './game';
 import { Paddle } from './paddle';
 import { PositionClass } from './position';
 
 export class Ball extends PositionClass {
-  private speed: number = 2;
+  private speed: number = BALL_SPEED;
 
   constructor(x: number, y: number, w: number, h: number) {
     super(x, y, w, h);

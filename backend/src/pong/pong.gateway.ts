@@ -17,8 +17,9 @@ type UserID = string;
 
 @WebSocketGateway()
 export class PongGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-  constructor(private waitingRoom: WaitingRoomService) { }
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
+  constructor(private waitingRoom: WaitingRoomService) {}
 
   private readonly logger = new Logger(PongGateway.name);
 
@@ -79,16 +80,21 @@ export class PongGateway
     client.emit('waintingRoom');
   }
 
-  @SubscribeMessage('keyboardEvent')
-  handlePaddleMovement1(client: PongSocket, keycode: string): void {
+  @SubscribeMessage('arrowUp')
+  handleArrowUp(client: PongSocket, isPressed: boolean): void {
     const party = this.rooms.get(client.user.id!);
     if (party) {
-      const idPlayer1 = party.player1.socket.user.id;
-      if (idPlayer1 === client.user.id) {
-        party.updatePaddle1(keycode);
-      } else {
-        party.updatePaddle2(keycode);
-      }
+      const { id } = client.user;
+      party.movePaddle(id!, 'ArrowUp', isPressed);
+    }
+  }
+
+  @SubscribeMessage('arrowDown')
+  handleArrowDown(client: PongSocket, isPressed: boolean): void {
+    const party = this.rooms.get(client.user.id!);
+    if (party) {
+      const { id } = client.user;
+      party.movePaddle(id!, 'ArrowDown', isPressed);
     }
   }
 }
