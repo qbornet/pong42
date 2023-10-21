@@ -3,6 +3,8 @@ import { useGameState } from './useGameState';
 
 export function useDraw(): {
   drawClassicGame: (context: CanvasRenderingContext2D) => void;
+  width: number;
+  height: number;
 } {
   const { gameState } = useGameState();
   const { isGameOver } = useGameOver();
@@ -134,5 +136,9 @@ export function useDraw(): {
     }
   };
 
-  return { drawClassicGame };
+  return {
+    drawClassicGame,
+    width: gameState ? gameState.canva.width : 1200,
+    height: gameState ? gameState.canva.height : 700
+  };
 }

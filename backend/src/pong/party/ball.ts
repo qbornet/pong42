@@ -5,8 +5,6 @@ import { Paddle } from './paddle';
 import { PositionClass } from './position';
 
 export class Ball extends PositionClass {
-  private speed: number = BALL_SPEED;
-
   constructor(x: number, y: number, w: number, h: number) {
     super(x, y, w, h);
     this.dy = Math.random() < 0.5 ? -1 : 1;
@@ -55,7 +53,7 @@ export class Ball extends PositionClass {
       }
     }
 
-    this.x += this.dx * this.speed;
-    this.y += this.dy * this.speed;
+    this.x += this.dx * BALL_SPEED;
+    this.y += this.dy * BALL_SPEED;
   }
 }

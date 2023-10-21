@@ -8,7 +8,7 @@ import { usePaddle } from '../../utils/hooks/usePaddle';
 
 export default function Pong() {
   const { socket } = useSocketContext();
-  const { drawClassicGame } = useDraw();
+  const { drawClassicGame, width, height } = useDraw();
   usePaddle();
   useGameStarted();
 
@@ -32,8 +32,8 @@ export default function Pong() {
       <Canvas
         draw={drawClassicGame}
         className="flex items-center rounded-lg shadow-lg"
-        width={1200}
-        height={700}
+        width={width}
+        height={height}
       />
     </div>
   );
