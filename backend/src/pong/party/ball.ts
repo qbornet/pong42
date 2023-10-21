@@ -4,7 +4,7 @@ import { Paddle } from './paddle';
 import { PositionClass } from './position';
 
 export class Ball extends PositionClass {
-  private speed: number = 1;
+  private speed: number = 2;
 
   constructor(x: number, y: number, w: number, h: number) {
     super(x, y, w, h);

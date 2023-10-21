@@ -87,12 +87,14 @@ export class PartyClassic extends Game {
     };
   }
 
-  startBroadcastingBallState(io: Server): void {
-    setInterval(() => {
+  startBroadcastingBallState(io: Server, callback: () => void): void {
+    const gameInterval = setInterval(() => {
       this.ball.updatePosition(this.paddle1, this.paddle2, this.canva, this);
-      // this.logger.log('ball pos : ', this.ball.getBallState());
-    }, 5);
-    setInterval(() => {
+      if (this.scorePlayer1 >= 10 || this.scorePlayer2 >= 10) {
+        io.to(this.partyName).emit('gameOver');
+        callback();
+        clearInterval(gameInterval);
+      }
       const gameState = {
         ball: {
           x: this.ball.x,
@@ -115,6 +117,6 @@ export class PartyClassic extends Game {
         scorePlayer2: this.scorePlayer2
       };
       io.to(this.partyName).emit('gameState', gameState);
-    }, 21);
+    }, 8);
   }
 }

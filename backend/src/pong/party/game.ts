@@ -20,9 +20,5 @@ export abstract class Game {
     this.partyName = name;
   }
 
-  abstract startBroadcastingBallState(
-    io: Server,
-    rightPlayer: string,
-    leftPlayer: string
-  ): void;
+  abstract startBroadcastingBallState(io: Server, callback: () => void): void;
 }
