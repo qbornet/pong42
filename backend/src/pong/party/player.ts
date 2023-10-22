@@ -9,4 +9,6 @@ export class Player {
   socket: PongSocket;
 
   role: 1 | 2;
+
+  isReady: boolean = false;
 }

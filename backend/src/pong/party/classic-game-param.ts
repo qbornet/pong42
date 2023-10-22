@@ -6,6 +6,7 @@ const CANVA_WIDTH = 1200;
 const CANVA_HEIGHT = 700;
 const BALL_SPEED = 4;
 const PADDLE_SPEED = 5;
+const VICTORY_POINT = 3;
 
 export {
   BALL_SPEED,
@@ -15,5 +16,6 @@ export {
   WALL_OFFSET,
   CANVA_HEIGHT,
   CANVA_WIDTH,
-  PADDLE_SPEED
+  PADDLE_SPEED,
+  VICTORY_POINT
 };

@@ -6,8 +6,8 @@ export function useGameOver(): { isGameOver: boolean } {
   const [isGameOver, setIsGameOver] = useState(false);
 
   useEffect(() => {
-    const onGameOver = () => {
-      setIsGameOver(true);
+    const onGameOver = (over: boolean) => {
+      setIsGameOver(over);
     };
 
     socket.on('gameOver', onGameOver);

@@ -1,195 +1,86 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Server } from 'socket.io';
+import { PartyClassic } from './party/party';
+import { WaitingRoomService } from './waiting-room/waiting-room.service';
+import { PongSocket } from './pong.interface';
+import { Game } from './party/game';
+
+type RoomName = string;
+type UserID = string;
 
 @Injectable()
 export class PongService {
   private readonly logger = new Logger(PongService.name);
 
-  private rooms = new Map<
-    string,
-    {
-      ballState: any;
-      paddlePlayer1: any;
-      paddlePlayer2: any;
-      scorePlayer1: number;
-      scorePlayer2: number;
-      gameInterval?: NodeJS.Timeout;
-    }
-  >();
+  private rooms: Map<RoomName | UserID, PartyClassic> = new Map();
 
-  initializeRoom(roomName: string) {
-    this.rooms.set(roomName, {
-      ballState: {
-        x: 600,
-        y: 350,
-        radius: 5,
-        dx: 1,
-        dy: 1
-      },
-      paddlePlayer1: {
-        x: 10,
-        y: 300,
-        width: 10,
-        height: 100,
-        dy: 2
-      },
-      paddlePlayer2: {
-        x: 1180,
-        y: 300,
-        width: 10,
-        height: 100,
-        dy: 2
-      },
-      scorePlayer1: 0,
-      scorePlayer2: 0
-    });
-  }
+  constructor(private waitingRoom: WaitingRoomService) {}
 
-  checkVictory(roomName: string): string | null {
-    const room = this.rooms.get(roomName);
-    if (!room) return null;
-
-    if (room.scorePlayer1 === 10) {
-      return 'player1';
-    }
-    if (room.scorePlayer2 === 10) {
-      return 'player2';
-    }
-    return null;
-  }
-
-  getBallState(roomName: string) {
-    const room = this.rooms.get(roomName);
-    if (!room) return null;
-
-    this.logger.debug(room.ballState);
-    return room.ballState;
-  }
-
-  handleKeyCode1(keycode: string, roomName: string) {
-    const room = this.rooms.get(roomName);
-    if (!room) return;
-
-    if (keycode === 'ArrowUp') {
-      room.paddlePlayer1.y -= room.paddlePlayer1.dy * 10;
-      if (room.paddlePlayer1.y < 0) {
-        room.paddlePlayer1.y = 0;
-      }
-      // this.logger.debug(this.paddlePlayer1.y);
-    } else if (keycode === 'ArrowDown') {
-      room.paddlePlayer1.y += room.paddlePlayer1.dy * 10;
-      if (room.paddlePlayer1.y + room.paddlePlayer1.height > 700) {
-        room.paddlePlayer1.y = 700 - room.paddlePlayer1.height;
-      }
-      // this.logger.debug(this.paddlePlayer1.y)
+  handlePaddle(clientID: string, keycode: string, isPressed: boolean) {
+    const party = this.getParty(clientID);
+    if (party) {
+      party.movePaddle(clientID, keycode, isPressed);
     }
   }
 
-  handleKeyCode2(keycode: string, roomName: string) {
-    const room = this.rooms.get(roomName);
-    if (!room) return;
+  isWaiting(client: PongSocket) {
+    return this.waitingRoom.isAwaitingPlayer(client);
+  }
 
-    if (keycode === 'ArrowUp') {
-      room.paddlePlayer2.y -= room.paddlePlayer2.dy * 10;
-      if (room.paddlePlayer2.y < 0) {
-        room.paddlePlayer2.y = 0;
-      }
-      // this.logger.debug(this.paddlePlayer2.y);
-    } else if (keycode === 'ArrowDown') {
-      room.paddlePlayer2.y += room.paddlePlayer2.dy * 10;
-      if (room.paddlePlayer2.y + room.paddlePlayer2.height > 700) {
-        room.paddlePlayer2.y = 700 - room.paddlePlayer2.height;
-      }
-      // this.logger.debug(this.paddlePlayer2.y)
+  getParty(clientID: string): Game | undefined {
+    return this.rooms.get(clientID);
+  }
+
+  isPlayer1(party: Game, clientID: string) {
+    return party.player1.socket.user.id === clientID;
+  }
+
+  getWaitingRoom() {
+    return this.waitingRoom;
+  }
+
+  createParty(client: PongSocket) {
+    const roomName = this.waitingRoom.getRoomName();
+    const party = this.waitingRoom.getParty(client);
+    if (party) {
+      this.rooms.set(roomName, party);
+      this.rooms.set(party.player1.socket.user.id!, party);
+      this.rooms.set(party.player2.socket.user.id!, party);
     }
+    return party;
   }
 
-  resetBall(roomName: string) {
-    const room = this.rooms.get(roomName);
-    if (!room) return;
-
-    room.ballState.x = 600;
-    room.ballState.y = 350;
-    room.ballState.dx = Math.random() < 0.5 ? -1 : 1;
-    room.ballState.dy = Math.random() * 2 - 1;
+  joinWaintingRoom(client: PongSocket): boolean {
+    const roomName = this.waitingRoom.getRoomName();
+    const isAdded = this.waitingRoom.addPlayer(client);
+    if (isAdded) {
+      client.join(roomName);
+      return true;
+    }
+    return false;
   }
 
-  adjustBallAngle(paddleY: number, roomName: string) {
-    const room = this.rooms.get(roomName);
-    if (!room) return;
-
-    const relativeIntersectY = room.ballState.y - (paddleY + 50);
-    const normalizedIntersectY = relativeIntersectY / 50;
-    const bounceAngle = normalizedIntersectY * (45 * (Math.PI / 180));
-
-    room.ballState.dy = 2 * Math.sin(bounceAngle);
+  setPlayerReady(clientID: string, party: Game) {
+    if (this.isPlayer1(party, clientID)) {
+      party.player1.isReady = !party.player1.isReady;
+      return party.player1.isReady;
+    }
+    party.player2.isReady = !party.player2.isReady;
+    return party.player2.isReady;
   }
 
-  startBroadcastingBallState(
-    io: Server,
-    rightPlayer: string,
-    leftPlayer: string,
-    roomName: string
+  startParty(
+    clientID: string,
+    emitState: (state: any) => void,
+    emitGameOver: () => void
   ) {
-    const room = this.rooms.get(roomName);
-    if (!room) return;
-
-    room.gameInterval = setInterval(() => {
-      // Mettre à jour l'état de la balle ici
-      room.ballState.x += room.ballState.dx;
-      room.ballState.y += room.ballState.dy;
-      // collisions raquette gauche
-      if (
-        room.ballState.x - room.ballState.radius <
-          room.paddlePlayer1.x + room.paddlePlayer1.width &&
-        room.ballState.y + room.ballState.radius > room.paddlePlayer1.y &&
-        room.ballState.y - room.ballState.radius <
-          room.paddlePlayer1.y + room.paddlePlayer1.height
-      ) {
-        room.ballState.dx = -room.ballState.dx;
-        this.adjustBallAngle(room.paddlePlayer1.y, roomName);
-      }
-      // collisions raquette droite
-      if (
-        room.ballState.x + room.ballState.radius > room.paddlePlayer2.x &&
-        room.ballState.y + room.ballState.radius > room.paddlePlayer2.y &&
-        room.ballState.y - room.ballState.radius <
-          room.paddlePlayer2.y + room.paddlePlayer2.height
-      ) {
-        room.ballState.dx = -room.ballState.dx;
-        this.adjustBallAngle(room.paddlePlayer2.y, roomName);
-      }
-
-      // gere la collision des parois hautes et basses
-      if (
-        room.ballState.y + room.ballState.radius > 700 ||
-        room.ballState.y - room.ballState.radius < 0
-      ) {
-        room.ballState.dy = -room.ballState.dy;
-      }
-
-      // reinitalisation pos this.ballState quand point marque
-      if (room.ballState.x + room.ballState.radius > 1200) {
-        // this.logger.log('Joueur gauche a marque 1 Point !!!!!!!!!!!!');
-        room.scorePlayer1 += 1;
-        io.to(roomName).emit('scorePlayer1', room.scorePlayer1);
-        this.resetBall(roomName);
-      }
-      if (room.ballState.x + room.ballState.radius < 0) {
-        // this.logger.log('joueur droit a marque 1 Point !!!!!!!!!!!!');
-        room.scorePlayer2 += 1;
-        io.to(roomName).emit('scorePlayer2', room.scorePlayer2);
-        this.resetBall(roomName);
-      }
-      const winner = this.checkVictory(roomName);
-      if (winner) {
-        clearInterval(room.gameInterval); // stop le jeu
-        io.to(roomName).emit('gameOver');
-      }
-
-      io.to(roomName).emit('ballState', room.ballState);
-      io.to(rightPlayer).emit('paddleRight', room.paddlePlayer1);
-      io.to(leftPlayer).emit('paddleLeft', room.paddlePlayer2);
-    }, 3);
+    const party = this.rooms.get(clientID);
+    if (party) {
+      party.startBroadcastingBallState(emitState, () => {
+        emitGameOver();
+        this.rooms.delete(party.player1.socket.user.id!);
+        this.rooms.delete(party.player2.socket.user.id!);
+        this.rooms.delete(party.partyName);
+      });
+    }
   }
 }

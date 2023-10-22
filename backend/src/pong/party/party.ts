@@ -10,6 +10,7 @@ import {
   CANVA_WIDTH,
   PADDLE_HEIGHT,
   PADDLE_WIDTH,
+  VICTORY_POINT,
   WALL_OFFSET
 } from './classic-game-param';
 
@@ -81,14 +82,21 @@ export class PartyClassic extends Game {
     };
   }
 
-  startBroadcastingBallState(io: Server, callback: () => void): void {
+  startBroadcastingBallState(
+    emitState: (state: any) => void,
+    emitGameOver: () => void
+  ): void {
+    this.isStarted = true;
     const gameInterval = setInterval(() => {
       this.ball.updatePosition(this.paddle1, this.paddle2, this.canva, this);
       this.paddle1.updatePosition(this.canva);
       this.paddle2.updatePosition(this.canva);
-      if (this.scorePlayer1 >= 10 || this.scorePlayer2 >= 10) {
-        io.to(this.partyName).emit('gameOver');
-        callback();
+      if (
+        this.scorePlayer1 >= VICTORY_POINT ||
+        this.scorePlayer2 >= VICTORY_POINT
+      ) {
+        emitGameOver();
+        this.isStarted = false;
         clearInterval(gameInterval);
       }
       const gameState = {
@@ -112,7 +120,7 @@ export class PartyClassic extends Game {
         scorePlayer1: this.scorePlayer1,
         scorePlayer2: this.scorePlayer2
       };
-      io.to(this.partyName).emit('gameState', gameState);
+      emitState(gameState);
     }, 8);
   }
 }

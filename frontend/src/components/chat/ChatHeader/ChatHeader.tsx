@@ -8,14 +8,19 @@ import {
   disconnectSocket
 } from '../../../utils/functions/socket';
 import { useStateContext } from '../../../contexts/state';
+import { useSocketContext } from '../../../contexts/socket';
 
 function ChatHeader() {
   const isConnected = useConnected();
   const { changeView, toggleArrow, isChatClosed } = useStateContext();
+  const { socket } = useSocketContext();
 
   useEffect(() => {
     connectSocket();
-  }, []);
+    return () => {
+      socket.disconnect();
+    };
+  }, [socket]);
 
   const chatHeaderStyle = isChatClosed
     ? 'static bg-pong-blue-300'
