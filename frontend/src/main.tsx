@@ -17,6 +17,7 @@ import Pong from './components/Pong/Pong';
 import Profile from './components/Profile/Profile';
 import './index.css';
 import { SocketContextProvider } from './contexts/socket';
+import Chat from './features/Chat/Chat';
 
 const router = createBrowserRouter([
   {
@@ -61,9 +62,12 @@ const router = createBrowserRouter([
   {
     path: '/pong',
     element: (
-      <SocketContextProvider>
-        <Pong />
-      </SocketContextProvider>
+      <>
+        <SocketContextProvider>
+          <Pong />
+        </SocketContextProvider>
+        <Chat />
+      </>
     )
   },
   {
