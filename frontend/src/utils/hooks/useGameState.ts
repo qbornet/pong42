@@ -23,6 +23,7 @@ interface GameState {
   canva: Canva;
   scorePlayer1: number;
   scorePlayer2: number;
+  maxScore: number;
 }
 
 export function useGameState(): { gameState: GameState | undefined } {

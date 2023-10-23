@@ -54,6 +54,13 @@ export class PartyClassic extends Game {
     return this.player1.socket.user.id === playerId;
   }
 
+  public isPlayerReady(playerId: string) {
+    if (playerId === this.player1.socket.user.id) {
+      return this.player1.isReady;
+    }
+    return this.player2.isReady;
+  }
+
   public togglePlayerReady(playerId: string) {
     if (playerId === this.player1.socket.user.id) {
       this.player1.isReady = !this.player1.isReady;
@@ -147,7 +154,8 @@ export class PartyClassic extends Game {
         },
         canva: this.canva,
         scorePlayer1: this.scorePlayer1,
-        scorePlayer2: this.scorePlayer2
+        scorePlayer2: this.scorePlayer2,
+        maxScore: VICTORY_POINT
       };
       this.io.to(this.partyName).emit('gameState', gameState);
     }, 8);

@@ -39,6 +39,7 @@ export class PongGateway
         client.emit('startGame', party.partyName);
       } else {
         this.io.to(party.partyName).emit('joinParty');
+        client.emit('playerReady', party.isPlayerReady(clientID));
       }
     } else if (this.waitingRoomService.isUserWaiting(clientID)) {
       client.join(this.waitingRoomService.getRoomName());
