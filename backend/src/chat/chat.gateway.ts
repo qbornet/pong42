@@ -91,6 +91,17 @@ export default class ChatGateway
     });
 
     await this.usersService.createUser({
+      id: '1fa03160-6419-4e52-8879-f99e90eeca39',
+      email: 'tyty@student.42.fr',
+      username: 'tyty',
+      password: 'toto',
+      twoAuthOn: false,
+      twoAuthSecret: 'toto',
+      apiToken: 'toto',
+      connectedChat: false
+    });
+
+    await this.usersService.createUser({
       id: '693e8fcf-915b-472d-beee-ed53fec63008',
       email: 'toto@student.42.fr',
       username: 'toto',

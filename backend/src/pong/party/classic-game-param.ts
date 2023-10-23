@@ -4,9 +4,9 @@ const PADDLE_HEIGHT = 100;
 const WALL_OFFSET = 5;
 const CANVA_WIDTH = 1200;
 const CANVA_HEIGHT = 700;
-const BALL_SPEED = 4;
+const BALL_SPEED = 2;
 const PADDLE_SPEED = 5;
-const VICTORY_POINT = 3;
+const VICTORY_POINT = 10;
 
 export {
   BALL_SPEED,
