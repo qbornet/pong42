@@ -9,4 +9,9 @@ export type RoomName = string;
 
 export type UserID = string;
 
-export type Status = 'waitingRoom' | 'playing' | 'notPlaying';
+export type Status =
+  | 'default'
+  | 'waitingRoom'
+  | 'partyStarted'
+  | 'partyNotStarted'
+  | 'partyEnded';
