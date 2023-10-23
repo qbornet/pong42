@@ -43,10 +43,7 @@ export class ClassicWaitingRoom {
     return this.parties.delete(id);
   }
 
-  public joinParty(
-    client: PongSocket,
-    io: Server
-  ): { partyName: string; player: Player } {
+  public joinParty(client: PongSocket, io: Server): string {
     client.join(this.roomName);
     if (this.waitingPlayer) {
       const player2 = new Player(client, 2);
@@ -65,9 +62,9 @@ export class ClassicWaitingRoom {
       this.roomName = `room-${this.roomCounter}`;
 
       this.waitingPlayer = undefined;
-      return { partyName: party.partyName, player: player2 };
+      return party.partyName;
     }
     this.waitingPlayer = new Player(client, 1);
-    return { partyName: this.roomName, player: this.waitingPlayer };
+    return this.roomName;
   }
 }

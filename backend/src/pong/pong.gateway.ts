@@ -32,9 +32,6 @@ export class PongGateway
     if (party) {
       client.join(party.partyName);
 
-      const role = party.isPlayer1(clientID) ? 1 : 2;
-      client.emit('playerRole', role);
-
       if (party.isStarted) {
         client.emit('startGame', party.partyName);
       } else {
@@ -59,14 +56,25 @@ export class PongGateway
     const party = this.waitingRoomService.getParty(clientID);
     if (party) return;
 
-    const { partyName, player } = this.waitingRoomService.joinParty(
-      client,
-      this.io
-    );
-    client.emit('playerRole', player.role);
+    const partyName = this.waitingRoomService.joinParty(client, this.io);
     client.emit('joinWaitingRoom');
     this.io.to(partyName).emit('joinParty');
     client.emit('gameState', PartyClassic.getInitGameState());
+  }
+
+  @SubscribeMessage('playerRole')
+  handleRole(client: PongSocket) {
+    const clientID = client.user.id!;
+    const party = this.waitingRoomService.getParty(clientID);
+    const response = { role: 0 };
+    if (party) {
+      if (party.isPlayer1(clientID)) {
+        response.role = 1;
+      } else {
+        response.role = 2;
+      }
+    }
+    client.emit('playerRole', response);
   }
 
   @SubscribeMessage('playAgain')

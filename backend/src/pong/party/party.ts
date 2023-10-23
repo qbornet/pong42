@@ -14,6 +14,31 @@ import {
   WALL_OFFSET
 } from './classic-game-param';
 
+interface Position {
+  x: number;
+  y: number;
+}
+
+interface PaddleShape extends Position {
+  width: number;
+  height: number;
+}
+
+interface CanvaShape {
+  width: number;
+  height: number;
+}
+
+interface GameState {
+  ball: Position;
+  leftPaddle: PaddleShape;
+  rightPaddle: PaddleShape;
+  canva: CanvaShape;
+  scorePlayer1: number;
+  scorePlayer2: number;
+  maxScore: number;
+}
+
 export class PartyClassic extends Game {
   private ball: Ball;
 
@@ -85,7 +110,7 @@ export class PartyClassic extends Game {
     }
   }
 
-  public static getInitGameState() {
+  public static getInitGameState(): GameState {
     return {
       ball: {
         x: CANVA_WIDTH / 2 - BALLSIZE / 2,
@@ -108,7 +133,8 @@ export class PartyClassic extends Game {
         height: CANVA_HEIGHT
       },
       scorePlayer1: 0,
-      scorePlayer2: 0
+      scorePlayer2: 0,
+      maxScore: VICTORY_POINT
     };
   }
 
@@ -135,7 +161,7 @@ export class PartyClassic extends Game {
         this.isOver = true;
         clearInterval(gameInterval);
       }
-      const gameState = {
+      const gameState: GameState = {
         ball: {
           x: this.ball.x,
           y: this.ball.y
