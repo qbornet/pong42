@@ -35,6 +35,12 @@ export class PongService {
     client.emit('joinWaitingRoom');
   }
 
+  handleLeaveWaitingRoom(client: PongSocket) {
+    const clientID = client.user.id!;
+    this.waitingRoomService.leaveWaitingRoom(clientID);
+    client.emit('leaveWaitingRoom');
+  }
+
   handleRole(client: PongSocket) {
     const clientID = client.user.id!;
     const party = this.waitingRoomService.getParty(clientID);

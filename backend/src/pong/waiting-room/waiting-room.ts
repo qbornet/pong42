@@ -40,6 +40,12 @@ export class ClassicWaitingRoom {
     return this.parties.delete(id);
   }
 
+  public leaveWaitingRoom(id: UserID) {
+    if (this.isUserWaiting(id)) {
+      this.waitingPlayer = undefined;
+    }
+  }
+
   public joinParty(client: PongSocket, io: Server): string {
     client.join(this.roomName);
     if (this.waitingPlayer) {
