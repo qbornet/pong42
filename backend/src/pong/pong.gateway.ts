@@ -59,15 +59,13 @@ export class PongGateway
     const party = this.waitingRoomService.getParty(clientID);
     if (party) return;
 
-    const newParty = this.waitingRoomService.joinParty(client, this.io);
-    if (newParty) {
-      client.emit('playerRole', 2);
-      client.emit('joinWaitingRoom');
-      this.io.to(newParty.partyName).emit('joinParty');
-    } else {
-      client.emit('playerRole', 1);
-      client.emit('joinWaitingRoom');
-    }
+    const { partyName, player } = this.waitingRoomService.joinParty(
+      client,
+      this.io
+    );
+    client.emit('playerRole', player.role);
+    client.emit('joinWaitingRoom');
+    this.io.to(partyName).emit('joinParty');
     client.emit('gameState', PartyClassic.getInitGameState());
   }
 
