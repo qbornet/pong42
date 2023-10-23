@@ -9,8 +9,8 @@ import {
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { PongSocket } from './pong.interface';
-import { PongService } from './pong.service';
 import { PartyClassic } from './party/party';
+import { ClassicWaitingRoom } from './waiting-room/waiting-room';
 
 @WebSocketGateway()
 export class PongGateway
@@ -20,7 +20,7 @@ export class PongGateway
 
   @WebSocketServer() io: Server;
 
-  constructor(private pongService: PongService) {}
+  constructor(private waitingRoomService: ClassicWaitingRoom) {}
 
   afterInit() {
     this.logger.log('Initialize');
@@ -28,23 +28,20 @@ export class PongGateway
 
   handleConnection(client: PongSocket): any {
     const clientID = client.user.id!;
-    const party = this.pongService.getParty(clientID);
+    const party = this.waitingRoomService.getParty(clientID);
     if (party) {
       client.join(party.partyName);
 
-      if (this.pongService.isPlayer1(party, clientID)) {
-        client.emit('playerRole', 1);
-      } else {
-        client.emit('playerRole', 2);
-      }
+      const role = party.isPlayer1(clientID) ? 1 : 2;
+      client.emit('playerRole', role);
 
       if (party.isStarted) {
         client.emit('startGame', party.partyName);
       } else {
         this.io.to(party.partyName).emit('joinParty');
       }
-    } else if (this.pongService.isWaiting(client)) {
-      client.join(this.pongService.getWaitingRoom().getRoomName());
+    } else if (this.waitingRoomService.isUserWaiting(clientID)) {
+      client.join(this.waitingRoomService.getRoomName());
       client.emit('joinWaitingRoom');
     }
     client.emit('gameState', PartyClassic.getInitGameState());
@@ -58,20 +55,17 @@ export class PongGateway
   @SubscribeMessage('joinWaitingRoom')
   handleJoinWaitingRoom(client: PongSocket) {
     const clientID = client.user.id!;
-    const party = this.pongService.getParty(clientID);
+    const party = this.waitingRoomService.getParty(clientID);
     if (party) return;
-    const hasJoin = this.pongService.joinWaintingRoom(client);
-    if (hasJoin) {
+
+    const newParty = this.waitingRoomService.joinParty(client, this.io);
+    if (newParty) {
+      client.emit('playerRole', 2);
+      client.emit('joinWaitingRoom');
+      this.io.to(newParty.partyName).emit('joinParty');
+    } else {
       client.emit('playerRole', 1);
       client.emit('joinWaitingRoom');
-    } else {
-      const newParty = this.pongService.createParty(client);
-      if (newParty) {
-        client.join(newParty.partyName);
-        client.emit('playerRole', 2);
-        client.emit('joinWaitingRoom');
-        this.io.to(newParty.partyName).emit('joinParty');
-      }
     }
     client.emit('gameState', PartyClassic.getInitGameState());
   }
@@ -85,30 +79,31 @@ export class PongGateway
   @SubscribeMessage('playerReady')
   handlePlayerReady(client: PongSocket) {
     const clientID = client.user.id!;
-    const party = this.pongService.getParty(clientID);
+    const party = this.waitingRoomService.getParty(clientID);
     if (party) {
-      const ready = this.pongService.setPlayerReady(clientID, party);
+      const ready = party.togglePlayerReady(clientID);
       client.emit('playerReady', ready);
-      if (party.player1.isReady && party.player2.isReady) {
-        const emitState = (state: any) => {
-          this.io.to(party.partyName).emit('gameState', state);
-        };
-        const emitGameOver = () => {
-          this.io.to(party.partyName).emit('gameOver', true);
-        };
-        this.pongService.startParty(clientID, emitState, emitGameOver);
-        this.io.to(party.partyName).emit('startGame', party.partyName);
-      }
+      party.startParty(() => {
+        this.waitingRoomService.removeParty(party.partyName);
+        this.waitingRoomService.removeParty(party.player2.id);
+        this.waitingRoomService.removeParty(party.player1.id);
+      });
     }
   }
 
   @SubscribeMessage('arrowUp')
   handleArrowUp(client: PongSocket, isPressed: boolean): void {
-    this.pongService.handlePaddle(client.user.id!, 'ArrowUp', isPressed);
+    const party = this.waitingRoomService.getParty(client.user.id!);
+    if (party) {
+      party.movePaddle(client.user.id!, 'ArrowUp', isPressed);
+    }
   }
 
   @SubscribeMessage('arrowDown')
   handleArrowDown(client: PongSocket, isPressed: boolean): void {
-    this.pongService.handlePaddle(client.user.id!, 'ArrowDown', isPressed);
+    const party = this.waitingRoomService.getParty(client.user.id!);
+    if (party) {
+      party.movePaddle(client.user.id!, 'ArrowDown', isPressed);
+    }
   }
 }

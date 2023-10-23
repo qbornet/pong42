@@ -5,6 +5,8 @@ export abstract class Game {
 
   isStarted: boolean = false;
 
+  isOver: boolean = false;
+
   // Player1
   player1: Player;
 
@@ -27,8 +29,9 @@ export abstract class Game {
     isPressed: boolean
   ): void;
 
-  abstract startBroadcastingBallState(
-    emitState: (state: any) => void,
-    emitGameOver: () => void
-  ): void;
+  abstract incScore1(): void;
+
+  abstract incScore2(): void;
+
+  abstract startParty(clearParty: () => void): void;
 }

@@ -23,8 +23,11 @@ export class PartyClassic extends Game {
 
   private canva: Canva;
 
-  constructor(p1: Player, p2: Player, name: string) {
+  private io: Server;
+
+  constructor(p1: Player, p2: Player, name: string, io: Server) {
     super(p1, p2, name);
+    this.io = io;
     this.canva = new Canva(0, 0, CANVA_WIDTH, CANVA_HEIGHT);
 
     this.ball = new Ball(
@@ -47,7 +50,27 @@ export class PartyClassic extends Game {
     );
   }
 
-  movePaddle(playerId: string, keycode: string, isPressed: boolean) {
+  public isPlayer1(playerId: string) {
+    return this.player1.socket.user.id === playerId;
+  }
+
+  public togglePlayerReady(playerId: string) {
+    if (playerId === this.player1.socket.user.id) {
+      this.player1.isReady = !this.player1.isReady;
+      return this.player1.isReady;
+    }
+    this.player2.isReady = !this.player2.isReady;
+    return this.player2.isReady;
+  }
+
+  public startParty(clearParty: () => void) {
+    if (this.player1.isReady && this.player2.isReady) {
+      this.startBroadcastingBallState(clearParty);
+      this.io.to(this.partyName).emit('startGame', this.partyName);
+    }
+  }
+
+  public movePaddle(playerId: string, keycode: string, isPressed: boolean) {
     if (playerId === this.player1.socket.user.id) {
       this.paddle1.setActive(keycode, isPressed);
     } else {
@@ -82,10 +105,15 @@ export class PartyClassic extends Game {
     };
   }
 
-  startBroadcastingBallState(
-    emitState: (state: any) => void,
-    emitGameOver: () => void
-  ): void {
+  public incScore1() {
+    this.scorePlayer1 += 1;
+  }
+
+  public incScore2() {
+    this.scorePlayer2 += 1;
+  }
+
+  private startBroadcastingBallState(clearParty: () => void): void {
     this.isStarted = true;
     const gameInterval = setInterval(() => {
       this.ball.updatePosition(this.paddle1, this.paddle2, this.canva, this);
@@ -95,8 +123,9 @@ export class PartyClassic extends Game {
         this.scorePlayer1 >= VICTORY_POINT ||
         this.scorePlayer2 >= VICTORY_POINT
       ) {
-        emitGameOver();
-        this.isStarted = false;
+        this.io.to(this.partyName).emit('gameOver', true);
+        clearParty();
+        this.isOver = true;
         clearInterval(gameInterval);
       }
       const gameState = {
@@ -120,7 +149,7 @@ export class PartyClassic extends Game {
         scorePlayer1: this.scorePlayer1,
         scorePlayer2: this.scorePlayer2
       };
-      emitState(gameState);
+      this.io.to(this.partyName).emit('gameState', gameState);
     }, 8);
   }
 }
