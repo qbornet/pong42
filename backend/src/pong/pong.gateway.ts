@@ -11,6 +11,7 @@ import { Server } from 'socket.io';
 import { PongSocket } from './pong.interface';
 import { PartyClassic } from './party/party';
 import { ClassicWaitingRoom } from './waiting-room/waiting-room';
+import { PongService } from './pong.service';
 
 @WebSocketGateway()
 export class PongGateway
@@ -20,7 +21,10 @@ export class PongGateway
 
   @WebSocketServer() io: Server;
 
-  constructor(private waitingRoomService: ClassicWaitingRoom) {}
+  constructor(
+    private pongService: PongService,
+    private waitingRoomService: ClassicWaitingRoom
+  ) {}
 
   afterInit() {
     this.logger.log('Initialize');
@@ -28,26 +32,25 @@ export class PongGateway
 
   handleConnection(client: PongSocket): any {
     const clientID = client.user.id!;
-    const party = this.waitingRoomService.getParty(clientID);
-    if (party) {
-      client.join(party.partyName);
+    // const party = this.waitingRoomService.getParty(clientID);
+    // if (party) {
+    //  client.join(party.partyName);
 
-      if (party.isStarted) {
-        client.emit('startGame', party.partyName);
-      } else {
-        this.io.to(party.partyName).emit('joinParty');
-        client.emit('playerReady', party.isPlayerReady(clientID));
-      }
-    } else if (this.waitingRoomService.isUserWaiting(clientID)) {
-      client.join(this.waitingRoomService.getRoomName());
-      client.emit('joinWaitingRoom');
-    }
-    client.emit('gameState', PartyClassic.getInitGameState());
-    this.logger.debug(`New connection : ${client.id}`);
+    //  if (party.isStarted) {
+    //    client.emit('startGame', party.partyName);
+    //  } else {
+    //    this.io.to(party.partyName).emit('joinParty');
+    //    client.emit('playerReady', party.isPlayerReady(clientID));
+    //  }
+    // } else if (this.waitingRoomService.isUserWaiting(clientID)) {
+    //  client.join(this.waitingRoomService.getRoomName());
+    //  client.emit('joinWaitingRoom');
+    // }
+    this.logger.debug(`New connection : ${client.user.id}`);
   }
 
   handleDisconnect(client: PongSocket): any {
-    this.logger.debug(`Disconnected : ${client.id}`);
+    this.logger.debug(`Disconnected : ${client.user.id}`);
   }
 
   @SubscribeMessage('joinWaitingRoom')
@@ -56,10 +59,8 @@ export class PongGateway
     const party = this.waitingRoomService.getParty(clientID);
     if (party) return;
 
-    const partyName = this.waitingRoomService.joinParty(client, this.io);
+    this.waitingRoomService.joinParty(client, this.io);
     client.emit('joinWaitingRoom');
-    this.io.to(partyName).emit('joinParty');
-    client.emit('gameState', PartyClassic.getInitGameState());
   }
 
   @SubscribeMessage('playerRole')
@@ -80,6 +81,10 @@ export class PongGateway
   @SubscribeMessage('playAgain')
   handlePlayAgain(client: PongSocket) {
     client.emit('gameOver', false);
+  }
+
+  @SubscribeMessage('initialState')
+  handleInitialState(client: PongSocket) {
     client.emit('gameState', PartyClassic.getInitGameState());
   }
 
@@ -87,15 +92,16 @@ export class PongGateway
   handlePlayerReady(client: PongSocket) {
     const clientID = client.user.id!;
     const party = this.waitingRoomService.getParty(clientID);
+    let ready = false;
     if (party) {
-      const ready = party.togglePlayerReady(clientID);
-      client.emit('playerReady', ready);
+      ready = party.togglePlayerReady(clientID);
       party.startParty(() => {
         this.waitingRoomService.removeParty(party.partyName);
         this.waitingRoomService.removeParty(party.player2.id);
         this.waitingRoomService.removeParty(party.player1.id);
       });
     }
+    client.emit('playerReady', ready);
   }
 
   @SubscribeMessage('arrowUp')

@@ -4,3 +4,9 @@ import { IUsers } from 'src/database/service/interface/users';
 export interface PongSocket extends Socket {
   user: Partial<IUsers>;
 }
+
+export type RoomName = string;
+
+export type UserID = string;
+
+export type Status = 'waitingRoom' | 'playing' | 'notPlaying';

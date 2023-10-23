@@ -97,7 +97,10 @@ export class PartyClassic extends Game {
 
   public startParty(clearParty: () => void) {
     if (this.player1.isReady && this.player2.isReady) {
-      this.startBroadcastingBallState(clearParty);
+      if (this.isStarted === false) {
+        this.startGameLoop(clearParty);
+      }
+      this.startBroadcastingGameState();
       this.io.to(this.partyName).emit('startGame', this.partyName);
     }
   }
@@ -146,7 +149,7 @@ export class PartyClassic extends Game {
     this.scorePlayer2 += 1;
   }
 
-  private startBroadcastingBallState(clearParty: () => void): void {
+  private startGameLoop(clearParty: () => void): void {
     this.isStarted = true;
     const gameInterval = setInterval(() => {
       this.ball.updatePosition(this.paddle1, this.paddle2, this.canva, this);
@@ -160,6 +163,14 @@ export class PartyClassic extends Game {
         clearParty();
         this.isOver = true;
         clearInterval(gameInterval);
+      }
+    }, 8);
+  }
+
+  private startBroadcastingGameState(): void {
+    const broadcastInterval = setInterval(() => {
+      if (this.isOver) {
+        clearInterval(broadcastInterval);
       }
       const gameState: GameState = {
         ball: {

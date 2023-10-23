@@ -22,6 +22,7 @@ export default function Pong() {
   usePaddle();
 
   const handleJoinWaitingRoom = () => {
+    socket.emit('initialState');
     socket.emit('joinWaitingRoom');
   };
 
