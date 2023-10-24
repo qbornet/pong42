@@ -13,10 +13,11 @@ import ErrorValidation from '@login/ErrorValidation';
 import ValidationTwoAuth from '@login/ValidationTwoAuth';
 import UploadImg from '@login/UploadImg';
 import { loader as loaderProfile } from './components/Profile/profile.loader';
-import Pong from './components/Pong/Pong';
+import Pong, { JoinWaitingRoom } from './components/Pong/Pong';
 import Profile from './components/Profile/Profile';
 import './index.css';
 import { SocketContextProvider } from './contexts/socket';
+import Chat from './features/Chat/Chat';
 
 const router = createBrowserRouter([
   {
@@ -61,9 +62,12 @@ const router = createBrowserRouter([
   {
     path: '/pong',
     element: (
-      <SocketContextProvider>
-        <Pong />
-      </SocketContextProvider>
+      <>
+        <SocketContextProvider>
+          <Pong />
+        </SocketContextProvider>
+        <Chat />
+      </>
     )
   },
   {

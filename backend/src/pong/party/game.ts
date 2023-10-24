@@ -1,8 +1,11 @@
-import { Server } from 'socket.io';
 import { Player } from './player';
 
 export abstract class Game {
   partyName: string;
+
+  isStarted: boolean = false;
+
+  isOver: boolean = false;
 
   // Player1
   player1: Player;
@@ -20,5 +23,15 @@ export abstract class Game {
     this.partyName = name;
   }
 
-  abstract startBroadcastingBallState(io: Server, callback: () => void): void;
+  abstract movePaddle(
+    playerId: string,
+    keycode: string,
+    isPressed: boolean
+  ): void;
+
+  abstract incScore1(): void;
+
+  abstract incScore2(): void;
+
+  abstract startParty(clearParty: () => void): void;
 }

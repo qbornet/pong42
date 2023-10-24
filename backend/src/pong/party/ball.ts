@@ -20,7 +20,7 @@ export class Ball extends PositionClass {
     // collision paroi droite
     if (this.x + this.width >= canva.width) {
       // this.logger.log('Joueur gauche a marque 1 Point !!!!!!!!!!!!');
-      game.scorePlayer1 += 1;
+      game.incScore1();
       this.x = canva.width / 2 - this.width / 2;
       this.y = canva.height / 2 - this.height / 2;
     }
@@ -28,7 +28,7 @@ export class Ball extends PositionClass {
     // collision paroi gauche
     if (this.x <= 0) {
       // this.logger.log('joueur droit a marque 1 Point !!!!!!!!!!!!');
-      game.scorePlayer2 += 1;
+      game.incScore2();
       this.x = canva.width / 2 - this.width / 2;
       this.y = canva.height / 2 - this.height / 2;
     }

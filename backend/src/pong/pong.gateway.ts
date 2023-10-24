@@ -8,93 +8,76 @@ import {
   WebSocketServer
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { WaitingRoomService } from './waiting-room/waiting-room.service';
 import { PongSocket } from './pong.interface';
 import { PartyClassic } from './party/party';
-
-type RoomName = string;
-type UserID = string;
+import { PongService } from './pong.service';
 
 @WebSocketGateway()
 export class PongGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-  constructor(private waitingRoom: WaitingRoomService) {}
-
   private readonly logger = new Logger(PongGateway.name);
 
   @WebSocketServer() io: Server;
+
+  constructor(private pongService: PongService) {}
 
   afterInit() {
     this.logger.log('Initialize');
   }
 
-  private rooms: Map<RoomName | UserID, PartyClassic> = new Map();
-
   handleConnection(client: PongSocket): any {
-    const party = this.rooms.get(client.user.id!);
-    if (party && client.user) {
-      client.join(party.partyName);
-      if (party.player1.socket.user.id === client.user.id) {
-        client.emit('playerRole', 1);
-      } else {
-        client.emit('playerRole', 2);
-      }
-      client.emit('startGame', party.partyName);
-    } else {
-      const roomName = this.waitingRoom.getRoomName();
-      const isAdded = this.waitingRoom.addPlayer(client);
-      if (isAdded) {
-        client.join(roomName);
-        client.emit('playerRole', 1);
-      } else {
-        const newParty = this.waitingRoom.getParty(client);
-        if (newParty) {
-          client.join(roomName);
-          this.rooms.set(roomName, newParty);
-          this.rooms.set(newParty.player1.socket.user.id!, newParty);
-          this.rooms.set(newParty.player2.socket.user.id!, newParty);
-          client.emit('playerRole', 2);
-          this.io.to(roomName).emit('startGame', roomName);
-        }
-      }
-    }
-    client.emit('gameState', PartyClassic.getInitGameState());
-    this.logger.debug(`New connection : ${client.id}`);
+    this.pongService.handleConnection(client);
+    this.logger.debug(`New connection : ${client.user.id}`);
   }
 
   handleDisconnect(client: PongSocket): any {
-    this.logger.debug(`Disconnected : ${client.id}`);
+    this.pongService.handleLeaveWaitingRoom(client);
+    this.logger.debug(`Disconnected : ${client.user.id}`);
+  }
+
+  @SubscribeMessage('leaveWaitingRoom')
+  handleLeaveWaitingRoom(client: PongSocket) {
+    this.pongService.handleLeaveWaitingRoom(client);
+  }
+
+  @SubscribeMessage('joinWaitingRoom')
+  handleJoinWaitingRoom(client: PongSocket) {
+    this.pongService.handleJoinWaitingRoom(client, this.io);
+  }
+
+  @SubscribeMessage('playerRole')
+  handleRole(client: PongSocket) {
+    this.pongService.handleRole(client);
+  }
+
+  @SubscribeMessage('playAgain')
+  handlePlayAgain(client: PongSocket) {
+    client.emit('playAgain');
+  }
+
+  @SubscribeMessage('initialState')
+  handleInitialState(client: PongSocket) {
+    client.emit('gameState', PartyClassic.getInitGameState());
   }
 
   @SubscribeMessage('playerReady')
   handlePlayerReady(client: PongSocket) {
-    const party = this.rooms.get(client.user.id!);
-    if (party) {
-      party.startBroadcastingBallState(this.io, () => {
-        this.rooms.delete(party.player1.socket.user.id!);
-        this.rooms.delete(party.player2.socket.user.id!);
-        this.rooms.delete(party.partyName);
-      });
-    }
-    client.emit('waintingRoom');
+    this.pongService.handlePlayerReady(client);
+  }
+
+  @SubscribeMessage('isPlayerReady')
+  handleIsPlayerReady(client: PongSocket) {
+    this.pongService.handleIsPlayerReady(client);
   }
 
   @SubscribeMessage('arrowUp')
   handleArrowUp(client: PongSocket, isPressed: boolean): void {
-    const party = this.rooms.get(client.user.id!);
-    if (party) {
-      const { id } = client.user;
-      party.movePaddle(id!, 'ArrowUp', isPressed);
-    }
+    this.pongService.handleArrowUp(client, isPressed);
   }
 
   @SubscribeMessage('arrowDown')
   handleArrowDown(client: PongSocket, isPressed: boolean): void {
-    const party = this.rooms.get(client.user.id!);
-    if (party) {
-      const { id } = client.user;
-      party.movePaddle(id!, 'ArrowDown', isPressed);
-    }
+    this.pongService.handleArrowDown(client, isPressed);
   }
 }

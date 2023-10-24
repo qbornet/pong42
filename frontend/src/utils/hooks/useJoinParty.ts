@@ -3,35 +3,33 @@ import { useSocketContext } from '../../contexts/socket';
 import { useGameOver } from './useGameOver';
 import { useConnection } from './useConnection';
 
-export function useGameStarted(): { isGameStarted: boolean } {
+export function useJoinParty(): { hasJoinParty: boolean } {
   const { socket } = useSocketContext();
-  const [isGameStarted, setIsGameStarted] = useState(false);
+  const [hasJoinParty, setHasJoinParty] = useState(false);
   const { isGameOver } = useGameOver();
   const { pongStatus } = useConnection();
 
   useEffect(() => {
-    if (pongStatus === 'partyStarted') {
-      setIsGameStarted(true);
+    if (pongStatus === 'partyNotStarted') {
+      setHasJoinParty(true);
     } else {
-      setIsGameStarted(false);
+      setHasJoinParty(false);
     }
   }, [pongStatus]);
 
   useEffect(() => {
-    if (isGameOver) {
-      setIsGameStarted(false);
-    }
+    setHasJoinParty(false);
   }, [isGameOver]);
 
   useEffect(() => {
-    const onStartGame = () => {
-      setIsGameStarted(true);
+    const onJoinParty = () => {
+      setHasJoinParty(true);
     };
-    socket.on('startGame', onStartGame);
 
+    socket.on('joinParty', onJoinParty);
     return () => {
-      socket.off('startGame', onStartGame);
+      socket.off('joinParty', onJoinParty);
     };
   }, [socket]);
-  return { isGameStarted };
+  return { hasJoinParty };
 }
