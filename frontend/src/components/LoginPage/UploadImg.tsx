@@ -27,7 +27,7 @@ export default function UploadImg() {
   };
 
   const handleNextClick = () => {
-    navigate('/profile');
+    navigate('/home');
   };
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,7 +89,7 @@ export default function UploadImg() {
       });
 
     if (result) {
-      navigate('/profile');
+      navigate('/home');
     }
   };
 
