@@ -1,5 +1,5 @@
 import { redirect } from 'react-router-dom';
-import axios, { AxiosResponse, AxiosError, AxiosRequestConfig } from 'axios';
+import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { CONST_BACKEND_URL } from '@constant';
 
 export async function loader() {
@@ -9,14 +9,16 @@ export async function loader() {
 
   const config: AxiosRequestConfig = {
     withCredentials: true,
-    headers: { Authorization: `Bearer ${jwt}` }
+    headers: {
+      Authorization: `Bearer ${jwt}`
+    }
   };
-  const result = await axios
-    .get(`${CONST_BACKEND_URL}/img/download`, config)
-    .then((res: AxiosResponse) => res.data)
+  const res = await axios
+    .get(`${CONST_BACKEND_URL}/auth/token`, config)
+    .then((response: AxiosResponse) => response.data)
     .catch((err: AxiosError) => {
       if (err) error = true;
     });
 
-  return error ? redirect('/') : result;
+  return error ? redirect('/') : res;
 }

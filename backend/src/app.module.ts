@@ -7,6 +7,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { ImgModule } from './img/img.module';
 import { ChatModule } from './chat/chat.module';
+import { UserModule } from './user/user.module';
 import envSchema from './env.validation';
 import configuration from './config/configuration';
 import { PongModule } from './pong/pong.module';
@@ -27,7 +28,8 @@ import { PongModule } from './pong/pong.module';
     ChatModule,
     AuthModule,
     ImgModule,
-    PongModule
+    PongModule,
+    UserModule
   ],
   controllers: [AppController],
   providers: [AppService]

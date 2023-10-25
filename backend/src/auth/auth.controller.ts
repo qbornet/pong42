@@ -43,11 +43,18 @@ export class AuthController {
     this.logger.log('AuthController Init...');
   }
 
-  @Get('login_only')
+  @Get('token')
   @UseGuards(ApiGuard, JwtAuthGuard)
   @HttpCode(200)
-  getLogedUser(@Req() req: any) {
-    return req.user;
+  checkToken() {}
+
+  @Get('logout')
+  @UseGuards(ApiGuard, JwtAuthGuard)
+  @HttpCode(200)
+  async logoutUser(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('api_token');
+    res.setHeader('Authorization', '');
+    res.setHeader('Location', `${CONST_FRONTEND_URL}`);
   }
 
   @Post('2fa-generate')
@@ -56,13 +63,6 @@ export class AuthController {
   async generate2Fa(@Req() req: any) {
     const { optAuthUrl } = await this.authService.generate2FASecret(req.user);
     return this.authService.generateQrCodeDataUrl(optAuthUrl);
-  }
-
-  @Get('2fa-login')
-  @UseGuards(ApiGuard)
-  @HttpCode(200)
-  async authenticatePage(@Res() res: Response) {
-    res.status(200).json({ message: 'ok' });
   }
 
   @Post('2fa-login')
@@ -83,13 +83,6 @@ export class AuthController {
     const jsonWebToken = await this.authService.loginWith2Fa(req.user);
     res.setHeader('Authorization', `Bearer ${jsonWebToken.access_token}`);
     return jsonWebToken;
-  }
-
-  @Get('login')
-  @UseGuards(ApiGuard)
-  @HttpCode(200)
-  getLogin(@Res() res: Response) {
-    res.json({ message: 'ok' });
   }
 
   @Post('login')
@@ -135,7 +128,8 @@ export class AuthController {
       httpOnly: true
     });
     await this.authService.updateUser(user, {
-      apiToken: token.access_token
+      apiToken: token.access_token,
+      maxAge: token.expires_in * 1000
     });
 
     // res should not be return to avoid cerciluar dependicy
@@ -144,13 +138,6 @@ export class AuthController {
       return;
     }
     res.status(301).redirect(`${CONST_FRONTEND_URL}/login`);
-  }
-
-  // this might change in the future.
-  @Get('create_profile')
-  @UseGuards(ApiGuard)
-  returnCreate(@Res() res: Response) {
-    res.status(200).json({ message: 'ok' });
   }
 
   // create user profile
@@ -168,7 +155,6 @@ export class AuthController {
         headers: { Authorization: `Bearer ${token}` }
       };
 
-      this.logger.debug('in createUser() or post create_profile route 1st');
       const info$ = this.httpService
         .get('https://api.intra.42.fr/v2/me', config)
         .pipe(map((response: AxiosResponse) => response.data));
@@ -193,7 +179,6 @@ export class AuthController {
         return;
       }
 
-      this.logger.debug('in createUser() or post create_profile route 2nd');
       const tokenInfo$ = this.httpService
         .get(CONST_INFO_URL, config)
         .pipe(map((response: AxiosResponse) => response.data));
@@ -212,7 +197,6 @@ export class AuthController {
         password: user.password
       };
 
-      this.logger.debug('in createUser() or post create_profile route 3rd');
       const jwt$ = this.httpService
         .post(CONST_LOCAL_LOGIN, loginInfo, {
           headers: {
@@ -230,12 +214,5 @@ export class AuthController {
     } catch (e) {
       throw new HttpException(`${e.message}`, e.code);
     }
-  }
-
-  // will be replaced with the actual profile information
-  @Get('profile')
-  @UseGuards(ApiGuard)
-  profile() {
-    return 'profile';
   }
 }

@@ -9,14 +9,13 @@ export async function loader() {
 
   const config: AxiosRequestConfig = {
     withCredentials: true,
-    headers: { Authorization: `Bearer ${jwt}` }
+    headers: { Authorization: `Bearer ${jwt!}` }
   };
   const result = await axios
-    .get(`${CONST_BACKEND_URL}/img/download`, config)
+    .post(`${CONST_BACKEND_URL}/auth/2fa-generate`, {}, config)
     .then((res: AxiosResponse) => res.data)
     .catch((err: AxiosError) => {
       if (err) error = true;
     });
-
   return error ? redirect('/') : result;
 }

@@ -12,17 +12,19 @@ datasource db {
 
 model Users {
   id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  img             String    @default("/home/jfrancai/repos/transcendence/backend/img/default.jpg")
+  img             String    @default("/home/qbornet/42/ft_transcendence/backend/img/default.jpg")
   email           String    @unique
   username        String    @unique
   password        String
   twoAuthOn       Boolean   @default(false)
   twoAuthSecret   String?
   apiToken        String?
+  maxAge          Int       @default(0)
   connectedChat   Boolean   @default(false)
   channels        Channel[]
   messageSent     Message[] @relation(name: "sender")
   messageReceived Message[] @relation(name: "receiver")
+  friendList      String[]  @db.Uuid
   blockList       String[]  @db.Uuid
 }
 

@@ -11,6 +11,7 @@ import {
   Param
 } from '@nestjs/common';
 import { join } from 'path';
+import { ApiGuard } from 'src/auth/guards/api.guard';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { AuthService } from 'src/auth/auth.service';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -20,6 +21,7 @@ import { IUsers } from '../database/service/interface/users';
 import { ChannelService } from '../database/service/channel.service';
 
 @Controller('img')
+@UseGuards(ApiGuard, JwtAuthGuard)
 export class ImgController {
   private logger = new Logger('ImgController');
 
@@ -32,7 +34,6 @@ export class ImgController {
   }
 
   @Post('upload')
-  @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('image'))
   async uploadFile(
     @Req() req: any,
@@ -62,7 +63,6 @@ export class ImgController {
   }
 
   @Post('upload/:id')
-  @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('image'))
   async uploadChannelPicture(
     @Param('id') chanID: string,
@@ -87,19 +87,17 @@ export class ImgController {
   }
 
   @Get('download')
-  @UseGuards(JwtAuthGuard)
   async getUserImage(@Req() req: any) {
     const jwt = req.headers.authorization.replace('Bearer ', '');
     const user = await this.authService.findUserByJWT(jwt);
     if (user) {
-      const imgValue = this.imgService.imageToBase64(user.img);
-      return { username: user.username, ...imgValue };
+      const imgValue = this.imgService.imageToBase64(user?.img);
+      return { username: user.username, uuid: user.id, ...imgValue };
     }
     return null;
   }
 
-  @Get('download/:id')
-  @UseGuards(JwtAuthGuard)
+  @Get('download_channel/:id')
   async getChannelImage(@Req() req: any, @Param('id') chanID: string) {
     const jwt = req.headers.authorization.replace('Bearer ', '');
     const user = await this.authService.findUserByJWT(jwt);
@@ -110,5 +108,16 @@ export class ImgController {
 
     const imgValue = this.imgService.imageToBase64(channel.img);
     return { chanName: channel.chanName, ...imgValue };
+  }
+
+  // use this route for fetching on specific user
+  @Get('download/:username')
+  async findUserImage(@Param('username') toFind: string) {
+    const user = await this.authService.findUser({ username: toFind });
+    if (user) {
+      const imgValue = this.imgService.imageToBase64(user?.img);
+      return { username: user.username, tofind_uuid: user.id, ...imgValue };
+    }
+    return null;
   }
 }

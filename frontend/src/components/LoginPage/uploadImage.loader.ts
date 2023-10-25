@@ -12,7 +12,7 @@ export async function loader() {
     headers: { Authorization: `Bearer ${jwt}` }
   };
   const result = await axios
-    .get(`${CONST_BACKEND_URL}/img/download`, config)
+    .get(`${CONST_BACKEND_URL}/auth/token`, config)
     .then((res: AxiosResponse) => res.data)
     .catch((err: AxiosError) => {
       if (err) error = true;
