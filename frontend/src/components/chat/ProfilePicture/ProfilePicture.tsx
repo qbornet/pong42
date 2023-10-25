@@ -2,6 +2,8 @@ import { CONST_BACKEND_URL } from '@constant';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
+type ImageInfo = { username: string; uuid: string; img: string };
+
 interface ProfilePictureProps {
   size?: 'xs' | 's' | 'm' | 'l' | 'xl';
   select?: boolean;
@@ -16,10 +18,7 @@ const style = Object.freeze({
 });
 
 function ProfilePicture({ size = 'xl', select = false }: ProfilePictureProps) {
-  const [data, setData] = useState<{
-    img: string;
-    ext: string;
-  }>({ img: '', ext: '' });
+  const [data, setData] = useState<ImageInfo | undefined>(undefined);
   useEffect(() => {
     const fetchData = () => {
       const jwt = localStorage.getItem('jwt');
@@ -39,11 +38,7 @@ function ProfilePicture({ size = 'xl', select = false }: ProfilePictureProps) {
   return (
     <img
       alt="pp"
-      src={`${
-        data.ext === '.jpeg'
-          ? 'data:image/jpeg;base64'
-          : 'data:image/png;base64'
-      },${data.img}`}
+      src={data ? data.img : ''}
       className={`object-contain ${
         style[size]
       } w-flex-shrink-0 relative flex items-end justify-center rounded-full ${

@@ -88,6 +88,12 @@ const router = createBrowserRouter([
   {
     path: '/home',
     element: <Home />,
+    children: [
+      {
+        path: '',
+        element: <Chat />
+      }
+    ],
     loader: homeLoader
   }
 ]);
