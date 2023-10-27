@@ -1,5 +1,7 @@
 import { v4 as uuid } from 'uuid';
 import { Server } from 'socket.io';
+import { Logger } from '@nestjs/common';
+import { MatchService } from 'src/database/service/match.service';
 import { PongSocket, RoomName, Status, UserID } from '../pong.interface';
 import { Player } from '../party/player';
 import { Game } from '../party/game.abstract';
@@ -10,13 +12,15 @@ export interface PartyConstructor<GameType> {
 }
 
 export class WaitingRoom {
+  private logger = new Logger(WaitingRoom.name);
+
   private roomName: string;
 
   private waitingPlayer: Player | undefined;
 
   private parties: Map<RoomName | UserID, Game> = new Map();
 
-  constructor(roomName: string) {
+  constructor(roomName: string, private matchService: MatchService) {
     this.roomName = roomName;
   }
 
@@ -158,6 +162,7 @@ export class WaitingRoom {
     if (party) {
       ready = party.togglePlayerReady(clientID, isReady);
       party.startParty(() => {
+        this.handleDataOfMatch(party, party.playerWon);
         this.removeParty(party.partyName);
         this.removeParty(party.player2.id);
         this.removeParty(party.player1.id);
@@ -177,6 +182,29 @@ export class WaitingRoom {
     const party = this.getParty(client.user.id!);
     if (party) {
       party.movePaddle(client.user.id!, 'ArrowDown', isPressed);
+    }
+  }
+
+  handleDataOfMatch(party: Game, playerWon: number) {
+    const player1Id = party.player1.id;
+    const player2Id = party.player2.id;
+    const timestamp = Date.now();
+
+    this.logger.debug(
+      `playerWonParty: ${party.playerWon}, player1Id: ${player1Id}, player2Id: ${player2Id}`
+    );
+    if (playerWon === 1) {
+      const winMatchHistory = `1|${player2Id}|${timestamp}`;
+      const lostMatchHistory = `0|${player1Id}|${timestamp}`;
+
+      this.matchService.addMatchHistory(player1Id, winMatchHistory);
+      this.matchService.addMatchHistory(player2Id, lostMatchHistory);
+    } else if (playerWon === 2) {
+      const winMatchHistory = `1|${player1Id}|${timestamp}`;
+      const lostMatchHistory = `0|${player2Id}|${timestamp}`;
+
+      this.matchService.addMatchHistory(player2Id, winMatchHistory);
+      this.matchService.addMatchHistory(player1Id, lostMatchHistory);
     }
   }
 }

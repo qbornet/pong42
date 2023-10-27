@@ -1,5 +1,6 @@
 import { Server } from 'socket.io';
 import { Injectable } from '@nestjs/common';
+import { MatchService } from 'src/database/service/match.service';
 import { PongSocket, UserID } from './pong.interface';
 import { WaitingRoom } from './waiting-room/waiting-room';
 import { ClassicParty } from './party/classic-party/classic-party';
@@ -12,6 +13,8 @@ export class PongService {
   private speedWaitingRoom: WaitingRoom = new WaitingRoom('speed');
 
   private classicWaitingRoom: WaitingRoom = new WaitingRoom('classic');
+
+  constructor(private matchService: MatchService) {}
 
   handleConnection(client: PongSocket): any {
     this.classicWaitingRoom.handleConnection(client);
