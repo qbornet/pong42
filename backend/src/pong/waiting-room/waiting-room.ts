@@ -1,3 +1,4 @@
+import { v4 as uuid } from 'uuid';
 import { Server } from 'socket.io';
 import { PongSocket, RoomName, Status, UserID } from '../pong.interface';
 import { Player } from '../party/player';
@@ -10,8 +11,6 @@ export interface PartyConstructor<GameType> {
 
 export class WaitingRoom {
   private roomName: string;
-
-  private roomCounter: number = 0;
 
   private waitingPlayer: Player | undefined;
 
@@ -74,8 +73,7 @@ export class WaitingRoom {
       this.parties.set(party.player1.id, party);
       this.parties.set(party.player2.id, party);
 
-      this.roomCounter += 1;
-      this.roomName = `room-${this.roomCounter}`;
+      this.roomName = uuid();
 
       this.waitingPlayer = undefined;
       return party.partyName;
