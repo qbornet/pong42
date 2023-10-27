@@ -20,7 +20,7 @@ export class WaitingRoom {
 
   private parties: Map<RoomName | UserID, Game> = new Map();
 
-  constructor(roomName: string, private matchService: MatchService) {
+  constructor(roomName: string) {
     this.roomName = roomName;
   }
 
@@ -155,14 +155,18 @@ export class WaitingRoom {
     client.emit('isPlayerReady', ready);
   }
 
-  handlePlayerReady(client: PongSocket, isReady: boolean) {
+  handlePlayerReady(
+    client: PongSocket,
+    isReady: boolean,
+    matchService: MatchService
+  ) {
     const clientID = client.user.id!;
     const party = this.getParty(clientID);
     let ready = false;
     if (party) {
       ready = party.togglePlayerReady(clientID, isReady);
       party.startParty(() => {
-        this.handleDataOfMatch(party, party.playerWon);
+        this.handleDataOfMatch(party, party.playerWon, matchService);
         this.removeParty(party.partyName);
         this.removeParty(party.player2.id);
         this.removeParty(party.player1.id);
@@ -185,7 +189,11 @@ export class WaitingRoom {
     }
   }
 
-  handleDataOfMatch(party: Game, playerWon: number) {
+  handleDataOfMatch(
+    party: Game,
+    playerWon: number,
+    matchService: MatchService
+  ) {
     const player1Id = party.player1.id;
     const player2Id = party.player2.id;
     const timestamp = Date.now();
@@ -197,14 +205,14 @@ export class WaitingRoom {
       const winMatchHistory = `1|${player2Id}|${timestamp}`;
       const lostMatchHistory = `0|${player1Id}|${timestamp}`;
 
-      this.matchService.addMatchHistory(player1Id, winMatchHistory);
-      this.matchService.addMatchHistory(player2Id, lostMatchHistory);
+      matchService.addMatchHistory(player1Id, winMatchHistory);
+      matchService.addMatchHistory(player2Id, lostMatchHistory);
     } else if (playerWon === 2) {
       const winMatchHistory = `1|${player1Id}|${timestamp}`;
       const lostMatchHistory = `0|${player2Id}|${timestamp}`;
 
-      this.matchService.addMatchHistory(player2Id, winMatchHistory);
-      this.matchService.addMatchHistory(player1Id, lostMatchHistory);
+      matchService.addMatchHistory(player2Id, winMatchHistory);
+      matchService.addMatchHistory(player1Id, lostMatchHistory);
     }
   }
 }

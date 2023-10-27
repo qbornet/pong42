@@ -58,7 +58,7 @@ export class PongService {
   handlePlayerReady(client: PongSocket, isReady: boolean) {
     const room = this.rooms.get(client.user.id!);
     if (room) {
-      room.handlePlayerReady(client, isReady);
+      room.handlePlayerReady(client, isReady, this.matchService);
     }
   }
 
