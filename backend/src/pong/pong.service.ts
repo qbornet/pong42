@@ -10,9 +10,9 @@ import { SpeedParty } from './party/speed-ball-party/speed-party';
 export class PongService {
   private rooms: Map<UserID, WaitingRoom> = new Map();
 
-  private speedWaitingRoom: WaitingRoom = new WaitingRoom('speed');
+  private speedWaitingRoom: WaitingRoom = new WaitingRoom(SpeedParty);
 
-  private classicWaitingRoom: WaitingRoom = new WaitingRoom('classic');
+  private classicWaitingRoom: WaitingRoom = new WaitingRoom(ClassicParty);
 
   constructor(private matchService: MatchService) {}
 
@@ -22,18 +22,73 @@ export class PongService {
     if (room) room.handleConnection(client);
   }
 
-  handleJoinWaitingRoom(
-    client: PongSocket,
-    io: Server,
-    type: 'classic' | 'speed'
-  ) {
-    if (type === 'classic') {
-      this.classicWaitingRoom.handleJoinWaitingRoom(client, io, ClassicParty);
+  handleJoinSpeedWaitingRoom(client: PongSocket, io: Server) {
+    const id = client.user.id!;
+    if (
+      !this.speedWaitingRoom.isInParty(id) &&
+      !this.speedWaitingRoom.isInInviteRoom(id)
+    ) {
+      const hasJoined = this.speedWaitingRoom.handleJoinWaitingRoom(client, io);
+      if (hasJoined) {
+        this.rooms.set(client.user.id!, this.speedWaitingRoom);
+      }
+    }
+  }
+
+  handleJoinClassicWaitingRoom(client: PongSocket, io: Server) {
+    const id = client.user.id!;
+    if (
+      !this.classicWaitingRoom.isInParty(id) &&
+      !this.classicWaitingRoom.isInInviteRoom(id)
+    ) {
+      const hasJoined = this.classicWaitingRoom.handleJoinWaitingRoom(
+        client,
+        io
+      );
+      if (hasJoined) {
+        this.rooms.set(client.user.id!, this.classicWaitingRoom);
+      }
+    }
+  }
+
+  handleCreateClassicInvite(player1: PongSocket, player2: PongSocket) {
+    if (this.classicWaitingRoom.handleCreateInvite(player1, player2)) {
+      this.rooms.set(player1.user.id!, this.classicWaitingRoom);
+    }
+  }
+
+  handleDestroyClassicInvite(player1: PongSocket) {
+    this.classicWaitingRoom.handleDestroyInvite(player1);
+  }
+
+  handleCreateSpeedInvite(player1: PongSocket, player2: PongSocket) {
+    if (this.speedWaitingRoom.handleCreateInvite(player1, player2)) {
+      this.rooms.set(player1.user.id!, this.speedWaitingRoom);
+    }
+  }
+
+  handleDestroySpeedInvite(player1: PongSocket) {
+    this.speedWaitingRoom.handleDestroyInvite(player1);
+  }
+
+  handleAcceptClassicInvite(client: PongSocket, io: Server) {
+    if (this.classicWaitingRoom.handleAcceptInvite(client, io)) {
       this.rooms.set(client.user.id!, this.classicWaitingRoom);
-    } else {
-      this.speedWaitingRoom.handleJoinWaitingRoom(client, io, SpeedParty);
+    }
+  }
+
+  handleAcceptSpeedInvite(client: PongSocket, io: Server) {
+    if (this.speedWaitingRoom.handleAcceptInvite(client, io)) {
       this.rooms.set(client.user.id!, this.speedWaitingRoom);
     }
+  }
+
+  handleDenyClassicInvite(client: PongSocket) {
+    this.classicWaitingRoom.handleDenyInvite(client);
+  }
+
+  handleDenySpeedInvite(client: PongSocket) {
+    this.speedWaitingRoom.handleDenyInvite(client);
   }
 
   handleLeaveWaitingRoom(client: PongSocket) {
