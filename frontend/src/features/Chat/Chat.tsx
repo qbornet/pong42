@@ -45,7 +45,7 @@ function Invite({ invite, setInvite }: InviteProps) {
 
   const handleDeny = () => {
     if (invite.mode === 'classic') {
-      socket.emit('denyClassiceInvite');
+      socket.emit('denyClassicInvite');
     } else if (invite.mode === 'speed') {
       socket.emit('denySpeedInvite');
     }
