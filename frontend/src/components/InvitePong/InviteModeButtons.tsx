@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useInvitePongStateContext } from '../../contexts/pongInviteState';
 import { BluePongButton } from '../Pong/PongButton';
@@ -44,6 +44,22 @@ export function InviteModeButtons() {
       CLASSIC_MODE();
     }
   };
+  useEffect(() => {
+    const onInviteDenied = () => {
+      if (isErr === false) {
+        setTimeout(() => {
+          setErrorMsg('');
+          setIsErr(false);
+        }, 3000);
+      }
+      setIsErr(true);
+      setErrorMsg('You are invitation has been denied');
+    };
+    socket.on('inviteDenied', onInviteDenied);
+    return () => {
+      socket.off('inviteDenied', onInviteDenied);
+    };
+  }, [socket, isErr]);
   const text = `Let's Pong with ${username}`;
   return (
     <RenderIf some={[isChoosingMode]}>

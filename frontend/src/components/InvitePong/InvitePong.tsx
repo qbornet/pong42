@@ -43,7 +43,7 @@ function InviteWrappedPong() {
     return () => {
       socket.off('inviteAccept', onInviteAccept);
     };
-  });
+  }, [socket, send]);
 
   useEffect(() => {
     connectSocket();
