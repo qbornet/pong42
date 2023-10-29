@@ -21,7 +21,7 @@ export function ReadyButton() {
               : () => socket.emit('playerReady')
           }
         >
-          {isSpeedReady || isClassicReady ? 'Ready' : 'Not Ready'}
+          {isSpeedReady || isClassicReady ? 'Not Ready' : 'Ready'}
         </BluePongButton>
       </PongDiv>
     </RenderIf>

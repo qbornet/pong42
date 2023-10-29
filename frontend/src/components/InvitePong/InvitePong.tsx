@@ -2,7 +2,10 @@ import { Outlet } from 'react-router-dom';
 import { useEffect } from 'react';
 import { SocketContextProvider, useSocketContext } from '../../contexts/socket';
 import { connectSocket } from '../../utils/functions/socket';
-import { PongInviteStateContextProvider } from '../../contexts/pongInviteState';
+import {
+  PongInviteStateContextProvider,
+  useInvitePongStateContext
+} from '../../contexts/pongInviteState';
 import { usePaddle } from '../../utils/hooks/usePaddle';
 import { Canvas } from '../Pong/Canvas';
 import { useDrawInvite } from '../../utils/hooks/useDrawInvite';
@@ -29,6 +32,18 @@ function InviteWrappedPong() {
   usePaddle();
   useInvitePlayerReady();
   useInviteConnection();
+  const { send } = useInvitePongStateContext();
+
+  useEffect(() => {
+    const onInviteAccept = () => {
+      send('CLASSIC_INIT_READY');
+      send('SPEED_INIT_READY');
+    };
+    socket.on('inviteAccept', onInviteAccept);
+    return () => {
+      socket.off('inviteAccept', onInviteAccept);
+    };
+  });
 
   useEffect(() => {
     connectSocket();

@@ -29,16 +29,13 @@ interface InviteProps {
 function Invite({ invite, setInvite }: InviteProps) {
   const { socket } = useSocketContext();
   const navigate = useNavigate();
-  const { send } = useInvitePongStateContext();
 
   const handleAccept = () => {
     navigate(`/pong/${invite.username}`);
     if (invite.mode === 'classic') {
       socket.emit('acceptClassicInvite');
-      send('CLASSIC_INIT_READY');
     } else if (invite.mode === 'speed') {
       socket.emit('acceptSpeedInvite');
-      send('SPEED_INIT_READY');
     }
     setInvite();
   };

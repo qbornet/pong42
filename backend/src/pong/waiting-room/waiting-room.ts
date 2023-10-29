@@ -292,7 +292,7 @@ export class WaitingRoom {
     const invite = this.getInvite(id);
     if (invite && this.isInvited(id, invite)) {
       invite.player1.emit('inviteAccept');
-      player2.emit('joinWaitingRoom');
+      invite.player2.emit('inviteAccept');
       player2.join(invite.partyName);
       this.joinInviteParty(invite, invite.player1, player2, io);
       this.deleteInvite(invite);
