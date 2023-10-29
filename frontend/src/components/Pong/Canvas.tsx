@@ -8,5 +8,7 @@ interface CanvasProps extends CanvasHTMLAttributes<HTMLCanvasElement> {
 export function Canvas({ width, height, draw }: CanvasProps) {
   const ref = useCanvas(draw);
 
-  return <canvas ref={ref} width={width} height={height} />;
+  return (
+    <canvas className="absolute" ref={ref} width={width} height={height} />
+  );
 }

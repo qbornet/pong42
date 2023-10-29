@@ -54,16 +54,11 @@ function InviteWrappedPong() {
 
   return (
     <div className="flex h-screen items-center justify-center bg-default bg-cover">
+      <Canvas draw={drawClassicGame} width={width} height={height} />
       <InviteModeButtons />
       <InviteWaitingButton />
       <InviteReadyButton />
       <InvitePlayAgainButton />
-      <Canvas
-        draw={drawClassicGame}
-        className="flex items-center rounded-lg shadow-lg"
-        width={width}
-        height={height}
-      />
     </div>
   );
 }

@@ -35,16 +35,11 @@ function WrappedPong() {
 
   return (
     <div className="flex h-screen items-center justify-center bg-default bg-cover">
+      <Canvas draw={drawClassicGame} width={width} height={height} />
       <ModeButtons />
       <WaitingButton />
       <ReadyButton />
       <PlayAgainButton />
-      <Canvas
-        draw={drawClassicGame}
-        className="flex items-center rounded-lg shadow-lg"
-        width={width}
-        height={height}
-      />
     </div>
   );
 }
