@@ -55,11 +55,13 @@ function InviteWrappedPong() {
 
 export default function InvitePong() {
   return (
-    <PongInviteStateContextProvider>
-      <SocketContextProvider>
-        <InviteWrappedPong />
-      </SocketContextProvider>
+    <>
+      <PongInviteStateContextProvider>
+        <SocketContextProvider>
+          <InviteWrappedPong />
+        </SocketContextProvider>
+      </PongInviteStateContextProvider>
       <Outlet />
-    </PongInviteStateContextProvider>
+    </>
   );
 }

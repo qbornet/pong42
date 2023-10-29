@@ -24,6 +24,7 @@ import Home from './components/Home/Home';
 import './index.css';
 import Chat from './features/Chat/Chat';
 import InvitePong from './components/InvitePong/InvitePong';
+import { PongInviteStateContextProvider } from './contexts/pongInviteState';
 
 const router = createBrowserRouter([
   {
@@ -79,7 +80,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: '',
-        element: <Chat />
+        element: <PongInviteStateContextProvider><Chat /></PongInviteStateContextProvider>
       }
     ]
   },
