@@ -1,12 +1,9 @@
-import { Outlet } from 'react-router-dom';
 import { useEffect } from 'react';
-import { SocketContextProvider, useSocketContext } from '../../contexts/socket';
 import { connectSocket } from '../../utils/functions/socket';
 import { useDraw } from '../../utils/hooks/useDraw';
 import { usePaddle } from '../../utils/hooks/usePaddle';
 import { Canvas } from './Canvas';
 import { usePlayerReady } from '../../utils/hooks/usePlayersJoinedParty';
-import { PongStateContextProvider } from '../../contexts/pongState';
 import { WaitingButton } from './WaitingButton';
 import { ModeButtons } from './ModeButton';
 import { useGameStarted } from '../../utils/hooks/useStartGame';
@@ -15,6 +12,7 @@ import { useGameOver } from '../../utils/hooks/useGameOver';
 import { ReadyButton } from './ReadyButton';
 import { PlayAgainButton } from './PlayAgainButton';
 import { useConnection } from '../../utils/hooks/useConnection';
+import { useSocketContext } from '../../contexts/socket';
 
 export function WrappedPong() {
   const { socket } = useSocketContext();
@@ -46,18 +44,5 @@ export function WrappedPong() {
         height={height}
       />
     </div>
-  );
-}
-
-export default function Pong() {
-  return (
-    <>
-      <SocketContextProvider>
-        <PongStateContextProvider>
-          <WrappedPong />
-        </PongStateContextProvider>
-      </SocketContextProvider>
-      <Outlet />
-    </>
   );
 }
