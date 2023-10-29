@@ -11,7 +11,10 @@ import { Search } from '../../components/chat/Search';
 import { Notification } from '../../components/chat/Notification';
 import { PrimaryButton } from '../../components/PrimaryButton/PrimaryButton';
 import RenderIf from '../../components/chat/RenderIf/RenderIf';
-import { PongInviteStateContextProvider, useInvitePongStateContext } from '../../contexts/pongInviteState';
+import {
+  PongInviteStateContextProvider,
+  useInvitePongStateContext
+} from '../../contexts/pongInviteState';
 
 interface InviteInterface {
   username: string;
