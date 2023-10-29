@@ -28,10 +28,8 @@ export class PongService {
       !this.speedWaitingRoom.isInParty(id) &&
       !this.speedWaitingRoom.isInInviteRoom(id)
     ) {
-      const hasJoined = this.speedWaitingRoom.handleJoinWaitingRoom(client, io);
-      if (hasJoined) {
-        this.rooms.set(client.user.id!, this.speedWaitingRoom);
-      }
+      this.speedWaitingRoom.handleJoinWaitingRoom(client, io);
+      this.rooms.set(client.user.id!, this.speedWaitingRoom);
     }
   }
 
@@ -41,13 +39,8 @@ export class PongService {
       !this.classicWaitingRoom.isInParty(id) &&
       !this.classicWaitingRoom.isInInviteRoom(id)
     ) {
-      const hasJoined = this.classicWaitingRoom.handleJoinWaitingRoom(
-        client,
-        io
-      );
-      if (hasJoined) {
-        this.rooms.set(client.user.id!, this.classicWaitingRoom);
-      }
+      this.classicWaitingRoom.handleJoinWaitingRoom(client, io);
+      this.rooms.set(client.user.id!, this.classicWaitingRoom);
     }
   }
 

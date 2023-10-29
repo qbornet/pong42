@@ -64,7 +64,7 @@ export class WaitingRoom {
 
   handleJoinWaitingRoom(client: PongSocket, io: Server) {
     client.join(this.roomName);
-    if (this.waitingPlayer) {
+    if (this.waitingPlayer && this.waitingPlayer.user.id !== client.user.id) {
       this.joinParty(this.waitingPlayer, client, io);
       this.waitingPlayer = undefined;
       return false;
