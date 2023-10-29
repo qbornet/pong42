@@ -22,8 +22,8 @@ import Profile from './components/Profile/Profile';
 import ProfileSearch from './components/Profile/ProfileSearch';
 import Home from './components/Home/Home';
 import './index.css';
-import { SocketContextProvider } from './contexts/socket';
 import Chat from './features/Chat/Chat';
+import InvitePong from './components/InvitePong/InvitePong';
 
 const router = createBrowserRouter([
   {
@@ -60,6 +60,17 @@ const router = createBrowserRouter([
     element: <UploadImg />,
     errorElement: <UploadImg />,
     loader: uploadImageLoader
+  },
+  {
+    path: '/pong-invite',
+    element: <InvitePong />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        path: '',
+        element: <Chat />
+      }
+    ]
   },
   {
     path: '/pong',

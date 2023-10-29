@@ -16,7 +16,7 @@ import { ReadyButton } from './ReadyButton';
 import { PlayAgainButton } from './PlayAgainButton';
 import { useConnection } from '../../utils/hooks/useConnection';
 
-export function WrappedPong() {
+function WrappedPong() {
   const { socket } = useSocketContext();
   const { drawClassicGame, width, height } = useDraw();
   useGameOver();
