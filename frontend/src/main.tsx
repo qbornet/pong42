@@ -62,7 +62,7 @@ const router = createBrowserRouter([
     loader: uploadImageLoader
   },
   {
-    path: '/pong-invite',
+    path: '/pong/:username',
     element: <InvitePong />,
     errorElement: <ErrorPage />,
     children: [

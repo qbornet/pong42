@@ -40,8 +40,8 @@ export default {
         'profile-purple': '#6659FD'
       },
       backgroundImage: {
-        default: "url('./images/background.png')",
-        'profile-default': "url('./images/background_profile.png')"
+        default: "url('/images/background.png')",
+        'profile-default': "url('/images/background_profile.png')"
       }
     }
   },

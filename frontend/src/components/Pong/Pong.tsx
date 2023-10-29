@@ -34,7 +34,7 @@ function WrappedPong() {
   }, [socket]);
 
   return (
-    <div className="flex h-screen items-center justify-center bg-[url('./images/background.png')] bg-cover">
+    <div className="flex h-screen items-center justify-center bg-default bg-cover">
       <ModeButtons />
       <WaitingButton />
       <ReadyButton />

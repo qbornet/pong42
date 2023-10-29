@@ -39,6 +39,8 @@ export function PongInviteStateContextProvider({
 }: PongInviteStateContextProviderProps) {
   const [state, send] = useMachine(pongInviteMachine);
 
+  console.log('here is the state: ', state.value);
+
   const stateProviderValue = useMemo(
     (): PongInviteState => ({
       isChoosingMode: state.matches('Choosing Mode'),

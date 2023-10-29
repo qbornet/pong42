@@ -31,6 +31,7 @@ export class PongGateway
   handleConnection(client: PongSocket): any {
     this.pongService.handleConnection(client);
     this.socketMap.set(client.user.id!, client);
+    this.socketMap.set(client.user.username!, client);
     this.logger.debug(`New connection : ${client.user.id}`);
   }
 
@@ -38,6 +39,7 @@ export class PongGateway
     this.pongService.handlePlayerReady(client, false);
     this.pongService.handleLeaveWaitingRoom(client);
     this.socketMap.delete(client.user.id!);
+    this.socketMap.delete(client.user.username!);
     this.logger.debug(`Disconnected : ${client.user.id}`);
   }
 

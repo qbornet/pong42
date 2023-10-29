@@ -10,11 +10,11 @@ export const pongInviteMachine = createMachine(
         on: {
           CLASSIC_MODE: {
             target: 'Classic Mode Waiting Room',
-            actions: ['joinClassicWaitingRoom', 'getInitialState']
+            actions: ['getInitialState']
           },
           SPEED_MODE: {
             target: 'Speed Mode Waiting Room',
-            actions: ['joinSpeedWaitingRoom', 'getInitialState']
+            actions: ['getInitialState']
           },
           SPEED_INIT_READY: {
             target: '#Pong Game.Speed Mode Party Lobby.Not Ready'
@@ -106,7 +106,7 @@ export const pongInviteMachine = createMachine(
             on: {
               PLAY_AGAIN: {
                 target: '#Pong Game.Classic Mode Waiting Room',
-                actions: ['joinClassicWaitingRoom', 'getInitialState']
+                actions: ['getInitialState']
               },
               CHANGE_MODE: {
                 target: '#Pong Game.Choosing Mode'
@@ -163,7 +163,7 @@ export const pongInviteMachine = createMachine(
               },
               PLAY_AGAIN: {
                 target: '#Pong Game.Speed Mode Waiting Room',
-                actions: ['joinSpeedWaitingRoom', 'getInitialState']
+                actions: ['getInitialState']
               }
             }
           }
@@ -194,12 +194,6 @@ export const pongInviteMachine = createMachine(
   },
   {
     actions: {
-      joinClassicWaitingRoom: () => {
-        socket.emit('joinClassicWaitingRoom');
-      },
-      joinSpeedWaitingRoom: () => {
-        socket.emit('joinSpeedWaitingRoom');
-      },
       getInitialState: () => {
         socket.emit('initialState');
       },

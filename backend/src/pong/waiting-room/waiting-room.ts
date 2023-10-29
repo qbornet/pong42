@@ -237,6 +237,7 @@ export class WaitingRoom {
 
   private createInvite(player1: PongSocket, player2: PongSocket) {
     const invite = new Invite(player1, player2);
+    player1.emit('joinWaitingRoom');
     player1.join(invite.partyName);
     this.invites.set(player1.user.id!, invite);
     this.invites.set(player2.user.id!, invite);
@@ -265,13 +266,35 @@ export class WaitingRoom {
     return false;
   }
 
+  private joinInviteParty(
+    invite: Invite,
+    client1: PongSocket,
+    client2: PongSocket,
+    io: Server
+  ) {
+    const player1 = new Player(client1, 1);
+    const player2 = new Player(client2, 2);
+
+    const party = new this.PartyConstructor(
+      player1,
+      player2,
+      invite.partyName,
+      io
+    );
+    io.to(party.partyName).emit('joinParty');
+    this.parties.set(party.partyName, party);
+    this.parties.set(party.player1.id, party);
+    this.parties.set(party.player2.id, party);
+  }
+
   handleAcceptInvite(player2: PongSocket, io: Server): boolean {
     const id = player2.user.id!;
     const invite = this.getInvite(id);
     if (invite && this.isInvited(id, invite)) {
       invite.player1.emit('inviteAccept');
+      player2.emit('joinWaitingRoom');
       player2.join(invite.partyName);
-      this.joinParty(invite.player1, player2, io);
+      this.joinInviteParty(invite, invite.player1, player2, io);
       this.deleteInvite(invite);
       return true;
     }

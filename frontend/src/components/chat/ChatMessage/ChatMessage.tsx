@@ -2,6 +2,8 @@ import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import ProfilePicture from '../ProfilePicture/ProfilePicture';
 import SecondaryButton from '../../SecondaryButton/SecondaryButton';
+import { useSocketContext } from '../../../contexts/socket';
+import RenderIf from '../RenderIf/RenderIf';
 
 /* Change the date type format */
 interface ChatMessageProps {
@@ -12,11 +14,12 @@ interface ChatMessageProps {
 }
 
 function ChatMessage({ message, time, username, noBgColor }: ChatMessageProps) {
+  const { socket } = useSocketContext();
   const [clicked, setClicked] = useState(false);
   const navigate = useNavigate();
 
   const handleInvite = () => {
-    navigate('/pong');
+    navigate(`/pong/${username}`);
   };
   return (
     <div
@@ -34,11 +37,13 @@ function ChatMessage({ message, time, username, noBgColor }: ChatMessageProps) {
         {clicked ? (
           <div className="flex justify-center gap-5">
             <SecondaryButton className="mt-3" span="Profile" />
-            <SecondaryButton
-              onClick={handleInvite}
-              className="mt-3"
-              span="Invite"
-            />
+            <RenderIf some={[username !== socket.username]}>
+              <SecondaryButton
+                onClick={handleInvite}
+                className="mt-3"
+                span="Invite"
+              />
+            </RenderIf>
           </div>
         ) : (
           <p className="mt-3 text-base text-pong-white">{message}</p>
