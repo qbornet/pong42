@@ -45,23 +45,43 @@ export class PongService {
   }
 
   handleCreateClassicInvite(player1: PongSocket, player2: PongSocket) {
-    if (this.classicWaitingRoom.handleCreateInvite(player1, player2)) {
+    const id2 = player2.user.id!;
+    if (
+      this.isInvitable(id2, player1) &&
+      this.classicWaitingRoom.handleCreateInvite(player1, player2)
+    ) {
       this.rooms.set(player1.user.id!, this.classicWaitingRoom);
     }
   }
 
-  handleDestroyClassicInvite(player1: PongSocket) {
+  handleDestroyInvite(player1: PongSocket) {
     this.classicWaitingRoom.handleDestroyInvite(player1);
   }
 
-  handleCreateSpeedInvite(player1: PongSocket, player2: PongSocket) {
-    if (this.speedWaitingRoom.handleCreateInvite(player1, player2)) {
-      this.rooms.set(player1.user.id!, this.speedWaitingRoom);
+  private isInvitable(id: UserID, playerInviting: PongSocket) {
+    const classicParty = this.classicWaitingRoom.getParty(id);
+    const speedParty = this.speedWaitingRoom.getParty(id);
+    if (classicParty || speedParty) {
+      playerInviting.emit('playerAlreadyPlaying');
+      return false;
     }
+    const classicInvite = this.classicWaitingRoom.getInvite(id);
+    const speedInvite = this.speedWaitingRoom.getInvite(id);
+    if (classicInvite || speedInvite) {
+      playerInviting.emit('playerAlreadyInvited');
+      return false;
+    }
+    return true;
   }
 
-  handleDestroySpeedInvite(player1: PongSocket) {
-    this.speedWaitingRoom.handleDestroyInvite(player1);
+  handleCreateSpeedInvite(player1: PongSocket, player2: PongSocket) {
+    const id2 = player2.user.id!;
+    if (
+      this.isInvitable(id2, player1) &&
+      this.speedWaitingRoom.handleCreateInvite(player1, player2)
+    ) {
+      this.rooms.set(player1.user.id!, this.speedWaitingRoom);
+    }
   }
 
   handleAcceptClassicInvite(client: PongSocket, io: Server) {

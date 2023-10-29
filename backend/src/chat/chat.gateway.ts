@@ -80,7 +80,7 @@ export default class ChatGateway
   async afterInit() {
     // /!\ To remove test only /!\
     await this.usersService.createUser({
-      id: 'ffa03160-6419-4e52-8879-f99e90eeca35',
+      id: '11111111-6419-4e52-8879-f99e90eeca35',
       email: 'jfrancai@student.42.fr',
       username: 'jfrancai',
       password: 'toto',
@@ -91,7 +91,7 @@ export default class ChatGateway
     });
 
     await this.usersService.createUser({
-      id: '1fa03160-6419-4e52-8879-f99e90eeca39',
+      id: '22222222-6419-4e52-8879-f99e90eeca39',
       email: 'tyty@student.42.fr',
       username: 'tyty',
       password: 'toto',
@@ -102,7 +102,7 @@ export default class ChatGateway
     });
 
     await this.usersService.createUser({
-      id: '693e8fcf-915b-472d-beee-ed53fec63008',
+      id: '33333333-915b-472d-beee-ed53fec63008',
       email: 'toto@student.42.fr',
       username: 'toto',
       password: 'toto',
@@ -113,7 +113,7 @@ export default class ChatGateway
     });
 
     await this.usersService.createUser({
-      id: '673e8fcf-915b-472d-beee-ed53fec63008',
+      id: '44444444-915b-472d-beee-ed53fec63008',
       email: 'tata@student.42.fr',
       username: 'tata',
       password: 'tata',

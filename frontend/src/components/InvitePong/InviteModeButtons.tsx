@@ -11,8 +11,7 @@ export function InviteModeButtons() {
   const { socket } = useSocketContext();
   const [errorMsg, setErrorMsg] = useState('');
   const [isErr, setIsErr] = useState(false);
-  const { CLASSIC_MODE, SPEED_MODE, isChoosingMode } =
-    useInvitePongStateContext();
+  const { CHANGE_MODE, send, isChoosingMode } = useInvitePongStateContext();
 
   const { username } = useParams();
 
@@ -26,7 +25,6 @@ export function InviteModeButtons() {
       setErrorMsg("You can't invite your self");
     } else {
       socket.emit('createSpeedInvite', username);
-      SPEED_MODE();
     }
   };
   const classicMode = () => {
@@ -41,7 +39,6 @@ export function InviteModeButtons() {
       setErrorMsg("You can't invite your self");
     } else {
       socket.emit('createClassicInvite', username);
-      CLASSIC_MODE();
     }
   };
   useEffect(() => {
@@ -53,13 +50,45 @@ export function InviteModeButtons() {
         }, 3000);
       }
       setIsErr(true);
-      setErrorMsg('You are invitation has been denied');
+      setErrorMsg('Your invitation has been denied');
+    };
+
+    const onPlayerInvited = (mode: 'CLASSIC_MODE' | 'SPEED_MODE') => {
+      send(mode);
+    };
+
+    const onPlayerAlreadyPlaying = () => {
+      if (isErr === false) {
+        setTimeout(() => {
+          setErrorMsg('');
+          setIsErr(false);
+        }, 3000);
+      }
+      setIsErr(true);
+      setErrorMsg(`${username} already in game`);
+    };
+    const onPlayerAlreadyInvited = () => {
+      if (isErr === false) {
+        setTimeout(() => {
+          setErrorMsg('');
+          setIsErr(false);
+        }, 3000);
+      }
+      setIsErr(true);
+      setErrorMsg(`${username} already invited by someone else`);
     };
     socket.on('inviteDenied', onInviteDenied);
+    socket.on('playerInvited', onPlayerInvited);
+    socket.on('playerAlreadyPlaying', onPlayerAlreadyPlaying);
+    socket.on('playerAlreadyInvited', onPlayerAlreadyInvited);
     return () => {
       socket.off('inviteDenied', onInviteDenied);
+      socket.off('playerInvited', onPlayerInvited);
+      socket.off('playerAlreadyPlaying', onPlayerAlreadyPlaying);
+      socket.off('playerAlreadyInvited', onPlayerAlreadyInvited);
     };
-  }, [socket, isErr]);
+  }, [socket, isErr, username, CHANGE_MODE, send]);
+
   const text = `Let's Pong with ${username}`;
   return (
     <RenderIf some={[isChoosingMode]}>

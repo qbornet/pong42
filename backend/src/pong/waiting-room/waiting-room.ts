@@ -226,7 +226,7 @@ export class WaitingRoom {
     return invite.player1.user.id! === id;
   }
 
-  private getInvite(id: UserID) {
+  getInvite(id: UserID) {
     return this.invites.get(id);
   }
 
@@ -247,7 +247,10 @@ export class WaitingRoom {
     const id1 = player1.user.id!;
     if (this.getParty(id1) || this.getInvite(id1)) return false;
     this.createInvite(player1, player2);
-    player1.emit('playerInvited');
+    player1.emit(
+      'playerInvited',
+      this.PartyConstructor === ClassicParty ? 'CLASSIC_MODE' : 'SPEED_MODE'
+    );
     player2.emit('invite', {
       mode: this.PartyConstructor === ClassicParty ? 'classic' : 'speed',
       username: player1.user.username
@@ -255,15 +258,13 @@ export class WaitingRoom {
     return true;
   }
 
-  handleDestroyInvite(player1: PongSocket): boolean {
+  handleDestroyInvite(player1: PongSocket) {
     const id = player1.user.id!;
     const invite = this.getInvite(id);
     if (invite && this.isInviteCreator(id, invite)) {
       this.deleteInvite(invite);
       invite.player2.emit('inviteDestroy');
-      return true;
     }
-    return false;
   }
 
   private joinInviteParty(

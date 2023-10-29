@@ -11,10 +11,7 @@ import { Search } from '../../components/chat/Search';
 import { Notification } from '../../components/chat/Notification';
 import { PrimaryButton } from '../../components/PrimaryButton/PrimaryButton';
 import RenderIf from '../../components/chat/RenderIf/RenderIf';
-import {
-  PongInviteStateContextProvider,
-  useInvitePongStateContext
-} from '../../contexts/pongInviteState';
+import { PongInviteStateContextProvider } from '../../contexts/pongInviteState';
 
 interface InviteInterface {
   username: string;
@@ -50,11 +47,13 @@ function Invite({ invite, setInvite }: InviteProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-auto flex flex-col items-center justify-center">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center">
       <div className="flex flex-col items-center gap-2 rounded-2xl bg-pong-blue-400 p-4 shadow-lg ">
-        <p className="font-bold text-pong-white">{`You are invited by ${invite.username} to play ${invite.mode} mode.`}</p>
-        <PrimaryButton onClick={handleAccept}>Accept</PrimaryButton>
-        <PrimaryButton onClick={handleDeny}>Deny</PrimaryButton>
+        <p className="p-2 text-xl font-bold text-pong-white">{`You've been invited by ${invite.username} to play ${invite.mode} mode.`}</p>
+        <div className="flex flex-row items-start gap-7">
+          <PrimaryButton onClick={handleAccept}>Accept</PrimaryButton>
+          <PrimaryButton onClick={handleDeny}>Deny</PrimaryButton>
+        </div>
       </div>
     </div>
   );

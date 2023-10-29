@@ -38,6 +38,9 @@ export class PongGateway
   handleDisconnect(client: PongSocket): any {
     this.pongService.handlePlayerReady(client, false);
     this.pongService.handleLeaveWaitingRoom(client);
+    this.pongService.handleDestroyInvite(client);
+    this.pongService.handleDenySpeedInvite(client);
+    this.pongService.handleDenyClassicInvite(client);
     this.socketMap.delete(client.user.id!);
     this.socketMap.delete(client.user.username!);
     this.logger.debug(`Disconnected : ${client.user.id}`);
@@ -78,9 +81,9 @@ export class PongGateway
     }
   }
 
-  @SubscribeMessage('destroyClassicInvite')
-  async handleDestroyClassicInvite(client: PongSocket) {
-    this.pongService.handleDestroyClassicInvite(client);
+  @SubscribeMessage('destroyInvite')
+  async handleDestroyInvite(client: PongSocket) {
+    this.pongService.handleDestroyInvite(client);
   }
 
   @SubscribeMessage('createSpeedInvite')
@@ -90,11 +93,6 @@ export class PongGateway
     if (idClient !== invitedId && player2) {
       this.pongService.handleCreateSpeedInvite(client, player2);
     }
-  }
-
-  @SubscribeMessage('destroySpeedInvite')
-  async handleDestroySpeedInvite(client: PongSocket) {
-    this.pongService.handleDestroySpeedInvite(client);
   }
 
   @SubscribeMessage('acceptClassicInvite')
