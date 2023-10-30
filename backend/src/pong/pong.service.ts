@@ -56,6 +56,7 @@ export class PongService {
 
   handleDestroyInvite(player1: PongSocket) {
     this.classicWaitingRoom.handleDestroyInvite(player1);
+    this.speedWaitingRoom.handleDestroyInvite(player1);
   }
 
   private isInvitable(id: UserID, playerInviting: PongSocket) {

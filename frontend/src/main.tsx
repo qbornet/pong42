@@ -71,8 +71,8 @@ const router = createBrowserRouter([
         path: '',
         element: <Chat />
       }
-    ],
-    loader: pongLoader
+    ]
+    //loader: pongLoader
   },
   {
     path: '/pong',
@@ -83,8 +83,8 @@ const router = createBrowserRouter([
         path: '',
         element: <Chat />
       }
-    ],
-    loader: pongLoader
+    ]
+    //loader: pongLoader
   },
   {
     path: '/profile',
