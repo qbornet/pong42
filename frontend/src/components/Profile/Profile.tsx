@@ -5,6 +5,7 @@ import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
 import { CONST_BACKEND_URL } from '@constant';
 import ModifyProfile from './ModifyProfile';
 import { isError } from '../../utils/functions/isError';
+import { Navbar } from '../Navbar/Navbar';
 
 type DataUser = { img: string; username: string; uuid: string };
 

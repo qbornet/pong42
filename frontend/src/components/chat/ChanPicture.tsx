@@ -16,11 +16,10 @@ const style = Object.freeze({
   xl: 'h-[155px] w-[155px] border-[5px]'
 });
 
+type ImageInfo = { img: string; chanName: string };
+
 export function ChanPicture({ size = 'xl', select = false, chanID }: Props) {
-  const [data, setData] = useState<{
-    img: string;
-    ext: string;
-  }>({ img: '', ext: '' });
+  const [data, setData] = useState<ImageInfo | undefined>();
 
   useEffect(() => {
     const fetchData = (id: string) => {
@@ -42,11 +41,7 @@ export function ChanPicture({ size = 'xl', select = false, chanID }: Props) {
   return (
     <img
       alt="channel"
-      src={`${
-        data.ext === '.jpeg'
-          ? 'data:image/jpeg;base64'
-          : 'data:image/png;base64'
-      },${data.img}`}
+      src={data ? data.img : ''}
       className={`object-contain ${
         style[size]
       } w-flex-shrink-0 relative flex items-end justify-center rounded-full ${

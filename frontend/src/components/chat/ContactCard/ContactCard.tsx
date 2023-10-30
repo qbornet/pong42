@@ -1,9 +1,13 @@
+import { useNavigate } from 'react-router-dom';
 import { Tooltip } from 'react-tooltip';
 import { BiMessageDetail } from 'react-icons/bi';
 import { BsEyeSlash, BsEye } from 'react-icons/bs';
 import { useState } from 'react';
 import ProfilePicture from '../ProfilePicture/ProfilePicture';
 import { useOutsideClick } from '../../../utils/hooks/useOutsideClick';
+import { useSocketContext } from '../../../contexts/socket';
+import SecondaryButton from '../../SecondaryButton/SecondaryButton';
+import RenderIf from '../RenderIf/RenderIf';
 
 interface ContactCardProps {
   sendMessage: () => any;
@@ -24,6 +28,11 @@ export function ContactCard({
 }: ContactCardProps) {
   const [clicked, setClicked] = useState(false);
   const ref = useOutsideClick(() => setClicked(false));
+  const navigate = useNavigate();
+  const { socket } = useSocketContext();
+  const handleInvite = () => {
+    navigate(`/pong/${username}`);
+  };
   return (
     <>
       <div
@@ -50,10 +59,13 @@ export function ContactCard({
             <BiMessageDetail className="userMessage h-6 w-6 text-pong-blue-100 " />
           ) : null}
           {clicked || blocked ? (
-            <button type="button" onClick={blocked ? unblockUser : blockUser}>
+            <div>
               {blocked ? (
                 <>
-                  <BsEyeSlash className="userUnblock h-5 w-5 text-pong-blue-100" />
+                  <BsEyeSlash
+                    onClick={blocked ? unblockUser : blockUser}
+                    className="userUnblock h-5 w-5 cursor-pointer text-pong-blue-100"
+                  />
                   <Tooltip
                     disableStyleInjection
                     className="z-50 flex flex-col rounded border-pong-blue-100 bg-pong-blue-500 bg-opacity-100 p-2 text-pong-white text-opacity-100 "
@@ -66,7 +78,19 @@ export function ContactCard({
                 </>
               ) : (
                 <>
-                  <BsEye className="userBlock h-5 w-5 text-pong-blue-100" />
+                  <div className="flex flex-row items-center gap-10">
+                    <BsEye
+                      onClick={blocked ? unblockUser : blockUser}
+                      className="userBlock h-5 w-5 cursor-pointer text-pong-blue-100"
+                    />
+                    <RenderIf some={[username !== socket.username]}>
+                      <SecondaryButton
+                        onClick={handleInvite}
+                        className="mt-3"
+                        span="Invite"
+                      />
+                    </RenderIf>
+                  </div>
                   <Tooltip
                     disableStyleInjection
                     className="z-50 flex flex-col rounded border-pong-blue-100 bg-pong-blue-500 bg-opacity-100 p-2 text-pong-white text-opacity-100 "
@@ -78,7 +102,7 @@ export function ContactCard({
                   </Tooltip>
                 </>
               )}
-            </button>
+            </div>
           ) : null}
         </div>
       </div>

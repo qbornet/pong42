@@ -12,6 +12,7 @@ import { Notification } from '../../components/chat/Notification';
 import { PrimaryButton } from '../../components/PrimaryButton/PrimaryButton';
 import RenderIf from '../../components/chat/RenderIf/RenderIf';
 import { PongInviteStateContextProvider } from '../../contexts/pongInviteState';
+import { Navbar } from '../../components/Navbar/Navbar';
 
 interface InviteInterface {
   username: string;
@@ -98,13 +99,16 @@ function ChatWrapped() {
 
 function Chat() {
   return (
-    <SocketContextProvider>
-      <PongInviteStateContextProvider>
-        <StateContextProvider>
-          <ChatWrapped />
-        </StateContextProvider>
-      </PongInviteStateContextProvider>
-    </SocketContextProvider>
+    <>
+      <Navbar />
+      <SocketContextProvider>
+        <PongInviteStateContextProvider>
+          <StateContextProvider>
+            <ChatWrapped />
+          </StateContextProvider>
+        </PongInviteStateContextProvider>
+      </SocketContextProvider>
+    </>
   );
 }
 

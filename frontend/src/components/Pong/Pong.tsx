@@ -15,6 +15,7 @@ import { useGameOver } from '../../utils/hooks/useGameOver';
 import { ReadyButton } from './ReadyButton';
 import { PlayAgainButton } from './PlayAgainButton';
 import { useConnection } from '../../utils/hooks/useConnection';
+import { Navbar } from '../Navbar/Navbar';
 
 function WrappedPong() {
   const { socket } = useSocketContext();

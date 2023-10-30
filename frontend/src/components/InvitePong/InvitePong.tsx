@@ -22,6 +22,7 @@ import { InviteModeButtons } from './InviteModeButtons';
 import { InviteWaitingButton } from './InviteWaitingButton';
 import { InviteReadyButton } from './InviteReadyButton';
 import { InvitePlayAgainButton } from './InvitePlayAgainButton';
+import { Navbar } from '../Navbar/Navbar';
 
 function InviteWrappedPong() {
   const { socket } = useSocketContext();
