@@ -1,9 +1,4 @@
-import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
 import ProfilePicture from '../ProfilePicture/ProfilePicture';
-import SecondaryButton from '../../SecondaryButton/SecondaryButton';
-import { useSocketContext } from '../../../contexts/socket';
-import RenderIf from '../RenderIf/RenderIf';
 
 /* Change the date type format */
 interface ChatMessageProps {
@@ -11,16 +6,23 @@ interface ChatMessageProps {
   time: string;
   username: string;
   noBgColor?: boolean;
+  userID: string;
 }
 
-function ChatMessage({ message, time, username, noBgColor }: ChatMessageProps) {
+function ChatMessage({
+  message,
+  time,
+  username,
+  userID,
+  noBgColor
+}: ChatMessageProps) {
   return (
     <div
       className={`${noBgColor ? '' : 'bg-pong-blue-400'}
         mx-2 my-1 flex flex-shrink-0 rounded-lg p-3 text-left `}
       role="presentation"
     >
-      <ProfilePicture size="xs" />
+      <ProfilePicture size="xs" userID={userID} />
       <div className="w-1 flex-grow cursor-pointer break-words px-2">
         <div className="flex items-center justify-between">
           <p className="text-sm font-bold text-pong-blue-100">{username}</p>

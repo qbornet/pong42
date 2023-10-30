@@ -39,6 +39,7 @@ export function AdminContact({
       key={userID}
       username={username}
       hideUsername={display && displayButtons}
+      userID={userID}
       showPointer={displayButtons && !display}
     >
       {displayButtons && display ? buttons() : null}

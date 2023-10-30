@@ -16,7 +16,7 @@ export function BannedContact({
 }: BannedContactProps) {
   const buttons = () => <UnbanButton userID={userID} chanID={chanID} />;
   return (
-    <ChanContact key={userID} username={username}>
+    <ChanContact key={userID} username={username} userID={userID}>
       {displayButtons ? buttons() : null}
     </ChanContact>
   );

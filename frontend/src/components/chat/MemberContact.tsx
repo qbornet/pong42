@@ -40,6 +40,7 @@ export function MemberContact({
       username={username}
       hideUsername={display && displayButtons}
       showPointer={displayButtons && !display}
+      userID={userID}
     >
       {displayButtons && display ? buttons() : null}
     </ChanContact>

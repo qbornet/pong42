@@ -7,6 +7,7 @@ type ImageInfo = { username: string; uuid: string; img: string };
 interface ProfilePictureProps {
   size?: 'xs' | 's' | 'm' | 'l' | 'xl';
   select?: boolean;
+  userID: string;
 }
 
 const style = Object.freeze({
@@ -17,13 +18,17 @@ const style = Object.freeze({
   xl: 'h-[155px] w-[155px] border-[5px]'
 });
 
-function ProfilePicture({ size = 'xl', select = false }: ProfilePictureProps) {
+function ProfilePicture({
+  size = 'xl',
+  select = false,
+  userID
+}: ProfilePictureProps) {
   const [data, setData] = useState<ImageInfo | undefined>(undefined);
   useEffect(() => {
     const fetchData = () => {
       const jwt = localStorage.getItem('jwt');
       axios
-        .get(`${CONST_BACKEND_URL}/img/download`, {
+        .get(`${CONST_BACKEND_URL}/img/download/${userID}`, {
           withCredentials: true,
           headers: { Authorization: `Bearer ${jwt!}` }
         })
@@ -33,7 +38,7 @@ function ProfilePicture({ size = 'xl', select = false }: ProfilePictureProps) {
         .catch(() => {});
     };
     fetchData();
-  }, []);
+  }, [userID]);
 
   return (
     <img

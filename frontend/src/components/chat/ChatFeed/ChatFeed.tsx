@@ -66,6 +66,7 @@ function ChanFeed({ userID, event }: ChanFeedProps) {
               time={chat.time}
               username={chat.username}
               noBgColor
+              userID={chat.senderID}
             />
           );
         }
@@ -75,6 +76,7 @@ function ChanFeed({ userID, event }: ChanFeedProps) {
             message={chat.message}
             time={chat.time}
             username={chat.username}
+            userID={chat.senderID}
           />
         );
       })}

@@ -8,6 +8,7 @@ interface ChanContactProps {
   innerRef?: LegacyRef<any> | undefined;
   hideUsername?: boolean;
   showPointer?: boolean;
+  userID: string;
 }
 
 export function ChanContact({
@@ -16,7 +17,8 @@ export function ChanContact({
   onContextMenu,
   innerRef,
   hideUsername,
-  showPointer
+  showPointer,
+  userID
 }: ChanContactProps) {
   return (
     <>
@@ -31,7 +33,7 @@ export function ChanContact({
         }`}
       >
         <div className="flex items-center justify-center gap-3">
-          <ProfilePicture size="xs" />
+          <ProfilePicture size="xs" userID={userID} />
           {hideUsername ? null : (
             <p className="semibold max-w-[200px] break-all text-base text-pong-white">
               {username}

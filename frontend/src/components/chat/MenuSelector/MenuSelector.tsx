@@ -5,6 +5,7 @@ import { AiOutlineSearch } from 'react-icons/ai';
 import ProfilePicture from '../ProfilePicture/ProfilePicture';
 import RenderIf from '../RenderIf/RenderIf';
 import { useStateContext } from '../../../contexts/state';
+import { useSocketContext } from '../../../contexts/socket';
 
 export default function MenuSelector() {
   const {
@@ -16,6 +17,7 @@ export default function MenuSelector() {
     toggleMessageView,
     toggleChannelView
   } = useStateContext();
+  const { socket } = useSocketContext();
   return (
     <RenderIf
       some={[
@@ -66,7 +68,7 @@ export default function MenuSelector() {
           <p className="font-semibold">coming soon</p>
         </Tooltip>
         <button type="button">
-          <ProfilePicture size="xs" />
+          <ProfilePicture size="xs" userID={socket.userID} />
         </button>
       </div>
     </RenderIf>

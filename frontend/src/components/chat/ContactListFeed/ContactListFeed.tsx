@@ -62,6 +62,7 @@ export function ContactListFeed({ setUserID }: ContactListProps) {
                 });
               }}
               blocked={false}
+              userID={user.userID}
             />
           ))}
         </>
@@ -90,6 +91,7 @@ export function ContactListFeed({ setUserID }: ContactListProps) {
                 });
               }}
               blocked={false}
+              userID={user.userID}
             />
           ))}
         </>

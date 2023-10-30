@@ -16,6 +16,7 @@ interface ContactCardProps {
   noBgColor?: boolean;
   username: string;
   blocked: boolean;
+  userID: string;
 }
 
 export function ContactCard({
@@ -24,7 +25,8 @@ export function ContactCard({
   noBgColor,
   blockUser,
   unblockUser,
-  blocked
+  blocked,
+  userID
 }: ContactCardProps) {
   const [clicked, setClicked] = useState(false);
   const ref = useOutsideClick(() => setClicked(false));
@@ -49,7 +51,7 @@ export function ContactCard({
         onClick={clicked || blocked ? () => {} : sendMessage}
       >
         <div className="flex items-center justify-center gap-3">
-          <ProfilePicture size="xs" />
+          <ProfilePicture size="xs" userID={userID} />
           <p className="semibold max-w-[200px] break-all text-base text-pong-white">
             {username}
           </p>

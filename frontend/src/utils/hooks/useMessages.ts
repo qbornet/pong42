@@ -7,7 +7,7 @@ import { useSocketContext } from '../../contexts/socket';
 
 export function useMessages(targetID: string): ChatInfo[] {
   const { socket } = useSocketContext();
-  const [msg, setMsg] = useState<ChatInfo[]>([]);
+  const [msg, setMsg] = useState<any>([]);
   const isConnected = useConnected();
 
   useEffect(() => {
@@ -21,6 +21,7 @@ export function useMessages(targetID: string): ChatInfo[] {
           username: message.sender,
           chanName: message.chanName,
           chanID: message.chanID,
+          senderID: message.senderID,
           profilePictureUrl: 'starwatcher.jpg'
         });
         return message;
@@ -37,9 +38,10 @@ export function useMessages(targetID: string): ChatInfo[] {
           username: message.sender,
           chanName: message.chanName,
           chanID: message.chanID,
+          senderID: message.senderID,
           profilePictureUrl: 'starwatcher.jpg'
         };
-        setMsg((m) => m.concat(formatedMessage));
+        setMsg((m: any) => m.concat(formatedMessage));
       }
     };
 
@@ -50,9 +52,10 @@ export function useMessages(targetID: string): ChatInfo[] {
           message: message.content,
           time: formatTimeMessage(message.createdAt),
           username: message.sender,
+          senderID: message.senderID,
           profilePictureUrl: 'starwatcher.jpg'
         };
-        setMsg((m) => m.concat(formatedMessage));
+        setMsg((m: any) => m.concat(formatedMessage));
       }
     };
     const onMessages = (messages: Message[]) => {
@@ -62,6 +65,7 @@ export function useMessages(targetID: string): ChatInfo[] {
           id: message.messageID,
           message: message.content,
           time: formatTimeMessage(message.createdAt),
+          senderID: message.senderID,
           username:
             socket.userID === message.receiverID
               ? message.receiver

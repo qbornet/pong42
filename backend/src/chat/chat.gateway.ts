@@ -80,28 +80,6 @@ export default class ChatGateway
   async afterInit() {
     // /!\ To remove test only /!\
     await this.usersService.createUser({
-      id: '11111111-6419-4e52-8879-f99e90eeca35',
-      email: 'jfrancai@student.42.fr',
-      username: 'jfrancai',
-      password: 'toto',
-      twoAuthOn: false,
-      twoAuthSecret: 'toto',
-      apiToken: 'toto',
-      connectedChat: false
-    });
-
-    await this.usersService.createUser({
-      id: '22222222-6419-4e52-8879-f99e90eeca39',
-      email: 'tyty@student.42.fr',
-      username: 'tyty',
-      password: 'toto',
-      twoAuthOn: false,
-      twoAuthSecret: 'toto',
-      apiToken: 'toto',
-      connectedChat: false
-    });
-
-    await this.usersService.createUser({
       id: '33333333-915b-472d-beee-ed53fec63008',
       email: 'toto@student.42.fr',
       username: 'toto',
@@ -112,18 +90,7 @@ export default class ChatGateway
       connectedChat: false
     });
 
-    await this.usersService.createUser({
-      id: '44444444-915b-472d-beee-ed53fec63008',
-      email: 'tata@student.42.fr',
-      username: 'tata',
-      password: 'tata',
-      twoAuthOn: false,
-      twoAuthSecret: 'tata',
-      apiToken: 'tata',
-      connectedChat: false
-    });
     // /!\ To remove test only /!\
-
     this.logger.log('Initialized');
   }
 

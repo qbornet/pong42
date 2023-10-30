@@ -11,9 +11,14 @@ import { useStateContext } from '../../contexts/state';
 interface InviteContactProps {
   username: string;
   invite: () => any;
+  userID: string;
 }
 
-export function InviteContact({ username, invite }: InviteContactProps) {
+export function InviteContact({
+  username,
+  invite,
+  userID
+}: InviteContactProps) {
   return (
     <>
       <div
@@ -22,7 +27,7 @@ export function InviteContact({ username, invite }: InviteContactProps) {
         role="presentation"
       >
         <div className="flex items-center justify-center gap-3">
-          <ProfilePicture size="xs" />
+          <ProfilePicture size="xs" userID={userID} />
           <p className="semibold max-w-[200px] break-all text-base text-pong-white">
             {username}
           </p>
@@ -59,6 +64,7 @@ export function InviteChannelView({ chanID }: InviteChannelViewProps) {
             {inviteList.map((user: Contact) => (
               <InviteContact
                 key={user.userID}
+                userID={user.userID}
                 username={user.username}
                 invite={() => {
                   socket.emit('channelInvite', {
