@@ -5,6 +5,7 @@ import { action as createAction } from '@login/create.action';
 import { action as loginAction } from '@login/login.action';
 import { loader as loginTwoAuthLoader } from '@login/logintwoAuth.loader';
 import { loader as uploadImageLoader } from '@login/uploadImage.loader';
+import { loader as pongLoader } from './components/Pong/pong.loader.ts';
 import HomePage from '@login/HomePage';
 import LoginForm from '@login/LoginForm';
 import CreateForm from '@login/CreateForm';
@@ -70,7 +71,8 @@ const router = createBrowserRouter([
         path: '',
         element: <Chat />
       }
-    ]
+    ],
+    loader: pongLoader
   },
   {
     path: '/pong',
@@ -81,7 +83,8 @@ const router = createBrowserRouter([
         path: '',
         element: <Chat />
       }
-    ]
+    ],
+    loader: pongLoader
   },
   {
     path: '/profile',
