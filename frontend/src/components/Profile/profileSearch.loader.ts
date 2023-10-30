@@ -1,11 +1,12 @@
 import axios, { AxiosError, AxiosResponse, AxiosRequestConfig } from 'axios';
 import { CONST_BACKEND_URL } from '@constant';
+import { redirect } from 'react-router-dom';
 
 export async function loader(props: { request: Request }) {
   let error = false;
   const { request } = props;
   const jwt = localStorage.getItem('jwt');
-  if (!jwt) return window.location.replace('/');
+  if (!jwt) return redirect('/');
 
   const path = request.url.substring(request.url.indexOf('/profile'));
   const config: AxiosRequestConfig = {
@@ -24,7 +25,7 @@ export async function loader(props: { request: Request }) {
       if (err) error = true;
     });
 
-  if (error) return window.location.replace('/');
+  if (error) return redirect('/');
 
   const fetchUser = await axios
     .post(`${CONST_BACKEND_URL}/user/jwt`, { jwt }, config)
@@ -37,5 +38,5 @@ export async function loader(props: { request: Request }) {
     ...result,
     userFriendList: fetchUser.friendList
   };
-  return error ? window.location.replace('/') : userInfo;
+  return error ? redirect('/') : userInfo;
 }

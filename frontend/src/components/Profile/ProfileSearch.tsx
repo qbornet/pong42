@@ -59,7 +59,7 @@ export default function ProfileSearch() {
 
   return (
     <>
-      <div className="bg-[url('../images/background.png')] bg-cover">
+      <div className="bg-default bg-cover">
         <div className="flex h-screen flex-none flex-col items-center justify-start">
           <div className="relative flex grow-0 flex-col items-center rounded-[20px]">
             <div className="relative flex h-1/2 w-1/2 flex-col rounded-[20px]">

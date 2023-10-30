@@ -5,7 +5,7 @@ export default function ValidationTwoAuth() {
   const qrcode = useLoaderData() as string;
 
   return (
-    <div className="flex h-screen items-center justify-center bg-[url('./images/background.png')] bg-cover">
+    <div className="flex h-screen items-center justify-center bg-default bg-cover">
       <div className="flex w-[350px] flex-col items-center justify-center divide-y-[1px] divide-gray-400 rounded-[25px] border border-blue-pong-1 bg-blue-pong-2 px-4 py-10">
         <Header name="Activate 2FA" />
         <div className="mt-2 flex flex-col items-center justify-center pt-2">
