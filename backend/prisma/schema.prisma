@@ -57,12 +57,12 @@ model Channel {
 }
 
 model Match {
-  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  result    Int     @default(0)
-  timestamp Int     @default(0)
-  oppId     String? @db.Uuid
-  Users     Users?  @relation(name: "match", fields: [usersId], references: [id])
-  usersId   String? @db.Uuid
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  result    Int      @default(0)
+  timestamp DateTime @default(now())
+  oppId     String   @db.Uuid
+  users     Users    @relation(name: "match", fields: [usersId], references: [id])
+  usersId   String   @db.Uuid
 }
 
 enum ChannelType {

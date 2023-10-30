@@ -164,7 +164,7 @@ export class WaitingRoom {
     if (party) {
       ready = party.togglePlayerReady(clientID, isReady);
       party.startParty(() => {
-        this.handleDataOfMatch(party, party.playerWon, matchService);
+        this.handleDataOfMatch(party, matchService);
         party.player1.socket.leave(party.partyName);
         party.player2.socket.leave(party.partyName);
         this.removeParty(party.partyName);
@@ -189,27 +189,23 @@ export class WaitingRoom {
     }
   }
 
-  handleDataOfMatch(
-    party: Game,
-    playerWon: number,
-    matchService: MatchService
-  ) {
+  handleDataOfMatch(party: Game, matchService: MatchService) {
+    const { playerWon } = party;
     const player1Id = party.player1.id;
     const player2Id = party.player2.id;
-    const timestamp = Date.now();
 
     this.logger.debug(
-      `playerWonParty: ${party.playerWon}, player1Id: ${player1Id}, player2Id: ${player2Id}`
+      `playerWonParty: ${playerWon}, player1Id: ${player1Id}, player2Id: ${player2Id}`
     );
     if (playerWon === 1) {
-      const winMatchHistory = `1|${player2Id}|${timestamp}`;
-      const lostMatchHistory = `0|${player1Id}|${timestamp}`;
+      const winMatchHistory = `1|${player2Id}`;
+      const lostMatchHistory = `0|${player1Id}`;
 
       matchService.addMatchHistory(player1Id, winMatchHistory);
       matchService.addMatchHistory(player2Id, lostMatchHistory);
     } else if (playerWon === 2) {
-      const winMatchHistory = `1|${player1Id}|${timestamp}`;
-      const lostMatchHistory = `0|${player2Id}|${timestamp}`;
+      const winMatchHistory = `1|${player1Id}`;
+      const lostMatchHistory = `0|${player2Id}`;
 
       matchService.addMatchHistory(player2Id, winMatchHistory);
       matchService.addMatchHistory(player1Id, lostMatchHistory);
