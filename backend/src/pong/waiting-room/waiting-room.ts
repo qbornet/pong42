@@ -95,8 +95,15 @@ export class WaitingRoom {
     return this.parties.get(id);
   }
 
-  private removeParty(id: RoomName | UserID) {
-    return this.parties.delete(id);
+  removeParty(id: RoomName | UserID) {
+    const party = this.parties.get(id);
+    if (party && (party.isStarted === false || party.isOver === true)) {
+      party.player1.socket.emit('leaveParty');
+      party.player2.socket.emit('leaveParty');
+      this.parties.delete(party.partyName);
+      this.parties.delete(party.player1.id);
+      this.parties.delete(party.player2.id);
+    }
   }
 
   getRoomName() {
@@ -167,9 +174,9 @@ export class WaitingRoom {
         this.handleDataOfMatch(party, matchService);
         party.player1.socket.leave(party.partyName);
         party.player2.socket.leave(party.partyName);
-        this.removeParty(party.partyName);
-        this.removeParty(party.player2.id);
-        this.removeParty(party.player1.id);
+        this.parties.delete(party.partyName);
+        this.parties.delete(party.player1.id);
+        this.parties.delete(party.player2.id);
       });
     }
     client.emit('playerReady', ready);

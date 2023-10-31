@@ -46,6 +46,11 @@ export class PongGateway
     this.logger.debug(`Disconnected : ${client.user.id}`);
   }
 
+  @SubscribeMessage('leaveParty')
+  handleLeaveParty(client: PongSocket) {
+    this.pongService.handleLeaveParty(client);
+  }
+
   @SubscribeMessage('leaveWaitingRoom')
   handleLeaveWaitingRoom(client: PongSocket) {
     this.pongService.handlePlayerReady(client, false);

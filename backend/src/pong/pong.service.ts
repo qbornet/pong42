@@ -144,4 +144,9 @@ export class PongService {
       room.handleArrowDown(client, isPressed);
     }
   }
+
+  handleLeaveParty(client: PongSocket) {
+    this.classicWaitingRoom.removeParty(client.user.id!);
+    this.speedWaitingRoom.removeParty(client.user.id!);
+  }
 }

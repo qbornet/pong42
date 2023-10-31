@@ -130,7 +130,6 @@ describe('ChatGateway', () => {
       };
 
       client0.on('session', (session) => {
-        console.log(session);
         session0 = session;
       });
 
