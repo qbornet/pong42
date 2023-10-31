@@ -1,25 +1,17 @@
 import { CONST_BACKEND_URL } from '@constant';
 import axios, { AxiosRequestConfig } from 'axios';
 import { useEffect, useState } from 'react';
-import jwt_decode from 'jwt-decode';
 import { useParams } from 'react-router-dom';
-
-interface DecodedToken {
-  username: string;
-  email: string;
-  iat: string;
-  exp: string;
-}
+import { useJwtContext } from '../../contexts/jwt';
 
 function MatchHistory() {
   const [matchHistory, setMatchHistory] = useState([]);
   const [loading, setLoading] = useState(true);
-  const jwt = localStorage.getItem('jwt');
-  const decodedToken: DecodedToken = jwt_decode(jwt!);
+  const { jwt, decodedToken } = useJwtContext();
 
   function formatUtcPlus1Date(timestamp: Date) {
     const date = new Date(timestamp);
-    date.setHours(date.getHours()); // Add 1 hour for UTC+1
+    date.setHours(date.getHours());
     const formattedDate = `
 ${date.getHours()}:${date.getMinutes() < 10 ? '0' : ''}${date.getMinutes()}
     ${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
@@ -46,7 +38,7 @@ ${date.getHours()}:${date.getMinutes() < 10 ? '0' : ''}${date.getMinutes()}
   }, [username, jwt, decodedToken]);
 
   if (loading) {
-    return <div>Loading match history...</div>;
+    return <div>Loading...</div>;
   }
 
   return (

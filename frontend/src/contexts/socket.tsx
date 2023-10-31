@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useMemo } from 'react';
 import { PongSocket } from '../utils/hooks/useStatus.interfaces';
 import { socket } from '../utils/functions/socket';
+import { JwtContextProvider } from './jwt';
 
 const SocketContext = createContext<{
   socket: PongSocket;
@@ -15,9 +16,11 @@ export function SocketContextProvider({
 }: SocketContextProviderProps) {
   const socketProviderValue = useMemo(() => ({ socket }), []);
   return (
-    <SocketContext.Provider value={socketProviderValue}>
-      {children}
-    </SocketContext.Provider>
+    <JwtContextProvider>
+      <SocketContext.Provider value={socketProviderValue}>
+        {children}
+      </SocketContext.Provider>
+    </JwtContextProvider>
   );
 }
 

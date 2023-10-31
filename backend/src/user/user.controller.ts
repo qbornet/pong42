@@ -59,6 +59,16 @@ export class UserController {
     return this.removeService.removeSensitiveData({ username });
   }
 
+  @Get('game-stats/:username')
+  async getGameState(@Param('username') username: string) {
+    const user = await this.usersService.getUserWithMatchHistory(username);
+    if (user) {
+      const { matchWinned, matchLost } = user;
+      return { nbWin: matchWinned.length, nbLoose: matchLost.length };
+    }
+    return [];
+  }
+
   @Get('match-history/:username')
   async getMatchHistory(@Param('username') username: string) {
     const user = await this.usersService.getUserWithMatchHistory(username);

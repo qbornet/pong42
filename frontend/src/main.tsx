@@ -24,6 +24,7 @@ import './index.css';
 import Chat from './features/Chat/Chat';
 import InvitePong from './components/InvitePong/InvitePong';
 import { SocketContextProvider } from './contexts/socket.tsx';
+import { JwtContextProvider } from './contexts/jwt.tsx';
 
 const router = createBrowserRouter([
   {
