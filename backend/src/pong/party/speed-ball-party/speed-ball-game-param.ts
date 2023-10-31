@@ -11,7 +11,7 @@ const PADDLE_SPEED = 8;
 const PADDLE_WIDTH = 12;
 const PADDLE_HEIGHT = 100;
 
-const WALL_OFFSET = 0; // distance of the paddle from the wall
+const WALL_OFFSET = 10; // distance of the paddle from the wall
 
 // SpeedBall params
 const BALL_SPEED = 4;

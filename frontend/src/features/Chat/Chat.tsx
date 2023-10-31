@@ -48,8 +48,8 @@ function Invite({ invite, setInvite }: InviteProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center">
-      <div className="flex flex-col items-center gap-2 rounded-2xl bg-pong-blue-400 p-4 shadow-lg ">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center ">
+      <div className="flex flex-col items-center gap-2 rounded-2xl border border-pong-white bg-pong-blue-400 p-4 shadow-lg ">
         <p className="p-2 text-xl font-bold text-pong-white">{`You've been invited by ${invite.username} to play ${invite.mode} mode.`}</p>
         <div className="flex flex-row items-start gap-7">
           <PrimaryButton
