@@ -1,27 +1,78 @@
-import { Form } from 'react-router-dom';
+import { Form, isRouteErrorResponse, useRouteError } from 'react-router-dom';
 import IMAGES from '@img';
 import InputField from '@login/InputField';
+import { useEffect, useState } from 'react';
+import { isError } from '../../utils/functions/isError';
 
-export default function ModifyProfile(props: {
+interface ModifyProfileProps {
   option: boolean;
-  error: string | null;
   username: string;
   setOption: React.Dispatch<React.SetStateAction<boolean>>;
   handleClickClose: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  handleUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}) {
-  const { option, error, username, setOption, handleClickClose, handleUpload } =
-    props;
+  setImagePreview: (prev: string) => void;
+}
 
+export default function ModifyProfile({
+  option,
+  username,
+  setOption,
+  handleClickClose,
+  setImagePreview
+}: ModifyProfileProps) {
+  const [hasError, setHasError] = useState<string | null>(null);
+  const error = useRouteError();
+
+  useEffect(() => {
+    if (error && isRouteErrorResponse(error)) {
+      setHasError(error.data.message);
+      setTimeout(() => {
+        setHasError(null);
+      }, 5000);
+    } else if (error && isError(error)) {
+      setHasError(error.message);
+      setTimeout(() => {
+        setHasError(null);
+      }, 5000);
+    }
+  }, [error]);
+
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const allowedTypes = ['image/jpeg', 'image/png'];
+    const reader = new FileReader();
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 20000) {
+        setHasError('Invalid size of image should be under 20KB.');
+        setTimeout(() => {
+          setHasError(null);
+        }, 5000);
+        e.target.value = '';
+        return;
+      }
+      if (!allowedTypes.includes(file.type)) {
+        setHasError('Invalid file type.');
+        setTimeout(() => {
+          setHasError(null);
+        }, 5000);
+        e.target.value = '';
+        return;
+      }
+
+      reader.onload = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
   const handleSubmit = () => {
     setOption(false);
   };
 
   return (
     <div
-      className={`slide-in-from-top flex flex-col rounded-[25px] border border-blue-pong-1 bg-blue-pong-2 px-6 ${
-        option ? 'visible' : 'fade-out pointer-events-none'
-      }`}
+      className={`slide-in-from-top flex flex-col rounded-[25px] border border-blue-pong-1 bg-blue-pong-2 px-6 ${option ? 'visible' : 'fade-out pointer-events-none'
+        }`}
     >
       <div className="grid grid-cols-10">
         <button
@@ -32,9 +83,11 @@ export default function ModifyProfile(props: {
           <img src={IMAGES.cross} width="16" height="16" alt="cross" />
         </button>
       </div>
-      {error && (
+      {hasError && (
         <div className="flex items-center justify-center rounded-[18px] border border-blue-pong-1 bg-blue-pong-3 py-4 shadow-none">
-          <p className="font-roboto text-sm font-bold text-red-500">{error}</p>
+          <p className="font-roboto text-sm font-bold text-red-500">
+            {hasError}
+          </p>
         </div>
       )}
       <Form
