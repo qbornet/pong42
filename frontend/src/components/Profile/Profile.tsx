@@ -7,6 +7,10 @@ import ModifyProfile from './ModifyProfile';
 import { isError } from '../../utils/functions/isError';
 import MatchHistory from './MatchHistory';
 import { Status } from './Status';
+import { Background } from '../Background';
+import { MainContainer } from '../MainContainer';
+import { BannerImage } from '../BannerImage';
+import { ProfilePicture } from '../ProfilePicture';
 
 type DataUser = { img: string; username: string; uuid: string };
 
@@ -108,25 +112,12 @@ export default function Profile() {
 
   return (
     <>
-      <div className="bg-default bg-cover">
-        <div className="flex h-screen flex-none flex-col items-center justify-start">
+      <Background>
+        <MainContainer>
           <div className="relative flex grow-0 flex-col items-center rounded-[20px]">
-            <div className="relative flex h-1/2 w-1/2 flex-col rounded-[20px]">
-              <img
-                className="object-fill object-center"
-                src={IMAGES.background_profile}
-                alt="profile background"
-              />
-            </div>
-            {data && (
-              <div className="absolute bottom-[45%] z-[2]">
-                <img
-                  className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-full border-[4px] border-profile-purple md:h-24 md:w-20 lg:h-32 lg:w-32"
-                  src={imagePreview === null ? data.img : imagePreview}
-                  alt="pp"
-                />
-              </div>
-            )}
+            <BannerImage>
+              <ProfilePicture />
+            </BannerImage>
             <div className="absolute left-[20%] right-[20%] top-[60%] z-[1] flex flex-none overflow-visible rounded-[20px] bg-blue-950 bg-opacity-90 p-7 shadow-lg md:sticky md:top-32 lg:sticky lg:top-40">
               <div className="grid grid-cols-10 gap-1 text-center text-slate-200">
                 <div className="grid grid-cols-1 text-center">
@@ -167,18 +158,19 @@ export default function Profile() {
               </div>
             </div>
           </div>
-          <ModifyProfile
-            error={errorMsg}
-            option={option}
-            username={data ? data.username : ''}
-            setOption={setOption}
-            handleClickClose={handleClickClose}
-            handleUpload={handleUpload}
-          />
           <MatchHistory />
-        </div>
-      </div>
+        </MainContainer>
+      </Background>
       <Outlet />
     </>
   );
 }
+
+//<ModifyProfile
+//  error={errorMsg}
+//  option={option}
+//  username={data ? data.username : ''}
+//  setOption={setOption}
+//  handleClickClose={handleClickClose}
+//  handleUpload={handleUpload}
+///>
