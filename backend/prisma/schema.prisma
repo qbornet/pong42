@@ -21,7 +21,8 @@ model Users {
   apiToken        String?
   maxAge          Int       @default(0)
   connectedChat   Boolean   @default(false)
-  match           Match[]   @relation(name: "match")
+  matchWinned     Match[]   @relation(name: "win")
+  matchLost       Match[]   @relation(name: "lost")
   channels        Channel[]
   messageSent     Message[] @relation(name: "sender")
   messageReceived Message[] @relation(name: "receiver")
@@ -57,12 +58,12 @@ model Channel {
 }
 
 model Match {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  result    Int      @default(0)
-  timestamp DateTime @default(now())
-  oppId     String   @db.Uuid
-  users     Users    @relation(name: "match", fields: [usersId], references: [id])
-  usersId   String   @db.Uuid
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  timestamp     DateTime @default(now())
+  playerWin     Users    @relation(name: "win", fields: [idPlayerWin], references: [id])
+  idPlayerWin   String   @db.Uuid
+  playerLoose   Users?   @relation(name: "lost", fields: [idPlayerLoose], references: [id])
+  idPlayerLoose String?  @db.Uuid
 }
 
 enum ChannelType {

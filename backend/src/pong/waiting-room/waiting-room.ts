@@ -197,26 +197,12 @@ export class WaitingRoom {
   }
 
   handleDataOfMatch(party: Game, matchService: MatchService) {
-    const { playerWon } = party;
-    const player1Id = party.player1.id;
-    const player2Id = party.player2.id;
+    const { playerWon, playerLoose } = party;
 
     this.logger.debug(
-      `playerWonParty: ${playerWon}, player1Id: ${player1Id}, player2Id: ${player2Id}`
+      `playerWonParty: ${playerWon}, playerLooseParty: ${playerLoose}`
     );
-    if (playerWon === 1) {
-      const winMatchHistory = `1|${player2Id}`;
-      const lostMatchHistory = `0|${player1Id}`;
-
-      matchService.addMatchHistory(player1Id, winMatchHistory);
-      matchService.addMatchHistory(player2Id, lostMatchHistory);
-    } else if (playerWon === 2) {
-      const winMatchHistory = `1|${player1Id}`;
-      const lostMatchHistory = `0|${player2Id}`;
-
-      matchService.addMatchHistory(player2Id, winMatchHistory);
-      matchService.addMatchHistory(player1Id, lostMatchHistory);
-    }
+    matchService.addMatchHistory(playerWon, playerLoose);
   }
 
   private isInvited(id: UserID, invite: Invite) {

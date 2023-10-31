@@ -26,7 +26,9 @@ export abstract class Game {
 
   public scorePlayer2: number = 0;
 
-  public playerWon: number;
+  public playerWon: string = '';
+
+  public playerLoose: string = '';
   // Game element
 
   protected ball: Ball;
@@ -46,7 +48,6 @@ export abstract class Game {
   ) {
     this.player1 = p1;
     this.player2 = p2;
-    this.playerWon = 0;
     this.partyName = name;
     this.io = io;
     this.maxScore = winCondition;
@@ -109,7 +110,14 @@ export abstract class Game {
         this.scorePlayer2 >= this.maxScore
       ) {
         this.io.to(this.partyName).emit('gameOver', true);
-        this.playerWon = this.scorePlayer1 >= this.maxScore ? 1 : 2;
+        this.playerWon =
+          this.scorePlayer1 >= this.maxScore
+            ? this.player1.id
+            : this.player2.id;
+        this.playerLoose =
+          this.scorePlayer1 >= this.maxScore
+            ? this.player2.id
+            : this.player1.id;
         clearParty();
         this.isOver = true;
         clearInterval(gameInterval);
