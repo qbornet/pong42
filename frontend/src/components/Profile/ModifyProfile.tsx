@@ -71,8 +71,9 @@ export default function ModifyProfile({
 
   return (
     <div
-      className={`slide-in-from-top flex flex-col rounded-[25px] border border-blue-pong-1 bg-blue-pong-2 px-6 ${option ? 'visible' : 'fade-out pointer-events-none'
-        }`}
+      className={`slide-in-from-top absolute top-56 z-10 flex flex-col rounded-[25px] border border-blue-pong-1 bg-blue-pong-2 px-6 ${
+        option ? 'visible' : 'fade-out pointer-events-none'
+      }`}
     >
       <div className="grid grid-cols-10">
         <button

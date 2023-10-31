@@ -1,3 +1,5 @@
+import { CONST_BACKEND_URL } from '@constant';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import ModifyProfile from './ModifyProfile';
@@ -11,10 +13,33 @@ import { LeftBlock } from '../LeftBlock';
 import { CenterBlock } from '../CenterBlock';
 import { RightBlock } from '../RightBlock';
 
+type DataUser = { img: string; username: string; uuid: string };
+
 // will add other info when needed
 export default function Profile() {
   const [option, setOption] = useState<boolean>(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [data, setData] = useState<DataUser | null>();
+
+  useEffect(() => {
+    if (!data) {
+      const jwt = localStorage.getItem('jwt');
+
+      const fetchData = async () => {
+        const config: AxiosRequestConfig = {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${jwt}` }
+        };
+        const dataUser: DataUser = await axios
+          .get(`${CONST_BACKEND_URL}/img/download`, config)
+          .then((res: AxiosResponse) => res.data);
+
+        setData(dataUser);
+      };
+
+      fetchData();
+    }
+  }, [data]);
 
   useEffect(() => {
     const handleNavigation = () => {
@@ -52,15 +77,15 @@ export default function Profile() {
             <CenterBlock />
             <RightBlock handleClickOption={handleClickOption} />
           </BannerInfo>
+          <ModifyProfile
+            option={option}
+            username={data ? data.username : ''}
+            setOption={setOption}
+            handleClickClose={handleClickClose}
+            setImagePreview={(prev: string) => setImagePreview(prev)}
+          />
           <MatchHistory />
         </MainContainer>
-        <ModifyProfile
-          option={option}
-          username={data ? data.username : ''}
-          setOption={setOption}
-          handleClickClose={handleClickClose}
-          setImagePreview={(prev: string) => setImagePreview(prev)}
-        />
       </Background>
       <Outlet />
     </>
