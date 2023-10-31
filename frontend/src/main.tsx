@@ -17,11 +17,9 @@ import UploadImg from '@login/UploadImg';
 import { loader as profileLoader } from './components/Profile/profile.loader';
 import { action as profileAction } from './components/Profile/profile.action';
 import { loader as profileSearchLoader } from './components/Profile/profileSearch.loader';
-import { loader as homeLoader } from './components/Home/home.loader';
 import Pong from './components/Pong/Pong';
 import Profile from './components/Profile/Profile';
 import ProfileSearch from './components/Profile/ProfileSearch';
-import Home from './components/Home/Home';
 import './index.css';
 import Chat from './features/Chat/Chat';
 import InvitePong from './components/InvitePong/InvitePong';
@@ -110,18 +108,19 @@ const router = createBrowserRouter([
     ],
     errorElement: <ErrorPage />,
     loader: profileSearchLoader
-  },
-  {
-    path: '/home',
-    element: <Home />,
-    children: [
-      {
-        path: '',
-        element: <Chat />
-      }
-    ],
-    loader: homeLoader
   }
+  // ,
+  // {
+  //  path: '/home',
+  //  element: <Home />,
+  //  children: [
+  //    {
+  //      path: '',
+  //      element: <Chat />
+  //    }
+  //  ],
+  //  loader: homeLoader
+  // }
 ]);
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(

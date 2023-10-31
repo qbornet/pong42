@@ -20,5 +20,5 @@ export async function action(props: { request: Request }) {
     .then((response: AxiosResponse) => response.data);
 
   localStorage.setItem('jwt', result.access_token);
-  return redirect('/home');
+  return redirect('/pong');
 }
