@@ -104,7 +104,7 @@ export function useDraw(
   const drawClassicGame = (context: CanvasRenderingContext2D) => {
     resetCanvas(context);
     if (gameState && (isClassicMatchModeEnd || isSpeedModeMatchEnd)) {
-      if (gameState.scorePlayer1 >= gameState.maxScore) {
+      if (gameState.scorePlayer1 > gameState.scorePlayer2) {
         drawGameOverMessage(context, 'Player 1 Wins');
       } else {
         drawGameOverMessage(context, 'Player 2 Wins');
