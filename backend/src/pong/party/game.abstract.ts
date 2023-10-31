@@ -93,6 +93,12 @@ export abstract class Game {
       }
       this.startBroadcastingGameState();
       this.io.to(this.partyName).emit('startGame', this.partyName);
+      this.io.emit('gameStartStatus', {
+        username: this.player2.socket.user.username
+      });
+      this.io.emit('gameStartStatus', {
+        username: this.player1.socket.user.username
+      });
     }
   }
 
@@ -123,6 +129,12 @@ export abstract class Game {
         this.scorePlayer2 >= this.maxScore
       ) {
         this.io.to(this.partyName).emit('gameOver', true);
+        this.io.emit('gameOverStatus', {
+          username: this.player2.socket.user.username
+        });
+        this.io.emit('gameOverStatus', {
+          username: this.player1.socket.user.username
+        });
         this.idPlayerWin =
           this.scorePlayer1 > this.scorePlayer2
             ? this.player1.id

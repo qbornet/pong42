@@ -5,8 +5,8 @@ import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
 import { CONST_BACKEND_URL } from '@constant';
 import ModifyProfile from './ModifyProfile';
 import { isError } from '../../utils/functions/isError';
-import { Navbar } from '../Navbar/Navbar';
 import MatchHistory from './MatchHistory';
+import { Status } from './Status';
 
 type DataUser = { img: string; username: string; uuid: string };
 
@@ -162,11 +162,11 @@ export default function Profile() {
                       />
                     </button>
                   </div>
+                  <Status />
                 </div>
               </div>
             </div>
           </div>
-          <MatchHistory />
           <ModifyProfile
             error={errorMsg}
             option={option}
@@ -175,6 +175,7 @@ export default function Profile() {
             handleClickClose={handleClickClose}
             handleUpload={handleUpload}
           />
+          <MatchHistory />
         </div>
       </div>
       <Outlet />

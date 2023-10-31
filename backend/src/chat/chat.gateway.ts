@@ -80,6 +80,16 @@ export default class ChatGateway
   async afterInit() {
     // /!\ To remove test only /!\
     await this.usersService.createUser({
+      id: '55555555-915b-472d-beee-ed55fec65008',
+      email: 'tata@student.42.fr',
+      username: 'tata',
+      password: 'tata',
+      twoAuthOn: false,
+      twoAuthSecret: 'tata',
+      apiToken: 'tata',
+      connectedChat: false
+    });
+    await this.usersService.createUser({
       id: '33333333-915b-472d-beee-ed53fec63008',
       email: 'toto@student.42.fr',
       username: 'toto',
@@ -121,15 +131,15 @@ export default class ChatGateway
 
     this.usersService.setChatDisonnected(socket.user.id!);
 
-    const matchingSockets = await this.io.in(socket.user.id!).fetchSockets();
+    //const matchingSockets = await this.io.in(socket.user.id!).fetchSockets();
 
-    if (matchingSockets.length === 0) {
-      socket.broadcast.emit('userDisconnected', {
-        userID: socket.user.id,
-        username: socket.user.username
-      });
-      this.socketMap.delete(senderID);
-    }
+    //if (matchingSockets.length !== 0) {
+    socket.broadcast.emit('userDisconnected', {
+      userID: socket.user.id,
+      username: socket.user.username
+    });
+    this.socketMap.delete(senderID);
+    //}
   }
 
   @SubscribeMessage('session')

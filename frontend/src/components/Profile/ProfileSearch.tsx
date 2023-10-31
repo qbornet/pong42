@@ -4,6 +4,7 @@ import IMAGES from '@img';
 import { CONST_BACKEND_URL } from '@constant';
 import axios, { AxiosRequestConfig } from 'axios';
 import MatchHistory from './MatchHistory';
+import { Status } from './Status';
 
 export default function ProfileSearch() {
   const [isFriend, setIsFriend] = useState<string | undefined>(undefined);
@@ -119,6 +120,7 @@ export default function ProfileSearch() {
                       />
                     </button>
                   </div>
+                  <Status />
                 </div>
               </div>
             </div>

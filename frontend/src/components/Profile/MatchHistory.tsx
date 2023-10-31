@@ -56,8 +56,8 @@ ${date.getHours()}:${date.getMinutes() < 10 ? '0' : ''}${date.getMinutes()}
           <tr>
             <th>Player</th>
             <th>Status</th>
-            <th>Score</th>
             <th>Mode</th>
+            <th>Score</th>
             <th>Date</th>
           </tr>
         </thead>
@@ -77,10 +77,10 @@ ${date.getHours()}:${date.getMinutes() < 10 ? '0' : ''}${date.getMinutes()}
                   {`${match.playerWin} vs ${match.playerLoose}`}
                 </td>
                 <td className="border border-gray-400 p-2">{winOrLoose()}</td>
+                <td className="border border-gray-400 p-2">{match.mode}</td>
                 <td className="border border-gray-400 p-2">
                   {`${match.winnerScore}/${match.looserScore}`}
                 </td>
-                <td className="border border-gray-400 p-2">{match.mode}</td>
                 <td className="border border-gray-400 p-2">
                   {formatUtcPlus1Date(match.timestamp)}
                 </td>

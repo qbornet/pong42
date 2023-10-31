@@ -23,6 +23,7 @@ import ProfileSearch from './components/Profile/ProfileSearch';
 import './index.css';
 import Chat from './features/Chat/Chat';
 import InvitePong from './components/InvitePong/InvitePong';
+import { SocketContextProvider } from './contexts/socket.tsx';
 
 const router = createBrowserRouter([
   {
@@ -86,7 +87,11 @@ const router = createBrowserRouter([
   },
   {
     path: '/profile',
-    element: <Profile />,
+    element: (
+      <SocketContextProvider>
+        <Profile />
+      </SocketContextProvider>
+    ),
     children: [
       {
         path: '',
@@ -99,7 +104,12 @@ const router = createBrowserRouter([
   },
   {
     path: '/profile/:username',
-    element: <ProfileSearch />,
+    element: (
+      <SocketContextProvider>
+        <ProfileSearch />
+      </SocketContextProvider>
+    ),
+
     children: [
       {
         path: '',
