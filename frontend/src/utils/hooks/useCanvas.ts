@@ -25,7 +25,7 @@ export function useCanvas(draw: (context: CanvasRenderingContext2D) => void) {
             x: (canvas.width - refCanva.width * scale) / 2,
             y: (canvas.height - refCanva.height * scale) / 2
           };
-          context.clearRect(-10, -10, canvas.width + 100, canvas.height + 100);
+          context.clearRect(-20, -20, canvas.width + 300, canvas.height + 300);
           context.setTransform(scale, 0, 0, scale, origin.x, origin.y);
 
           draw(context);
