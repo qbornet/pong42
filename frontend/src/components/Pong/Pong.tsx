@@ -6,7 +6,10 @@ import { useDraw } from '../../utils/hooks/useDraw';
 import { usePaddle } from '../../utils/hooks/usePaddle';
 import { Canvas } from './Canvas';
 import { usePlayerReady } from '../../utils/hooks/usePlayersJoinedParty';
-import { PongStateContextProvider } from '../../contexts/pongState';
+import {
+  PongStateContextProvider,
+  usePongStateContext
+} from '../../contexts/pongState';
 import { WaitingButton } from './WaitingButton';
 import { ModeButtons } from './ModeButton';
 import { useGameStarted } from '../../utils/hooks/useStartGame';
@@ -15,11 +18,14 @@ import { useGameOver } from '../../utils/hooks/useGameOver';
 import { ReadyButton } from './ReadyButton';
 import { PlayAgainButton } from './PlayAgainButton';
 import { useConnection } from '../../utils/hooks/useConnection';
-import { Navbar } from '../Navbar/Navbar';
 
 function WrappedPong() {
   const { socket } = useSocketContext();
-  const { drawClassicGame, width, height } = useDraw();
+  const { isSpeedModeMatchEnd, isClassicMatchModeEnd } = usePongStateContext();
+  const { drawClassicGame, width, height } = useDraw(
+    isSpeedModeMatchEnd,
+    isClassicMatchModeEnd
+  );
   useGameOver();
   useJoinParty();
   useGameStarted();

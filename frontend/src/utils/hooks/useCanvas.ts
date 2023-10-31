@@ -13,12 +13,12 @@ export function useCanvas(draw: (context: CanvasRenderingContext2D) => void) {
       const renderer = () => {
         if (context && canvas) {
           const scale = Math.min(
-            window.innerWidth - 100 < refCanva.width
-              ? (window.innerWidth - 100) / refCanva.width
-              : 1,
-            window.innerHeight - 100 < refCanva.height
-              ? (window.innerHeight - 100) / refCanva.height
-              : 1
+            window.innerWidth - 300 < refCanva.width
+              ? (window.innerWidth - 300) / refCanva.width
+              : 0.99,
+            window.innerHeight - 300 < refCanva.height
+              ? (window.innerHeight - 300) / refCanva.height
+              : 0.98
           );
 
           const origin = {

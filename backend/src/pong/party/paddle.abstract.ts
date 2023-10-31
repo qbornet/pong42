@@ -46,13 +46,13 @@ export abstract class Paddle extends PositionClass {
   updatePosition(canva: ClassicCanva) {
     if (this.isUpActive && !this.isDownActive) {
       this.dy = -1;
-      if (this.y < 0) {
-        this.y = 0;
+      if (this.y < 10) {
+        this.y = 10;
       }
     } else if (this.isDownActive && !this.isUpActive) {
       this.dy = 1;
-      if (this.y + this.height > canva.height) {
-        this.y = canva.height - this.height;
+      if (this.y + this.height + 10 > canva.height) {
+        this.y = canva.height - this.height - 10;
       }
     } else {
       this.dy = 0;

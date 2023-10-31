@@ -8,7 +8,6 @@ import {
 } from '../../contexts/pongInviteState';
 import { usePaddle } from '../../utils/hooks/usePaddle';
 import { Canvas } from '../Pong/Canvas';
-import { useDrawInvite } from '../../utils/hooks/useDrawInvite';
 import {
   useInviteGameOver,
   useJoinInviteParty
@@ -22,11 +21,16 @@ import { InviteModeButtons } from './InviteModeButtons';
 import { InviteWaitingButton } from './InviteWaitingButton';
 import { InviteReadyButton } from './InviteReadyButton';
 import { InvitePlayAgainButton } from './InvitePlayAgainButton';
-import { Navbar } from '../Navbar/Navbar';
+import { useDraw } from '../../utils/hooks/useDraw';
 
 function InviteWrappedPong() {
   const { socket } = useSocketContext();
-  const { drawClassicGame, width, height } = useDrawInvite();
+  const { isSpeedModeMatchEnd, isClassicMatchModeEnd } =
+    useInvitePongStateContext();
+  const { drawClassicGame, width, height } = useDraw(
+    isSpeedModeMatchEnd,
+    isClassicMatchModeEnd
+  );
   useInviteGameOver();
   useJoinInviteParty();
   useInviteGameStarted();

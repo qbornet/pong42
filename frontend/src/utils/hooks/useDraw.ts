@@ -1,13 +1,16 @@
-import { usePongStateContext } from '../../contexts/pongState';
 import { useGameState } from './useGameState';
 
-export function useDraw(): {
+interface UseDrawReturn {
   drawClassicGame: (context: CanvasRenderingContext2D) => void;
   width: number;
   height: number;
-} {
+}
+
+export function useDraw(
+  isSpeedModeMatchEnd: boolean,
+  isClassicMatchModeEnd: boolean
+): UseDrawReturn {
   const { gameState } = useGameState();
-  const { isSpeedModeMatchEnd, isClassicMatchModeEnd } = usePongStateContext();
 
   // dessine ligne poitillee au centre
   const drawNet = (context: CanvasRenderingContext2D) => {
@@ -31,8 +34,15 @@ export function useDraw(): {
 
   const resetCanvas = (context: CanvasRenderingContext2D) => {
     if (context && gameState) {
-      context.fillStyle = '#000000';
-      context.fillRect(0, 0, gameState.canva.width, gameState.canva.height);
+      const { width } = gameState.canva;
+      const { height } = gameState.canva;
+      context.fillStyle = '#2A2957';
+      context.beginPath();
+      context.strokeStyle = '#ffffff';
+      context.roundRect(0, 0, width, height, 30);
+      context.lineWidth = 10;
+      context.stroke();
+      context.fill();
     }
   };
 
@@ -62,7 +72,9 @@ export function useDraw(): {
     height: number
   ) => {
     context.fillStyle = '#ffffff';
-    context.fillRect(x, y, width, height);
+    context.beginPath();
+    context.roundRect(x, y, width, height, 30);
+    context.fill();
   };
 
   // dessiner la balle
@@ -77,30 +89,6 @@ export function useDraw(): {
     context.fillStyle = '#ffffff';
     context.fill();
     context.closePath();
-  };
-
-  // ligne de touche du haut
-  const drawUpperLine = (context: CanvasRenderingContext2D) => {
-    if (gameState) {
-      context.beginPath();
-      context.lineWidth = 10;
-      context.moveTo(0, 0);
-      context.lineTo(gameState.canva.width, 0);
-      context.strokeStyle = '#ffffff';
-      context.stroke();
-    }
-  };
-
-  // ligne de touche du bas
-  const drawLowerLine = (context: CanvasRenderingContext2D) => {
-    if (gameState) {
-      context.beginPath();
-      context.lineWidth = 10;
-      context.moveTo(0, gameState.canva.height);
-      context.lineTo(gameState.canva.width, gameState.canva.height);
-      context.strokeStyle = '#ffffff';
-      context.stroke();
-    }
   };
 
   // afficher le score
@@ -124,8 +112,6 @@ export function useDraw(): {
     } else if (gameState) {
       drawScore(context);
       drawNet(context);
-      drawUpperLine(context);
-      drawLowerLine(context);
       drawPaddle(
         context,
         gameState.leftPaddle.x,

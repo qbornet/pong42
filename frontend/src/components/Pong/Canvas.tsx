@@ -9,6 +9,6 @@ export function Canvas({ width, height, draw }: CanvasProps) {
   const ref = useCanvas(draw);
 
   return (
-    <canvas className="absolute" ref={ref} width={width} height={height} />
+    <canvas className="absolute " ref={ref} width={width} height={height} />
   );
 }

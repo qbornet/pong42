@@ -8,14 +8,14 @@ const CANVA_HEIGHT = 700;
 // Paddle params
 const PADDLE_SPEED = 8;
 
-const PADDLE_WIDTH = 10;
+const PADDLE_WIDTH = 12;
 const PADDLE_HEIGHT = 100;
 
 const WALL_OFFSET = 0; // distance of the paddle from the wall
 
 // SpeedBall params
-const BALL_SPEED = 2;
-const BALLSIZE = 10;
+const BALL_SPEED = 4;
+const BALLSIZE = 25;
 const ACCELERATION = 1.1;
 
 export {
