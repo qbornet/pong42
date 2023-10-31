@@ -1,7 +1,7 @@
 interface BackgroundProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export function Background({ children }: BackgroundProps) {
-  return <div className="bg-default bg-cover">{children}</div>;
+  return <div className="bg-default bg-cover pt-10 ">{children}</div>;
 }
