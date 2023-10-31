@@ -1,0 +1,7 @@
+-- CreateEnum
+CREATE TYPE "MatchType" AS ENUM ('CLASSIC', 'SPEED');
+
+-- AlterTable
+ALTER TABLE "Match" ADD COLUMN     "looserScore" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "mode" "MatchType" NOT NULL DEFAULT 'CLASSIC',
+ADD COLUMN     "winnerScore" INTEGER NOT NULL DEFAULT 0;

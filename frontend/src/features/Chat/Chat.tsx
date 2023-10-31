@@ -52,8 +52,18 @@ function Invite({ invite, setInvite }: InviteProps) {
       <div className="flex flex-col items-center gap-2 rounded-2xl bg-pong-blue-400 p-4 shadow-lg ">
         <p className="p-2 text-xl font-bold text-pong-white">{`You've been invited by ${invite.username} to play ${invite.mode} mode.`}</p>
         <div className="flex flex-row items-start gap-7">
-          <PrimaryButton onClick={handleAccept}>Accept</PrimaryButton>
-          <PrimaryButton onClick={handleDeny}>Deny</PrimaryButton>
+          <PrimaryButton
+            className="bg-red-700 hover:bg-red-800"
+            onClick={handleDeny}
+          >
+            Deny
+          </PrimaryButton>
+          <PrimaryButton
+            className="bg-green-600 hover:bg-green-700"
+            onClick={handleAccept}
+          >
+            Accept
+          </PrimaryButton>
         </div>
       </div>
     </div>

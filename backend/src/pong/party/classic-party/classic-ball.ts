@@ -28,7 +28,7 @@ export class ClassicBall extends Ball {
       ) {
         this.dx = 1;
       } else {
-        this.game.incScore1();
+        this.game.incScore2();
         this.x = canva.width / 2;
         this.y = canva.height / 2;
       }
@@ -42,7 +42,7 @@ export class ClassicBall extends Ball {
       ) {
         this.dx = -1;
       } else {
-        this.game.incScore2();
+        this.game.incScore1();
         this.x = canva.width / 2;
         this.y = canva.height / 2;
       }

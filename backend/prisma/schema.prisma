@@ -58,16 +58,24 @@ model Channel {
 }
 
 model Match {
-  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  timestamp     DateTime @default(now())
-  playerWin     Users    @relation(name: "win", fields: [idPlayerWin], references: [id])
-  idPlayerWin   String   @db.Uuid
-  playerLoose   Users?   @relation(name: "lost", fields: [idPlayerLoose], references: [id])
-  idPlayerLoose String?  @db.Uuid
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  timestamp     DateTime  @default(now())
+  mode          MatchType @default(CLASSIC)
+  playerWin     Users     @relation(name: "win", fields: [idPlayerWin], references: [id])
+  idPlayerWin   String    @db.Uuid
+  winnerScore   Int       @default(0)
+  playerLoose   Users?    @relation(name: "lost", fields: [idPlayerLoose], references: [id])
+  idPlayerLoose String?   @db.Uuid
+  looserScore   Int       @default(0)
 }
 
 enum ChannelType {
   PUBLIC
   PRIVATE
   PASSWORD
+}
+
+enum MatchType {
+  CLASSIC
+  SPEED
 }

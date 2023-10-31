@@ -197,12 +197,19 @@ export class WaitingRoom {
   }
 
   handleDataOfMatch(party: Game, matchService: MatchService) {
-    const { playerWon, playerLoose } = party;
+    const { idPlayerWin, idPlayerLoose } = party;
+    const { winnerScore, looserScore } = party.getFinnalScore();
 
     this.logger.debug(
-      `playerWonParty: ${playerWon}, playerLooseParty: ${playerLoose}`
+      `playerWonParty: ${idPlayerWin}, playerLooseParty: ${idPlayerLoose}`
     );
-    matchService.addMatchHistory(playerWon, playerLoose);
+    matchService.addMatchHistory(
+      idPlayerWin,
+      idPlayerLoose,
+      party instanceof ClassicParty ? 'CLASSIC' : 'SPEED',
+      winnerScore,
+      looserScore
+    );
   }
 
   private isInvited(id: UserID, invite: Invite) {

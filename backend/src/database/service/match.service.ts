@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
+import { $Enums } from '@prisma/client';
 
 @Injectable()
 export class MatchService {
@@ -7,7 +8,13 @@ export class MatchService {
 
   constructor(private prisma: PrismaService) {}
 
-  async addMatchHistory(idPlayerWin: string, idPlayerLoose: string) {
+  async addMatchHistory(
+    idPlayerWin: string,
+    idPlayerLoose: string,
+    mode: $Enums.MatchType,
+    winnerScore: number,
+    looserScore: number
+  ) {
     try {
       return await this.prisma.match.create({
         data: {
@@ -16,7 +23,10 @@ export class MatchService {
           },
           playerLoose: {
             connect: { id: idPlayerLoose }
-          }
+          },
+          winnerScore,
+          looserScore,
+          mode
         }
       });
     } catch (e: any) {

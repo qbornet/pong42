@@ -36,7 +36,7 @@ export class SpeedBall extends Ball {
         this.speed *= ACCELERATION;
         this.dx = 1;
       } else {
-        this.game.incScore1();
+        this.game.incScore2();
         this.x = canva.width / 2;
         this.y = canva.height / 2;
         this.speed = this.defaultSpeed;
@@ -52,7 +52,7 @@ export class SpeedBall extends Ball {
         this.speed *= ACCELERATION;
         this.dx = -1;
       } else {
-        this.game.incScore2();
+        this.game.incScore1();
         this.x = canva.width / 2;
         this.y = canva.height / 2;
         this.speed = this.defaultSpeed;

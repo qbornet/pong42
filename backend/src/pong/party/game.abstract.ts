@@ -26,9 +26,9 @@ export abstract class Game {
 
   public scorePlayer2: number = 0;
 
-  public playerWon: string = '';
+  public idPlayerWin: string = '';
 
-  public playerLoose: string = '';
+  public idPlayerLoose: string = '';
   // Game element
 
   protected ball: Ball;
@@ -51,6 +51,19 @@ export abstract class Game {
     this.partyName = name;
     this.io = io;
     this.maxScore = winCondition;
+  }
+
+  public getFinnalScore() {
+    return {
+      winnerScore:
+        this.scorePlayer1 > this.scorePlayer2
+          ? this.scorePlayer1
+          : this.scorePlayer2,
+      looserScore:
+        this.scorePlayer1 > this.scorePlayer2
+          ? this.scorePlayer2
+          : this.scorePlayer1
+    };
   }
 
   public isPlayer1(playerId: string) {
@@ -110,12 +123,12 @@ export abstract class Game {
         this.scorePlayer2 >= this.maxScore
       ) {
         this.io.to(this.partyName).emit('gameOver', true);
-        this.playerWon =
-          this.scorePlayer1 >= this.maxScore
+        this.idPlayerWin =
+          this.scorePlayer1 > this.scorePlayer2
             ? this.player1.id
             : this.player2.id;
-        this.playerLoose =
-          this.scorePlayer1 >= this.maxScore
+        this.idPlayerLoose =
+          this.scorePlayer1 > this.scorePlayer2
             ? this.player2.id
             : this.player1.id;
         clearParty();
