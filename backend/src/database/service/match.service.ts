@@ -1,6 +1,6 @@
+import { $Enums } from '@prisma/client';
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
-import { $Enums } from '@prisma/client';
 
 @Injectable()
 export class MatchService {

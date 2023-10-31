@@ -6,6 +6,7 @@ import { CONST_BACKEND_URL } from '@constant';
 import ModifyProfile from './ModifyProfile';
 import { isError } from '../../utils/functions/isError';
 import { Navbar } from '../Navbar/Navbar';
+import MatchHistory from './MatchHistory';
 
 type DataUser = { img: string; username: string; uuid: string };
 
@@ -165,6 +166,7 @@ export default function Profile() {
               </div>
             </div>
           </div>
+          <MatchHistory />
           <ModifyProfile
             error={errorMsg}
             option={option}

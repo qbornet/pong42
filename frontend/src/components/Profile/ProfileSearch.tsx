@@ -3,6 +3,7 @@ import { useLoaderData, useNavigate, Outlet } from 'react-router-dom';
 import IMAGES from '@img';
 import { CONST_BACKEND_URL } from '@constant';
 import axios, { AxiosRequestConfig } from 'axios';
+import MatchHistory from './MatchHistory';
 
 export default function ProfileSearch() {
   const [isFriend, setIsFriend] = useState<string | undefined>(undefined);
@@ -122,6 +123,7 @@ export default function ProfileSearch() {
               </div>
             </div>
           </div>
+          <MatchHistory />
         </div>
       </div>
       <Outlet />

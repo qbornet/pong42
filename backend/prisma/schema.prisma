@@ -64,8 +64,8 @@ model Match {
   playerWin     Users     @relation(name: "win", fields: [idPlayerWin], references: [id])
   idPlayerWin   String    @db.Uuid
   winnerScore   Int       @default(0)
-  playerLoose   Users?    @relation(name: "lost", fields: [idPlayerLoose], references: [id])
-  idPlayerLoose String?   @db.Uuid
+  playerLoose   Users     @relation(name: "lost", fields: [idPlayerLoose], references: [id])
+  idPlayerLoose String    @db.Uuid
   looserScore   Int       @default(0)
 }
 

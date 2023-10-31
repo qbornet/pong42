@@ -94,6 +94,33 @@ export class UsersService {
     }
   }
 
+  async getUserWithMatchHistory(username: string) {
+    try {
+      return await this.prisma.users.findUnique({
+        where: {
+          username
+        },
+        include: {
+          matchWinned: {
+            include: {
+              playerWin: true,
+              playerLoose: true
+            }
+          },
+          matchLost: {
+            include: {
+              playerWin: true,
+              playerLoose: true
+            }
+          }
+        }
+      });
+    } catch (e: any) {
+      this.logger.warn(e);
+      return null;
+    }
+  }
+
   async deleteUserById(id: string) {
     try {
       return await this.prisma.users.delete({

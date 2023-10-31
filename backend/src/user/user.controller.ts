@@ -59,6 +59,29 @@ export class UserController {
     return this.removeService.removeSensitiveData({ username });
   }
 
+  @Get('match-history/:username')
+  async getMatchHistory(@Param('username') username: string) {
+    const user = await this.usersService.getUserWithMatchHistory(username);
+    if (user) {
+      const { matchWinned, matchLost } = user;
+      const allMatch = [...matchWinned, ...matchLost];
+      const matchSortedByDate = allMatch.sort(
+        (a, b) => b.timestamp.valueOf() - a.timestamp.valueOf()
+      );
+      const formattedMatch = matchSortedByDate.map((m) => ({
+        id: m.id,
+        playerWin: m.playerWin.username,
+        playerLoose: m.playerLoose.username,
+        winnerScore: m.winnerScore,
+        looserScore: m.looserScore,
+        timestamp: m.timestamp,
+        mode: m.mode
+      }));
+      return formattedMatch;
+    }
+    return [];
+  }
+
   @Post('check')
   async checkProfile(@Body('username') username: string) {
     const user = await this.usersService.getUser({ username });
