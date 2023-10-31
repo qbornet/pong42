@@ -111,9 +111,9 @@ export class ImgController {
   }
 
   // use this route for fetching on specific user
-  @Get('download/:username')
-  async findUserImage(@Param('username') toFind: string) {
-    const user = await this.authService.findUser({ username: toFind });
+  @Get('download/:id')
+  async findUserImage(@Param('id') id: string) {
+    const user = await this.authService.findUserById(id);
     if (user) {
       const imgValue = this.imgService.imageToBase64(user?.img);
       return { username: user.username, tofind_uuid: user.id, ...imgValue };

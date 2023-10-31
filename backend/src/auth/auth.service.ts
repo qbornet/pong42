@@ -162,6 +162,10 @@ export class AuthService {
     return this.usersService.getUser(userToFind);
   }
 
+  async findUserById(id: string) {
+    return this.usersService.getUserById(id);
+  }
+
   // get user assiocieted with the current token
   async findUserWithToken(token: string) {
     const config = {
