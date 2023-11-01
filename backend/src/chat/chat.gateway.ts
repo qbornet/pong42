@@ -73,29 +73,6 @@ export default class ChatGateway
   @WebSocketServer() io: Server;
 
   async afterInit() {
-    // /!\ To remove test only /!\
-    await this.usersService.createUser({
-      id: '55555555-915b-472d-beee-ed55fec65008',
-      email: 'tata@student.42.fr',
-      username: 'tata',
-      password: 'tata',
-      twoAuthOn: false,
-      twoAuthSecret: 'tata',
-      apiToken: 'tata',
-      connectedChat: false
-    });
-    await this.usersService.createUser({
-      id: '33333333-915b-472d-beee-ed53fec63008',
-      email: 'toto@student.42.fr',
-      username: 'toto',
-      password: 'toto',
-      twoAuthOn: false,
-      twoAuthSecret: 'toto',
-      apiToken: 'toto',
-      connectedChat: false
-    });
-
-    // /!\ To remove test only /!\
     this.logger.log('Initialized');
   }
 
