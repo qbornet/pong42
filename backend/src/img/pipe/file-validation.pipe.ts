@@ -10,7 +10,7 @@ export class FileValidationPipe implements PipeTransform {
   private readonly allowedExtensions = ['image/jpeg', 'image/png'];
 
   transform(value: Express.Multer.File, metadata: ArgumentMetadata) {
-    const oneMB = 100000;
+    const oneMB = 1000000;
 
     if (metadata.type === 'custom') {
       if (value.size > oneMB) {
