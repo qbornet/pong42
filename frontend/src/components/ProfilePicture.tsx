@@ -22,13 +22,11 @@ export function ProfilePicture({ imagePreview }: ProfilePictureProps) {
           withCredentials: true,
           headers: { Authorization: `Bearer ${jwt}` }
         };
+        const url = `${CONST_BACKEND_URL}/img/download/${
+          !username ? decodedToken.username : username
+        }`;
         const dataUser: DataUser = await axios
-          .get(
-            `${CONST_BACKEND_URL}/img/download/${
-              !username ? decodedToken.username : username
-            }`,
-            config
-          )
+          .get(url, config)
           .then((res: AxiosResponse) => res.data);
 
         setData(dataUser);

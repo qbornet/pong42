@@ -46,6 +46,7 @@ export function PrivateFeed({ userID, event }: PrivateFeedProps) {
               message={chat.message}
               time={chat.time}
               username={chat.username}
+              userID={userID}
               noBgColor
             />
           );
@@ -55,6 +56,7 @@ export function PrivateFeed({ userID, event }: PrivateFeedProps) {
             key={chat.id}
             message={chat.message}
             time={chat.time}
+            userID={userID}
             username={chat.username}
           />
         );

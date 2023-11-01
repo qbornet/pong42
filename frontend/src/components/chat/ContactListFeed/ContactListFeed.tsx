@@ -114,6 +114,7 @@ export function ContactListFeed({ setUserID }: ContactListProps) {
                   userID: user.userID
                 });
               }}
+              userID={user.userID}
               unblockUser={() => {
                 socket.emit('unblockUser', {
                   userID: user.userID

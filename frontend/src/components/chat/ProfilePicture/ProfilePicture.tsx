@@ -27,11 +27,13 @@ function ProfilePicture({
   useEffect(() => {
     const fetchData = () => {
       const jwt = localStorage.getItem('jwt');
+      const url = `${CONST_BACKEND_URL}/img/downloadById/${userID}`;
+      const config = {
+        withCredentials: true,
+        headers: { Authorization: `Bearer ${jwt!}` }
+      };
       axios
-        .get(`${CONST_BACKEND_URL}/img/download/${userID}`, {
-          withCredentials: true,
-          headers: { Authorization: `Bearer ${jwt!}` }
-        })
+        .get(url, config)
         .then((response) => {
           setData(response.data);
         })
