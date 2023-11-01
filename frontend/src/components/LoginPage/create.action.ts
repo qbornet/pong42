@@ -1,6 +1,13 @@
 import { redirect } from 'react-router-dom';
-import axios, { AxiosResponse } from 'axios';
+import axios, { isAxiosError } from 'axios';
 import { CONST_BACKEND_URL } from '@constant';
+
+type ErrorFormat = {
+  message: string;
+  path: string;
+  statusCode: number;
+  timestamp: string;
+};
 
 export async function action(props: { request: Request }) {
   const { request } = props;
@@ -33,7 +40,7 @@ export async function action(props: { request: Request }) {
       throw new Error('Password length must be 8 minimum');
     }
     throw new Error(
-      'Password start with [A-Z], need 1 [a-z], 1 [0-9], 1 [!@#$%&]'
+      'Password should contain 1 [A-Z], 1 [a-z], 1 [0-9], 1 [!@#$%&]'
     );
   }
 
@@ -42,21 +49,32 @@ export async function action(props: { request: Request }) {
   }
 
   // config axios so cookie are sent to server
+
   const config = {
     withCredentials: true,
     headers: { 'Content-Type': 'application/json' }
   };
-  const data = {
+  const sendData = {
     username,
     password,
     twoAuth
   };
-  const result = await axios
-    .post(`${CONST_BACKEND_URL}/auth/create_profile`, data, config)
-    .then((res: AxiosResponse) => res.data);
 
-  localStorage.setItem('jwt', result.access_token);
-  return twoAuth === 'on'
-    ? redirect('/2fa-validation') // eslint-disable-line
-    : redirect('/upload_img'); // eslint-disable-line
+  try {
+    const { data } = await axios.post(
+      `${CONST_BACKEND_URL}/auth/create_profile`,
+      sendData,
+      config
+    );
+
+    localStorage.setItem('jwt', data.access_token);
+    return twoAuth === 'on'
+      ? redirect('/2fa-validation') // eslint-disable-line
+      : redirect('/upload_img'); // eslint-disable-line
+  } catch (err: any) {
+    if (isAxiosError(err) && err.response) {
+      const errType = err.response.data as ErrorFormat;
+      throw new Error(errType.message);
+    }
+  }
 }
