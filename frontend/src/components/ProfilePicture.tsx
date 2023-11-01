@@ -20,17 +20,15 @@ export function ProfilePicture({
   const { username } = useParams();
 
   useEffect(() => {
-    if (!data) {
-      const config: AxiosRequestConfig = {
-        withCredentials: true,
-        headers: { Authorization: `Bearer ${jwt}` }
-      };
-      const url = `${CONST_BACKEND_URL}/img/download/${
-        !username ? decodedToken.username : username
-      }`;
-      axios.get(url, config).then((res: AxiosResponse) => setData(res.data));
-    }
-  }, [username, data, jwt, decodedToken]);
+    const config: AxiosRequestConfig = {
+      withCredentials: true,
+      headers: { Authorization: `Bearer ${jwt}` }
+    };
+    const url = `${CONST_BACKEND_URL}/img/download/${
+      !username ? decodedToken.username : username
+    }`;
+    axios.get(url, config).then((res: AxiosResponse) => setData(res.data));
+  }, [username, jwt, decodedToken]);
   return (
     <div className="z-[2]">
       <img
