@@ -23,8 +23,9 @@ export function LeftBlock() {
   const { username } = useParams();
 
   useEffect(() => {
-    const url = `${CONST_BACKEND_URL}/user/game-stats/${!username ? decodedToken.username : username
-      }`;
+    const url = `${CONST_BACKEND_URL}/user/game-stats/${
+      !username ? decodedToken.username : username
+    }`;
 
     const config: AxiosRequestConfig = {
       withCredentials: true,

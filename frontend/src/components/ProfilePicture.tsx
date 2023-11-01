@@ -1,6 +1,8 @@
+import { useParams } from 'react-router-dom';
 import { CONST_BACKEND_URL } from '@constant';
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { useEffect, useState } from 'react';
+import { useJwtContext } from '../contexts/jwt';
 
 type DataUser = { img: string; username: string; uuid: string };
 
@@ -10,18 +12,23 @@ interface ProfilePictureProps {
 
 export function ProfilePicture({ imagePreview }: ProfilePictureProps) {
   const [data, setData] = useState<DataUser | null>(null);
+  const { jwt, decodedToken } = useJwtContext();
+  const { username } = useParams();
 
   useEffect(() => {
     if (!data) {
-      const jwt = localStorage.getItem('jwt');
-
       const fetchData = async () => {
         const config: AxiosRequestConfig = {
           withCredentials: true,
           headers: { Authorization: `Bearer ${jwt}` }
         };
         const dataUser: DataUser = await axios
-          .get(`${CONST_BACKEND_URL}/img/download`, config)
+          .get(
+            `${CONST_BACKEND_URL}/img/download/${
+              !username ? decodedToken.username : username
+            }`,
+            config
+          )
           .then((res: AxiosResponse) => res.data);
 
         setData(dataUser);
@@ -29,7 +36,7 @@ export function ProfilePicture({ imagePreview }: ProfilePictureProps) {
 
       fetchData();
     }
-  }, [data]);
+  }, [username, data, jwt, decodedToken]);
   return (
     <div className="z-[2]">
       <img

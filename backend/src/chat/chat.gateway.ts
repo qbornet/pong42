@@ -49,11 +49,6 @@ import { ChannelInviteDto } from './dto/channel-invite.dto';
 import { CreateChannelDto } from './dto/create-channel.dto';
 import { ImgService } from '../img/img.service';
 
-// WebSocketGateways are instantiated from the SocketIoAdapter (inside src/adapters)
-// inside this IoAdapter there is authentification process with JWT
-// validation using the AuthModule. Be aware of this in case you are
-// stuck not understanding what is happenning.
-
 @UseFilters(ChatFilter)
 @UseGuards(EmptyChannelGuard, RestrictGuard, RolesGuard)
 @WebSocketGateway()
@@ -131,15 +126,26 @@ export default class ChatGateway
 
     this.usersService.setChatDisonnected(socket.user.id!);
 
-    //const matchingSockets = await this.io.in(socket.user.id!).fetchSockets();
-
-    //if (matchingSockets.length !== 0) {
     socket.broadcast.emit('userDisconnected', {
       userID: socket.user.id,
       username: socket.user.username
     });
     this.socketMap.delete(senderID);
-    //}
+  }
+
+  @SubscribeMessage('isConnected')
+  async handleIsconnected(
+    @ConnectedSocket() socket: ChatSocket,
+    @MessageBody() body: any
+  ) {
+    const user = await this.usersService.getUser({
+      username: body ? body.username : ''
+    });
+    let status = false;
+    if (user) {
+      status = user.connectedChat;
+    }
+    socket.emit('isConnected', status);
   }
 
   @SubscribeMessage('session')

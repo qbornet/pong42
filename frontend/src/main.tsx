@@ -99,7 +99,7 @@ const router = createBrowserRouter([
         element: <Chat />
       }
     ],
-    errorElement: <Profile />,
+    errorElement: <ErrorPage />,
     loader: profileLoader,
     action: profileAction
   },

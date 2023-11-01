@@ -8,22 +8,35 @@ interface DecodedToken {
   exp: string;
 }
 
-const jwt = localStorage.getItem('jwt');
-const decodedToken: DecodedToken = jwt_decode(jwt!);
+const getToken = () => {
+  const jwt = localStorage.getItem('jwt');
+  let decodedToken: DecodedToken = {
+    username: '',
+    email: '',
+    iat: '',
+    exp: ''
+  };
+  if (jwt) {
+    decodedToken = jwt_decode(jwt);
+  }
+  return { jwt, decodedToken };
+};
 
-const JwtContext = createContext<{
+interface GetToken {
   jwt: string | null;
   decodedToken: DecodedToken;
-} | null>(null);
+}
+
+const JwtContext = createContext<GetToken | null>(null);
 
 interface JwtContextProviderProps {
   children: React.ReactNode;
 }
 
 export function JwtContextProvider({ children }: JwtContextProviderProps) {
-  const socketProviderValue = useMemo(() => ({ jwt, decodedToken }), []);
+  const jwtProviderValue = useMemo((): GetToken => getToken(), []);
   return (
-    <JwtContext.Provider value={socketProviderValue}>
+    <JwtContext.Provider value={jwtProviderValue}>
       {children}
     </JwtContext.Provider>
   );
