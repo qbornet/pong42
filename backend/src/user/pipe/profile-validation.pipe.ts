@@ -7,14 +7,13 @@ import {
 } from '@nestjs/common';
 import Joi, { ObjectSchema } from 'joi';
 
-export const createSchema = Joi.object({
-  username: Joi.string().required(),
-  password: Joi.string().required(),
-  twoAuth: Joi.string().required()
+export const updateProfileSchema = Joi.object({
+  username: Joi.string().optional(),
+  password: Joi.string().optional()
 });
 
 @Injectable()
-export class ContentValidationPipe implements PipeTransform {
+export class ProfileValidationPipe implements PipeTransform {
   constructor(private schema: ObjectSchema) {}
 
   transform(value: any, metadata: ArgumentMetadata) {
@@ -22,13 +21,15 @@ export class ContentValidationPipe implements PipeTransform {
 
     if (metadata.type === 'body' && metadata.data === undefined) {
       const { error } = this.schema.validate(objectUnknown);
+
       if (error) {
         throw new HttpException(
           'Validation failed object need the right property',
           HttpStatus.BAD_REQUEST
         );
       }
-      const { username, password } = objectUnknown;
+      const { username, password } = value;
+
       if (username && !username.match(/^[a-z][^\W]{3,14}$/i)) {
         if (username.length > 15 || username.length < 4) {
           throw new HttpException(
@@ -59,6 +60,7 @@ export class ContentValidationPipe implements PipeTransform {
           HttpStatus.BAD_REQUEST
         );
       }
+
       return objectUnknown;
     }
     throw new HttpException('Need a body', HttpStatus.BAD_REQUEST);

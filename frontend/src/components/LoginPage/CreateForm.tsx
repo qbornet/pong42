@@ -3,6 +3,7 @@ import { Form, useRouteError, isRouteErrorResponse } from 'react-router-dom';
 import InputField from './InputField';
 import Header from './Header';
 import { isError } from '../../utils/functions/isError';
+import { isAxiosError } from 'axios';
 
 export default function CreateForm() {
   const error = useRouteError();
@@ -12,6 +13,10 @@ export default function CreateForm() {
   useEffect(() => {
     if (isError(error)) {
       setErrorMsg(error.message);
+      setTimeout(() => {
+        setErrorMsg(null);
+      }, 3000);
+    } else if (isAxiosError(error)) {
       setTimeout(() => {
         setErrorMsg(null);
       }, 3000);
