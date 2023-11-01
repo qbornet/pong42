@@ -18,7 +18,6 @@ export function LeftBlock() {
     nbWin: 0,
     nbLoose: 0
   });
-  const [loading, setLoading] = useState(true);
   const { jwt, decodedToken } = useJwtContext();
   const { username } = useParams();
 
@@ -35,11 +34,8 @@ export function LeftBlock() {
       .get(url, config)
       .then((response: any) => {
         setGameStats(response.data);
-        setLoading(false);
       })
-      .catch(() => {
-        setLoading(false);
-      });
+      .catch(() => {});
   }, [username, jwt, decodedToken]);
 
   const totalGames = gameStats.nbWin + gameStats.nbLoose;

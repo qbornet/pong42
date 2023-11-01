@@ -16,24 +16,17 @@ export function ProfilePicture({ imagePreview }: ProfilePictureProps) {
   const { username } = useParams();
 
   useEffect(() => {
-    if (!data) {
-      const fetchData = async () => {
-        const config: AxiosRequestConfig = {
-          withCredentials: true,
-          headers: { Authorization: `Bearer ${jwt}` }
-        };
-        const url = `${CONST_BACKEND_URL}/img/download/${
-          !username ? decodedToken.username : username
-        }`;
-        const dataUser: DataUser = await axios
-          .get(url, config)
-          .then((res: AxiosResponse) => res.data);
-
-        setData(dataUser);
+    const fetchData = () => {
+      const config: AxiosRequestConfig = {
+        withCredentials: true,
+        headers: { Authorization: `Bearer ${jwt}` }
       };
-
-      fetchData();
-    }
+      const url = `${CONST_BACKEND_URL}/img/download/${
+        !username ? decodedToken.username : username
+      }`;
+      axios.get(url, config).then((res: AxiosResponse) => setData(res.data));
+    };
+    fetchData();
   }, [username, data, jwt, decodedToken]);
   return (
     <div className="z-[2]">

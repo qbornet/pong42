@@ -32,7 +32,7 @@ export function useInviteConnection() {
 
   useEffect(() => {
     const onConnection = (status: Status) => {
-      console.log('status', status);
+      // console.log('status', status);
       send(status);
     };
 

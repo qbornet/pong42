@@ -23,7 +23,6 @@ export function Status() {
     };
 
     const onUserConnected = ({
-      userID,
       username
     }: {
       userID: string;
@@ -35,7 +34,6 @@ export function Status() {
     };
 
     const onUserDisconnected = ({
-      userID,
       username
     }: {
       userID: string;

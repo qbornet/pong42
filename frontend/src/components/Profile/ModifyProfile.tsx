@@ -1,5 +1,5 @@
+import { AiOutlineCloseCircle } from 'react-icons/ai';
 import { Form, isRouteErrorResponse, useRouteError } from 'react-router-dom';
-import IMAGES from '@img';
 import InputField from '@login/InputField';
 import { useEffect, useState } from 'react';
 import { isError } from '../../utils/functions/isError';
@@ -81,7 +81,7 @@ export default function ModifyProfile({
           onClick={handleClickClose}
           className="col-start-10 grid items-end justify-end pt-[0.25rem] text-right"
         >
-          <img src={IMAGES.cross} width="16" height="16" alt="cross" />
+          <AiOutlineCloseCircle className="mb-[-4px] mt-3 text-2xl font-bold text-pong-blue-500" />
         </button>
       </div>
       {hasError && (

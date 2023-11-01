@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Scrollable } from './Scrollable/Scrollable';
 import { useInviteList } from '../../utils/hooks/useInviteList';
@@ -19,6 +20,7 @@ export function InviteContact({
   invite,
   userID
 }: InviteContactProps) {
+  const navigate = useNavigate();
   return (
     <>
       <div
@@ -27,7 +29,11 @@ export function InviteContact({
         role="presentation"
       >
         <div className="flex items-center justify-center gap-3">
-          <ProfilePicture size="xs" userID={userID} />
+          <ProfilePicture
+            size="xs"
+            userID={userID}
+            onClick={() => navigate(`/profile/${username}`)}
+          />
           <p className="semibold max-w-[200px] break-all text-base text-pong-white">
             {username}
           </p>

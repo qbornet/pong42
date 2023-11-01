@@ -51,7 +51,11 @@ export function ContactCard({
         onClick={clicked || blocked ? () => {} : sendMessage}
       >
         <div className="flex items-center justify-center gap-3">
-          <ProfilePicture size="xs" userID={userID} />
+          <ProfilePicture
+            size="xs"
+            userID={userID}
+            onClick={() => navigate(`/profile/${username}`)}
+          />
           <p className="semibold max-w-[200px] break-all text-base text-pong-white">
             {username}
           </p>

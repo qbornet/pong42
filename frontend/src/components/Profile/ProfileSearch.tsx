@@ -1,10 +1,5 @@
 import { useState, useEffect } from 'react';
-import {
-  useLoaderData,
-  useNavigate,
-  Outlet,
-  useParams
-} from 'react-router-dom';
+import { useLoaderData, useNavigate, Outlet } from 'react-router-dom';
 import { CONST_BACKEND_URL } from '@constant';
 import axios, { AxiosRequestConfig } from 'axios';
 import MatchHistory from './MatchHistory';
@@ -16,7 +11,6 @@ import { BannerInfo } from '../BannerInfo';
 import { LeftBlock } from '../LeftBlock';
 import { CenterBlock } from '../CenterBlock';
 import { RightBlockInvite } from '../RightBlockInvite';
-import { useSocketContext } from '../../contexts/socket';
 
 export default function ProfileSearch() {
   const [isFriend, setIsFriend] = useState<string | undefined>(undefined);

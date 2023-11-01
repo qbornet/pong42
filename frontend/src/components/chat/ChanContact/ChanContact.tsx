@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { LegacyRef, MouseEventHandler } from 'react';
 import ProfilePicture from '../ProfilePicture/ProfilePicture';
 
@@ -20,6 +21,7 @@ export function ChanContact({
   showPointer,
   userID
 }: ChanContactProps) {
+  const navigate = useNavigate();
   return (
     <>
       <div
@@ -33,7 +35,11 @@ export function ChanContact({
         }`}
       >
         <div className="flex items-center justify-center gap-3">
-          <ProfilePicture size="xs" userID={userID} />
+          <ProfilePicture
+            size="xs"
+            userID={userID}
+            onClick={() => navigate(`/profile/${username}`)}
+          />
           {hideUsername ? null : (
             <p className="semibold max-w-[200px] break-all text-base text-pong-white">
               {username}

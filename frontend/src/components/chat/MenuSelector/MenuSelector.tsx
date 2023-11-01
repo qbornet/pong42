@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { Tooltip } from 'react-tooltip';
 import { BiBell, BiMessageDetail } from 'react-icons/bi';
 import { MdOutlineGroups } from 'react-icons/md';
@@ -6,6 +7,7 @@ import ProfilePicture from '../ProfilePicture/ProfilePicture';
 import RenderIf from '../RenderIf/RenderIf';
 import { useStateContext } from '../../../contexts/state';
 import { useSocketContext } from '../../../contexts/socket';
+import { useJwtContext } from '../../../contexts/jwt';
 
 export default function MenuSelector() {
   const {
@@ -18,6 +20,8 @@ export default function MenuSelector() {
     toggleChannelView
   } = useStateContext();
   const { socket } = useSocketContext();
+  const navigate = useNavigate();
+  const { decodedToken } = useJwtContext();
   return (
     <RenderIf
       some={[
@@ -68,7 +72,11 @@ export default function MenuSelector() {
           <p className="font-semibold">coming soon</p>
         </Tooltip>
         <button type="button">
-          <ProfilePicture size="xs" userID={socket.userID} />
+          <ProfilePicture
+            size="xs"
+            userID={socket.userID}
+            onClick={() => navigate(`/profile/${decodedToken.username}`)}
+          />
         </button>
       </div>
     </RenderIf>

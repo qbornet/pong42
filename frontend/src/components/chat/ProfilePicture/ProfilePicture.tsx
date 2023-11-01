@@ -8,6 +8,7 @@ interface ProfilePictureProps {
   size?: 'xs' | 's' | 'm' | 'l' | 'xl';
   select?: boolean;
   userID: string;
+  onClick: () => void;
 }
 
 const style = Object.freeze({
@@ -21,7 +22,8 @@ const style = Object.freeze({
 function ProfilePicture({
   size = 'xl',
   select = false,
-  userID
+  userID,
+  onClick
 }: ProfilePictureProps) {
   const [data, setData] = useState<ImageInfo | undefined>(undefined);
   useEffect(() => {
@@ -43,15 +45,17 @@ function ProfilePicture({
   }, [userID]);
 
   return (
-    <img
-      alt="pp"
-      src={data ? data.img : ''}
-      className={`object-contain ${
-        style[size]
-      } w-flex-shrink-0 relative flex items-end justify-center rounded-full ${
-        select ? 'border-solid border-pong-purple-100' : 'border-none'
-      } bg-cover bg-no-repeat`}
-    />
+    <div role="presentation" onClick={onClick}>
+      <img
+        alt="pp"
+        src={data ? data.img : ''}
+        className={`object-contain ${
+          style[size]
+        } w-flex-shrink-0 relative flex cursor-pointer items-end justify-center rounded-full ${
+          select ? 'border-solid border-pong-purple-100' : 'border-none'
+        } bg-cover bg-no-repeat`}
+      />
+    </div>
   );
 }
 
