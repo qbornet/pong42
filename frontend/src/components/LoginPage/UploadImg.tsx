@@ -33,7 +33,7 @@ export default function UploadImg() {
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     const allowedTypes = ['image/jpeg', 'image/png'];
-    const CONST_ONEMB = 100000;
+    const CONST_ONEMB = 1000000;
     const reader = new FileReader();
     const file = e.target.files?.[0];
     if (file) {

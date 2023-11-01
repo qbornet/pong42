@@ -9,7 +9,7 @@ export async function action(props: { request: Request }) {
 
   let updateObject;
   const { request } = props;
-  const CONST_ONEMB = 100000;
+  const CONST_ONEMB = 1000000;
   const imageForm = new FormData();
   const formData = await request.formData();
   const file: File = formData.get('pp') as File;
