@@ -1,7 +1,10 @@
 import {
   Controller,
   UseGuards,
+  UsePipes,
   Logger,
+  HttpException,
+  HttpStatus,
   Get,
   Post,
   Param,
@@ -18,6 +21,15 @@ import * as bcrypt from 'bcrypt';
 import { CONST_SALT } from 'src/auth/constants';
 import { AuthService } from 'src/auth/auth.service';
 import { RemoveService } from './service/remove.service';
+import {
+  ProfileValidationPipe,
+  updateProfileSchema
+} from './pipe/profile-validation.pipe';
+
+type UpdateProfileDto = {
+  username: string;
+  password: string;
+};
 
 type UserDto = {
   id: string;
@@ -102,6 +114,43 @@ export class UserController {
   async checkTwoAuth(@Body('username') username: string) {
     const user = await this.usersService.getUser({ username });
     return user?.twoAuthOn || null;
+  }
+  @Put('update_profile')
+  @UsePipes(new ProfileValidationPipe(updateProfileSchema))
+  async updateProfile(
+    @Req() req: any,
+    @Res({ passthrough: true }) res: any,
+    @Body() updatedUser: Partial<UpdateProfileDto>
+  ) {
+    if (updatedUser.username !== undefined) {
+      const checkUsername = await this.usersService.getUser({
+        username: updatedUser.username
+      });
+
+      if (checkUsername)
+        throw new HttpException('Invalid Username', HttpStatus.BAD_REQUEST);
+
+      const usernameAndHash = req.cookies.api_token;
+      const currentUser = await this.usersService.getUser(req.user);
+      if (!currentUser)
+        throw new HttpException('Invalid User', HttpStatus.UNAUTHORIZED);
+
+      // eslint-disable-next-line
+      const [username, hash] = usernameAndHash.split('|');
+      const newCookie = `${updatedUser.username}|${hash}`;
+      res.cookie('api_token', newCookie, {
+        maxAge: currentUser.maxAge,
+        sameSite: 'lax',
+        httpOnly: true
+      });
+    }
+
+    if (updatedUser.password !== undefined) {
+      const salt = await bcrypt.genSalt(CONST_SALT);
+      const hashPassword = await bcrypt.hash(updatedUser.password, salt);
+      updatedUser.password = hashPassword;
+    }
+    await this.usersService.updateUser(req.user, updatedUser);
   }
 
   @Put('update')

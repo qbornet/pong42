@@ -10,12 +10,12 @@ export class FileValidationPipe implements PipeTransform {
   private readonly allowedExtensions = ['image/jpeg', 'image/png'];
 
   transform(value: Express.Multer.File, metadata: ArgumentMetadata) {
-    const twentyKB = 50000;
+    const oneMB = 100000;
 
     if (metadata.type === 'custom') {
-      if (value.size > twentyKB) {
+      if (value.size > oneMB) {
         throw new BadRequestException(
-          'Invalid size the image should be under 20KB'
+          'Invalid size the image should be under 1MB'
         );
       }
 
