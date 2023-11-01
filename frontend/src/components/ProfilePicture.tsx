@@ -8,9 +8,13 @@ type DataUser = { img: string; username: string; uuid: string };
 
 interface ProfilePictureProps {
   imagePreview: string | null;
+  isFriend: boolean;
 }
 
-export function ProfilePicture({ imagePreview }: ProfilePictureProps) {
+export function ProfilePicture({
+  imagePreview,
+  isFriend
+}: ProfilePictureProps) {
   const [data, setData] = useState<DataUser | null>(null);
   const { jwt, decodedToken } = useJwtContext();
   const { username } = useParams();
@@ -31,7 +35,9 @@ export function ProfilePicture({ imagePreview }: ProfilePictureProps) {
   return (
     <div className="z-[2]">
       <img
-        className="h-16 w-16 rounded-full border-[2px] border-profile-purple md:h-24 md:w-24 md:border-[3px]"
+        className={`h-16 w-16 rounded-full border-[2px] ${
+          isFriend ? 'border-green-login' : 'border-profile-purple'
+        } md:h-24 md:w-24 md:border-[3px]`}
         src={!imagePreview ? data?.img : imagePreview}
         alt="pp"
       />

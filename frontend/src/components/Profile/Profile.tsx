@@ -25,16 +25,15 @@ export default function Profile() {
     if (!data) {
       const jwt = localStorage.getItem('jwt');
 
-      const fetchData = async () => {
+      const fetchData = () => {
         const config: AxiosRequestConfig = {
           withCredentials: true,
           headers: { Authorization: `Bearer ${jwt}` }
         };
-        const dataUser: DataUser = await axios
+        axios
           .get(`${CONST_BACKEND_URL}/img/download`, config)
-          .then((res: AxiosResponse) => res.data);
-
-        setData(dataUser);
+          .then((res: AxiosResponse) => setData(res.data))
+          .catch(() => {});
       };
 
       fetchData();

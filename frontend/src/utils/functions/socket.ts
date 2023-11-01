@@ -33,6 +33,6 @@ export const disconnectSocket = () => socket.disconnect();
 
 socket.onAny((event, ...args) => {
   /* eslint-disable */
-  if (event !== 'gameState') console.log(event, args);
+  // if (event !== 'gameState') console.log(event, args);
   /* eslint-enable */
 });

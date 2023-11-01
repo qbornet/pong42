@@ -48,21 +48,30 @@ export function ContactCard({
           e.preventDefault();
           setClicked(true);
         }}
-        onClick={clicked || blocked ? () => {} : sendMessage}
       >
-        <div className="flex items-center justify-center gap-3">
+        <div className="flex flex-shrink-0 items-center justify-center gap-3">
           <ProfilePicture
             size="xs"
             userID={userID}
             onClick={() => navigate(`/profile/${username}`)}
           />
-          <p className="semibold max-w-[200px] break-all text-base text-pong-white">
-            {username}
-          </p>
+          <button
+            type="button"
+            onClick={clicked || blocked ? () => {} : sendMessage}
+          >
+            <p className="semibold max-w-[200px] break-all text-base text-pong-white">
+              {username}
+            </p>
+          </button>
         </div>
         <div ref={ref} className="flex flex-row gap-4">
           {!clicked && !blocked ? (
-            <BiMessageDetail className="userMessage h-6 w-6 text-pong-blue-100 " />
+            <button
+              type="button"
+              onClick={clicked || blocked ? () => {} : sendMessage}
+            >
+              <BiMessageDetail className="userMessage h-6 w-6 text-pong-blue-100 " />
+            </button>
           ) : null}
           {clicked || blocked ? (
             <div>

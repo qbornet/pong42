@@ -69,7 +69,10 @@ export default function ProfileSearch() {
       <Background>
         <MainContainer>
           <BannerImage>
-            <ProfilePicture imagePreview={null} />
+            <ProfilePicture
+              imagePreview={null}
+              isFriend={isFriend !== undefined}
+            />
           </BannerImage>
           <BannerInfo>
             <LeftBlock />

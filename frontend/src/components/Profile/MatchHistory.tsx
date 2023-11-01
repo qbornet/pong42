@@ -42,18 +42,18 @@ ${date.getHours()}:${date.getMinutes() < 10 ? '0' : ''}${date.getMinutes()}
   }
 
   return (
-    <div className="mt-10 flex text-pong-white">
-      <table>
-        <thead>
-          <tr>
-            <th>Player</th>
-            <th>Status</th>
-            <th>Mode</th>
-            <th>Score</th>
-            <th>Date</th>
+    <div className="">
+      <table className="w-full rounded-xl bg-pong-blue-400 p-10 text-left">
+        <thead className="flex w-full items-center justify-center rounded-t-xl bg-pong-blue-500 text-white">
+          <tr className="flex w-full items-center justify-center rounded-t-xl bg-pong-blue-500 text-white">
+            <th className="w-1/5 p-2">Player</th>
+            <th className="w-1/5 p-2">Status</th>
+            <th className="w-1/5 p-2">Mode</th>
+            <th className="w-1/5 p-2">Score</th>
+            <th className="w-1/5 p-2">Date</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="no-scrollbar flex h-80 w-full flex-col items-center justify-between overflow-y-scroll ">
           {matchHistory.map((match: any) => {
             const winOrLoose = () => {
               const name = !username ? decodedToken.username : username;
@@ -64,16 +64,19 @@ ${date.getHours()}:${date.getMinutes() < 10 ? '0' : ''}${date.getMinutes()}
             };
 
             return (
-              <tr key={match.id}>
-                <td className="border border-gray-400 p-2">
+              <tr
+                key={match.id}
+                className="mb-3 flex w-full border-b border-b-pong-blue-500 text-pong-white"
+              >
+                <td className="w-1/5 p-2">
                   {`${match.playerWin} vs ${match.playerLoose}`}
                 </td>
-                <td className="border border-gray-400 p-2">{winOrLoose()}</td>
-                <td className="border border-gray-400 p-2">{match.mode}</td>
-                <td className="border border-gray-400 p-2">
+                <td className="w-1/5 p-2">{winOrLoose()}</td>
+                <td className="w-1/5 p-2">{match.mode}</td>
+                <td className="w-1/5 p-2">
                   {`${match.winnerScore}/${match.looserScore}`}
                 </td>
-                <td className="border border-gray-400 p-2">
+                <td className="w-1/5 p-2">
                   {formatUtcPlus1Date(match.timestamp)}
                 </td>
               </tr>
