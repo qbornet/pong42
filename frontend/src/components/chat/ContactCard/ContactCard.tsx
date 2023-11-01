@@ -54,6 +54,7 @@ export function ContactCard({
             size="xs"
             userID={userID}
             onClick={() => navigate(`/profile/${username}`)}
+            username={username}
           />
           <button
             type="button"

@@ -76,6 +76,7 @@ export default function MenuSelector() {
             size="xs"
             userID={socket.userID}
             onClick={() => navigate(`/profile/${decodedToken.username}`)}
+            username={decodedToken.username}
           />
         </button>
       </div>

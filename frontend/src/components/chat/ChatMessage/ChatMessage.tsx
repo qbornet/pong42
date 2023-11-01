@@ -28,6 +28,7 @@ function ChatMessage({
         size="xs"
         userID={userID}
         onClick={() => navigate(`/profile/${username}`)}
+        username={username}
       />
       <div className="w-1 flex-grow cursor-pointer break-words px-2">
         <div className="flex items-center justify-between">

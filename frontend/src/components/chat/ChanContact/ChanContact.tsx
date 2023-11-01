@@ -39,6 +39,7 @@ export function ChanContact({
             size="xs"
             userID={userID}
             onClick={() => navigate(`/profile/${username}`)}
+            username={username}
           />
           {hideUsername ? null : (
             <p className="semibold max-w-[200px] break-all text-base text-pong-white">

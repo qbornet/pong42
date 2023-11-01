@@ -33,6 +33,7 @@ export function InviteContact({
             size="xs"
             userID={userID}
             onClick={() => navigate(`/profile/${username}`)}
+            username={username}
           />
           <p className="semibold max-w-[200px] break-all text-base text-pong-white">
             {username}

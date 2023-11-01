@@ -20,7 +20,7 @@ export function ProfilePicture({
   const { username } = useParams();
 
   useEffect(() => {
-    const fetchData = () => {
+    if (!data) {
       const config: AxiosRequestConfig = {
         withCredentials: true,
         headers: { Authorization: `Bearer ${jwt}` }
@@ -29,8 +29,7 @@ export function ProfilePicture({
         !username ? decodedToken.username : username
       }`;
       axios.get(url, config).then((res: AxiosResponse) => setData(res.data));
-    };
-    fetchData();
+    }
   }, [username, data, jwt, decodedToken]);
   return (
     <div className="z-[2]">

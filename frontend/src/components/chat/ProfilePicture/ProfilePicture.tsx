@@ -8,6 +8,7 @@ interface ProfilePictureProps {
   size?: 'xs' | 's' | 'm' | 'l' | 'xl';
   select?: boolean;
   userID: string;
+  username: string;
   onClick: () => void;
 }
 
@@ -23,13 +24,14 @@ function ProfilePicture({
   size = 'xl',
   select = false,
   userID,
-  onClick
+  onClick,
+  username
 }: ProfilePictureProps) {
   const [data, setData] = useState<ImageInfo | undefined>(undefined);
   useEffect(() => {
     const fetchData = () => {
       const jwt = localStorage.getItem('jwt');
-      const url = `${CONST_BACKEND_URL}/img/downloadById/${userID}`;
+      const url = `${CONST_BACKEND_URL}/img/download/${username}`;
       const config = {
         withCredentials: true,
         headers: { Authorization: `Bearer ${jwt!}` }
@@ -42,7 +44,7 @@ function ProfilePicture({
         .catch(() => {});
     };
     fetchData();
-  }, [userID]);
+  }, [userID, username]);
 
   return (
     <div role="presentation" onClick={onClick}>

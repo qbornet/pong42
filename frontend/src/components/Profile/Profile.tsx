@@ -69,7 +69,7 @@ export default function Profile() {
       <Background>
         <MainContainer>
           <BannerImage>
-            <ProfilePicture imagePreview={imagePreview} />
+            <ProfilePicture imagePreview={imagePreview} isFriend={false} />
           </BannerImage>
           <BannerInfo>
             <LeftBlock />
