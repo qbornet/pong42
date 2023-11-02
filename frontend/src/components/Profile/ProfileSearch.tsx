@@ -37,9 +37,8 @@ export default function ProfileSearch() {
     socket.emit('usersBlocked');
   }, [socket, isFriend]);
 
-  const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    let newFriendList: string[] = [];
     const jwt = localStorage.getItem('jwt');
     if (!jwt) navigate('/');
 
@@ -48,27 +47,21 @@ export default function ProfileSearch() {
       headers: { Authorization: `Bearer ${jwt!}` }
     };
     if (isFriend) {
-      newFriendList = data.userFriendList.filter(
-        (value) => value !== data.tofind_uuid
-      );
       setIsFriend(undefined);
+      socket.emit('users');
+      axios
+        .get(
+          `${CONST_BACKEND_URL}/user/removeFriend/${data.tofind_uuid}`,
+          config
+        )
+        .catch(() => {});
     } else {
-      if (data.userFriendList) {
-        newFriendList = [
-          ...data.userFriendList.filter((value) => value !== data.tofind_uuid),
-          data.tofind_uuid
-        ];
-      } else {
-        newFriendList = [data.tofind_uuid];
-      }
       setIsFriend(data.tofind_uuid);
+      socket.emit('users');
+      axios
+        .get(`${CONST_BACKEND_URL}/user/addFriend/${data.tofind_uuid}`, config)
+        .catch(() => {});
     }
-
-    await axios.put(
-      `${CONST_BACKEND_URL}/user/update`,
-      { friendList: newFriendList },
-      config
-    );
   };
 
   return (

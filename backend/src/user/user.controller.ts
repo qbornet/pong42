@@ -13,7 +13,6 @@ import {
   Req,
   Res
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { ApiGuard } from 'src/auth/guards/api.guard';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { UsersService } from 'src/database/service/users.service';
@@ -29,20 +28,6 @@ import {
 type UpdateProfileDto = {
   username: string;
   password: string;
-};
-
-type UserDto = {
-  id: string;
-  img: string;
-  email: string;
-  username: string;
-  password: string;
-  twoAuthOn: boolean;
-  twoAuthSecret: string | null;
-  apiToken: string | null;
-  connectedChat: boolean;
-  friendList: string[];
-  blockList: string[];
 };
 
 @Controller('user')
@@ -115,6 +100,7 @@ export class UserController {
     const user = await this.usersService.getUser({ username });
     return user?.twoAuthOn || null;
   }
+
   @Put('update_profile')
   @UsePipes(new ProfileValidationPipe(updateProfileSchema))
   async updateProfile(
@@ -153,46 +139,39 @@ export class UserController {
     await this.usersService.updateUser(req.user, updatedUser);
   }
 
-  @Put('update')
-  async updateUser(
-    @Req() req: any,
-    @Res({ passthrough: true }) res: any,
-    @Body() updateObject: Prisma.UsersUpdateInput
-  ) {
-    // update cookie with new username
-    if (updateObject.username !== undefined) {
-      const checkUsername = await this.usersService.getUser({
-        username: updateObject.username as string
+  @Get('addFriend/:uuid')
+  async addFriend(@Req() req: any, @Param('uuid') uuid: string) {
+    const otherUser = await this.usersService.getUserById(uuid);
+    const user = await this.usersService.getUser(req.user);
+    if (user && otherUser) {
+      const { friendList } = user;
+      const otherFriendList = otherUser.friendList;
+      if (friendList.includes(uuid) === false) {
+        await this.usersService.updateUser(req.user, {
+          friendList: [...friendList, uuid]
+        });
+      }
+      if (otherFriendList.includes(uuid) === false) {
+        await this.usersService.updateUser(otherUser, {
+          friendList: [...otherFriendList, user.id]
+        });
+      }
+    }
+  }
+
+  @Get('removeFriend/:uuid')
+  async removeFriend(@Req() req: any, @Param('uuid') uuid: string) {
+    const otherUser = await this.usersService.getUserById(uuid);
+    const user = await this.usersService.getUser(req.user);
+    if (user && otherUser) {
+      const friendList = user.friendList.filter((f) => f !== uuid);
+      const otherFriendList = otherUser.friendList.filter((f) => f !== user.id);
+      await this.usersService.updateUser(req.user, {
+        friendList: [...friendList]
       });
-
-      if (checkUsername) {
-        // handle error this should return null
-      }
-
-      const usernameAndHash = req.cookies.api_token;
-      const user = await this.usersService.getUser(req.user);
-      if (!user) {
-        return;
-      }
-
-      // eslint-disable-next-line
-      const [username, hash] = usernameAndHash.split('|');
-      const newCookie = `${updateObject.username}|${hash}`;
-      res.cookie('api_token', newCookie, {
-        maxAge: user.maxAge,
-        sameSite: 'lax',
-        httpOnly: true
+      await this.usersService.updateUser(otherUser, {
+        friendList: [...otherFriendList]
       });
     }
-
-    if (updateObject.password !== undefined) {
-      const salt = await bcrypt.genSalt(CONST_SALT);
-      const hashPassword = await bcrypt.hash(
-        updateObject.password as string,
-        salt
-      );
-      updateObject.password = hashPassword;
-    }
-    await this.usersService.updateUser(req.user, updateObject);
   }
 }

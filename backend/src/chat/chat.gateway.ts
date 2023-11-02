@@ -167,18 +167,17 @@ export default class ChatGateway
     const senderID = socket.user.id!;
     const user = await this.usersService.getUserById(senderID);
     const privateUsers = await this.usersService.getAllUsers();
-    const publicUsers: PublicChatUser[] = [];
+    const publicUsers: (PublicChatUser & { isFriend: boolean })[] = [];
     if (privateUsers && user) {
       privateUsers
         .filter((u) => !user.blockList.includes(u.id))
         .forEach((u) => {
-          if (user.friendList.includes(u.id)) {
-            publicUsers.push({
-              userID: u.id,
-              connected: u.connectedChat,
-              username: u.username!
-            });
-          }
+          publicUsers.push({
+            userID: u.id,
+            connected: u.connectedChat,
+            username: u.username!,
+            isFriend: user.friendList.includes(u.id)
+          });
         });
     }
     socket.emit('users', publicUsers);

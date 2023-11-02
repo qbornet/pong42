@@ -33,7 +33,7 @@ export interface Contact extends User {
   chanID?: string | undefined;
 }
 
-export type ContactList = Contact[];
+export type ContactList = (Contact & { isFriend: boolean })[];
 
 export interface Status {
   isConnected: boolean;

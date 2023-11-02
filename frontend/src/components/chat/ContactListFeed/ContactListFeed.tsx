@@ -23,13 +23,16 @@ export function ContactListFeed({ setUserID }: ContactListProps) {
     socket.emit('usersBlocked');
   }, [socket]);
 
+  const friend: ContactList = [];
   const online: ContactList = [];
   const offline: ContactList = [];
 
   contactList
     .filter((d) => d.userID !== socket.userID)
     .forEach((user) => {
-      if (user.connected === true) {
+      if (user.connected && user.isFriend) {
+        friend.push(user);
+      } else if (user.connected) {
         online.push(user);
       } else {
         offline.push(user);
@@ -38,6 +41,35 @@ export function ContactListFeed({ setUserID }: ContactListProps) {
 
   return (
     <Scrollable>
+      {friend.length ? (
+        <>
+          <p className="pl-2 font-semibold text-pong-blue-100">
+            {`ONLINE FRIENDS — ${friend.length}`}
+          </p>
+          {friend.map((user: Contact) => (
+            <ContactCard
+              key={user.userID}
+              username={user.username}
+              sendMessage={() => {
+                setUserID(user.userID);
+                toggleConversationView();
+              }}
+              blockUser={() => {
+                socket.emit('blockUser', {
+                  userID: user.userID
+                });
+              }}
+              unblockUser={() => {
+                socket.emit('unblockUser', {
+                  userID: user.userID
+                });
+              }}
+              blocked={false}
+              userID={user.userID}
+            />
+          ))}
+        </>
+      ) : null}
       {online.length ? (
         <>
           <p className="pl-2 font-semibold text-pong-blue-100">
