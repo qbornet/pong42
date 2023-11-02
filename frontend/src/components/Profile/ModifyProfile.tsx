@@ -42,8 +42,8 @@ export default function ModifyProfile({
     const reader = new FileReader();
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 20000) {
-        setHasError('Invalid size of image should be under 20KB.');
+      if (file.size > 1000000) {
+        setHasError('Invalid size of image should be under 1MB.');
         setTimeout(() => {
           setHasError(null);
         }, 5000);

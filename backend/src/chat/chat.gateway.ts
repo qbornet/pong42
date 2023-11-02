@@ -172,11 +172,13 @@ export default class ChatGateway
       privateUsers
         .filter((u) => !user.blockList.includes(u.id))
         .forEach((u) => {
-          publicUsers.push({
-            userID: u.id,
-            connected: u.connectedChat,
-            username: u.username!
-          });
+          if (user.friendList.includes(u.id)) {
+            publicUsers.push({
+              userID: u.id,
+              connected: u.connectedChat,
+              username: u.username!
+            });
+          }
         });
     }
     socket.emit('users', publicUsers);

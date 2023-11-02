@@ -89,7 +89,7 @@ export function CreateChannelView({
     const reader = new FileReader();
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 50000) {
+      if (file.size > 1000000) {
         return;
       }
       if (!allowedTypes.includes(file.type)) {

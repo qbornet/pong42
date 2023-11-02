@@ -11,10 +11,12 @@ import { BannerInfo } from '../BannerInfo';
 import { LeftBlock } from '../LeftBlock';
 import { CenterBlock } from '../CenterBlock';
 import { RightBlockInvite } from '../RightBlockInvite';
+import { useSocketContext } from '../../contexts/socket';
 
 export default function ProfileSearch() {
   const [isFriend, setIsFriend] = useState<string | undefined>(undefined);
   const navigate = useNavigate();
+  const { socket } = useSocketContext();
   const data = useLoaderData() as {
     img: string;
     username: string;
@@ -29,6 +31,11 @@ export default function ProfileSearch() {
       setIsFriend(findFriend);
     }
   }, [data.tofind_uuid, data.userFriendList]);
+
+  useEffect(() => {
+    socket.emit('users');
+    socket.emit('usersBlocked');
+  }, [socket, isFriend]);
 
   const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
