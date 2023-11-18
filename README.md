@@ -1,4 +1,4 @@
-# Transcendence
+# Pong42
 
 ## Reference
 
@@ -41,15 +41,3 @@ Game
 - the game must be responsive
 
 [subject](./ressources/en.subject.pdf)
-
-## Notes
-
-- Players online qui fait deffiler de dashboard jusqu'a la card des player online
-- Bouton pour les friends
-- Channel box qui pop up du bottom droit du dash board, tab pour les channels et discussion avec les frien
-- tous les acces du side menu de gauche permet de scroll sur les cards
-- Cards:
-    * historique
-    * leader board (top 10 best players)
-    * game history
-    * 
